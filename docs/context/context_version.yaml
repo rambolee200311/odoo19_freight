@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.6
+context_version: 0.1.7
 update_time: 2026-08-11
 adapt_sprint: Sprint0-Context-Baseline
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.7:
+    update_content: |
+      独立审计对账与收尾：
+      - 独立审计报告逐项核对：多数已修复（业务分类/引擎/清单/Asset Map/Git 入库）
+      - Asset Map 补入 context_readiness_review.md
+      - verify.py 新增 c14 Forbidden Change 机器可读结构检查（14 项门禁）
+      - 字段/状态/接口语义保护仍为 DOCUMENT_ONLY，需后续实现规则对比器
+    update_type: 独立审计对账
+    effect_scope: 引擎 + Asset Map + 审计记录
+
   0.1.6:
     update_content: |
       修复回归对抗测试：

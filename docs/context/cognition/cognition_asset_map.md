@@ -33,6 +33,7 @@
 | `cognition/cognition_rule.yaml` | 认知强制加载规则 |
 | `cognition/cognition_consistency_check.yaml` | 认知一致性校验 |
 | `cognition/cognition_refresh.yaml` | 认知刷新与沉淀 |
+| `cognition/context_readiness_review.md` | 独立验收与修复记录 |
 | `governance/*.yaml` | 治理、风险、审计、工具、Bug 工作流 |
 | `governance/test_lessons.yaml` | 跨迭代教训 |
 | `governance/check_view_fields.py` | View-Model 字段交叉校验（tk_freight 自有模型） |

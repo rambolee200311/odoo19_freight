@@ -288,3 +288,24 @@ F8（中）Git 未纳入（docs/execution/technical_debt 未 add/commit），与
 | Context 缺失 | 移走 context_version.yaml | context_loader exit 3 拦截；verify c12 版本刷新拦截 |
 
 `verify.py` 当前 13 项门禁；无探针时基线 13/13 PASS。
+
+## 18. Independent Audit Reconciliation (2026-08-11)
+
+收到独立审计报告后逐项核对：
+
+| 审计发现 | 当前状态 | 证据 |
+|---|---|---|
+| 业务规则混入假设/方案 | FIXED | knowledge_classification.md（B/A/U/C 分类）+ freight_rule/finance_flow 重分类 |
+| finance_flow 把方案写成现状 | FIXED | 字段表已标 DESIGN_PROPOSAL，未实现 |
+| check_view_fields 旧前缀空转 | FIXED | 已只校验 tk_freight 自有模型，View-Model PASS |
+| verify 未查 odoo18_tms | FIXED | c4 覆盖 odoo18_tms/odoo18e_tms/tlmp. |
+| SQL 直写无 Guard | FIXED | c9 拦截 |
+| 规则冲突无 Guard | FIXED | c13 利润口径一致性 |
+| Forbidden 无机器可读清单 | FIXED | protected_* 清单 + c14 结构检查；字段/状态语义保护仍 DOCUMENT_ONLY |
+| Asset Map 缺资产 | FIXED | context_version/prompt_template/check_view_fields/context_readiness_review 均已声明 |
+| intent defect 空壳 | FIXED | 已记录 AUDIT-TEST-001/002 |
+| 技术债缺分类 | FIXED | Known Debt / Risk / Confirmed Bug / Unknown |
+| Git 未跟踪 | FIXED | commits ef8fcd6d / e4d38baa / b7ba80ad；docs/context 41 文件已入库 |
+| odoo_check 运行时验证 | OPEN | 沙箱内无法执行；宿主机常驻 + XML-RPC 后补 |
+
+`verify.py` 升级为 14 项门禁；无探针时基线 14/14 PASS。

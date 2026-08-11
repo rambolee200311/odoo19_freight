@@ -88,3 +88,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "探针测试后已删除；verify 13/13 PASS"
+
+  - contract_id: INT-FREIGHT-AUDIT-003
+    sprint_name: 独立审计对账收尾
+    context_baseline: "0.1.7"
+    execute_time: "2026-08-11"
+    test_category: "审计对账 + 门禁收尾"
+    test_target_models: []
+    total_case_count: 14
+    pass_count: 14
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 14 项门禁 + context_loader 基线"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "独立审计 12 项发现中 11 项已闭环，odoo_check 运行时验证 OPEN"

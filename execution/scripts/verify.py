@@ -247,6 +247,42 @@ def c13():
     return True
 check('规则冲突', c13)
 
+
+# c14: Forbidden Change 机器可读结构检查
+FORBIDDEN_SECTIONS = [
+    'protected_models:', 'protected_fields:', 'protected_state_values:',
+    'interface_contracts:', 'require_user_confirmation:', 'document_only:',
+]
+OWNED_PROTECTED_MODELS = [
+    'freight.shipment', 'freight.service', 'shipment.quotation',
+    'shipment.freight.booking',
+]
+
+
+def c14():
+    import re
+    fp = os.path.join(BASE, 'docs/context/constraints/forbidden_change.yaml')
+    if not os.path.exists(fp):
+        print('\n  forbidden_change.yaml not found')
+        return False
+    content = open(fp, encoding='utf-8').read()
+    missing = [s for s in FORBIDDEN_SECTIONS if s not in content]
+    if missing:
+        print(f'\n  FORBIDDEN MISSING SECTION: {missing}')
+        return False
+    model_src = ''
+    for f in sorted(glob.glob(os.path.join(BASE, 'mymodules/tk_freight/models', '*.py'))):
+        model_src += open(f, encoding='utf-8').read()
+    absent = [
+        m for m in OWNED_PROTECTED_MODELS
+        if not re.search(r"_name\s*=\s*['\"]" + re.escape(m) + r"['\"]", model_src)
+    ]
+    if absent:
+        print(f'\n  PROTECTED MODEL NOT IN MODULE: {absent}')
+        return False
+    return True
+check('Forbidden结构', c14)
+
 print(f'\n========== 结果: {passed} pass, {failed} fail ==========')
 if failed == 0: print('  ALL CHECKS PASSED \U0001f7e2')
 else: print(f'  {failed} checks failed \u274c')
