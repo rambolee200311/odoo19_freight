@@ -335,3 +335,14 @@ F8（中）Git 未纳入（docs/execution/technical_debt 未 add/commit），与
 - “不建设价目表/审批”改为当前阶段决策（B-08，范围=当前项目/当前阶段，未来可重新讨论）。
 - 缺口分类严格区分 CONFIRMED_BUG / TECHNICAL_DEBT / MISSING_FEATURE / RISK / UNKNOWN；未实现 ≠ 技术债。
 - `technical_debt.md` 同步严格分类；`knowledge_classification.md` 增加 B-12 与引用规范。
+
+## 21. Domain Reference Added (2026-08-11)
+
+新增 `docs/context/business/reference/china_export_freight_forwarding_domain_model.md`：
+
+- 元数据：`knowledge_type=DOMAIN_REFERENCE / authority=REFERENCE_ONLY / project_requirement=false`。
+- 覆盖行业业务主体、核心业务链、核心对象、典型状态、财务、单证、运输模式、业务变体。
+- 明确 `Industry Reference ≠ Project Requirement / Business Decision / Code Fact / Forbidden Change`。
+- 定义三层差异分析映射：行业参考 → 项目已确认需求 → 代码事实 → 覆盖评估。
+- 行业能力与 tk_freight 不一致时只记录 `DOMAIN_REFERENCE_DIFFERENCE`，不产生开发动作。
+- 本文件已纳入 verify REQUIRED_CONTEXT（c10）。

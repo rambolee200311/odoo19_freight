@@ -33,6 +33,7 @@
 - `TD-*`：技术债（`mymodules/tk_freight/docs/technical_debt.md`），分类见该文件。
 - `U-*`：UNKNOWN / 未确认需求（本文件 U 清单）。
 - `CODE_FACT`：代码现状，不代表业务规定。
+- `DOMAIN_REFERENCE`：行业通用参考（`business/reference/`），仅用于理解领域，不等于项目需求、决策、代码事实或 Forbidden Change。
 
 ## 推测/方案（ASSUMPTION / NEEDS_CONFIRMATION）
 

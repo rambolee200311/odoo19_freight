@@ -173,6 +173,8 @@ REQUIRED_CONTEXT = [
     'docs/context/cognition/cognition_asset_map.md',
     'docs/context/constraints/forbidden_change.yaml',
     'docs/context/business/freight_rule.md',
+    'docs/context/business/export_freight_coverage.md',
+    'docs/context/business/reference/china_export_freight_forwarding_domain_model.md',
     'docs/context/business/knowledge_classification.md',
     'docs/context/history/decision_note.md',
     'docs/context/history/bug_record.md',
