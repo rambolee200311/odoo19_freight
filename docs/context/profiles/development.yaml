@@ -4,13 +4,22 @@ name: development
 include:
   - architecture
   - business
+  - cognition
   - constraints
+  - governance
   - history
 
 exclude:
   - governance/human_loop
   - governance/audit_spec
   - validation
+
+required:
+  - context_version.yaml
+  - cognition/cognition_asset_map.md
+  - architecture/module_map.md
+  - constraints/forbidden_change.yaml
+  - governance/rules.yaml
 
 load_strategy:
   mode: selective

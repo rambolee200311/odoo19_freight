@@ -25,6 +25,7 @@
 | `business/finance_flow.md` | 财务单据流与核算口径 |
 | `business/business_debt_register.md` | 业务技术债摘要 |
 | `business/knowledge_classification.md` | 事实/推测/未知知识分类 |
+| `business/business_rules.yaml` | 机器可读业务规则表（verify 对比器输入） |
 | `business/export_freight_coverage.md` | 现有功能 vs 出口货代业务覆盖矩阵 |
 | `business/reference/china_export_freight_forwarding_domain_model.md` | 中国出口货代行业 Domain Reference（REFERENCE_ONLY） |
 | `history/decision_note.md` | 架构与业务决策记录 |

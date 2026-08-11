@@ -346,3 +346,15 @@ F8（中）Git 未纳入（docs/execution/technical_debt 未 add/commit），与
 - 定义三层差异分析映射：行业参考 → 项目已确认需求 → 代码事实 → 覆盖评估。
 - 行业能力与 tk_freight 不一致时只记录 `DOMAIN_REFERENCE_DIFFERENCE`，不产生开发动作。
 - 本文件已纳入 verify REQUIRED_CONTEXT（c10）。
+
+## 22. Anti-Drift Guards Added (2026-08-11)
+
+补齐五项防偏离机制（context_version 0.1.11）：
+
+- `business/business_rules.yaml`：机器可读规则表（BR-*，CONFIRMED / ASSUMPTION / UNKNOWN / DECISION_CONFIRMED）。
+- verify c15：Intent scope 越界检查（scope_paths vs 工作区变更）。
+- verify c16：规则表结构检查（必需 BR 与状态齐全）。
+- verify c17：`business/*` 变更强制同步 `history/decision_note.md`。
+- verify c18：`unresolved_unknowns` 非空且 intent 涉及 mymodules 代码时拦截。
+- c13 利润口径对比改为读取 `business_rules.yaml` BR-04，消除硬编码。
+- 治理规则：每个 Sprint 结束执行独立审计对账。

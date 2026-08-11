@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """产出语法门禁 — 可执行版本。取代 verify.sh（避免 bash heredoc 问题）"""
-import os, sys, glob, xml.etree.ElementTree as ET
+import os, re, sys, glob, xml.etree.ElementTree as ET
 
 BASE = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 MODELS = os.path.join(BASE, 'mymodules/tk_freight/models')
@@ -176,6 +176,7 @@ REQUIRED_CONTEXT = [
     'docs/context/business/export_freight_coverage.md',
     'docs/context/business/reference/china_export_freight_forwarding_domain_model.md',
     'docs/context/business/knowledge_classification.md',
+    'docs/context/business/business_rules.yaml',
     'docs/context/history/decision_note.md',
     'docs/context/history/bug_record.md',
     'docs/context/governance/check_view_fields.py',
@@ -229,6 +230,17 @@ check('版本刷新', c12)
 def c13():
     import re
     canonical = "已开票收入−已确认成本−税费"
+    rules_path = os.path.join(BASE, 'docs/context/business/business_rules.yaml')
+    if os.path.exists(rules_path):
+        rules_content = open(rules_path, encoding='utf-8').read()
+        block = rules_content.split('id: BR-04', 1)
+        if len(block) == 2:
+            m = re.search(r'statement:\s*"([^"]+)"', block[1])
+            if m:
+                raw = re.sub(r'\s+', '', m.group(1).split('（')[0])
+                if raw.startswith('利润='):
+                    raw = raw[len('利润='):]
+                canonical = raw
     bad = []
     for f in sorted(glob.glob(os.path.join(BASE, 'docs/context/business', '*.md'))):
         with open(f, encoding='utf-8') as fh:
@@ -284,6 +296,147 @@ def c14():
         return False
     return True
 check('Forbidden结构', c14)
+
+
+USER_LOCAL_PATHS = (
+    '.gitignore',
+    '.vscode/',
+    'mymodules/tk_freight/docs/config.xml',
+    'debug_logs/',
+)
+
+
+def _current_intent_yaml():
+    files = sorted(glob.glob(os.path.join(BASE, 'docs/context/intent', '*[Ss]print*.yaml')))
+    files = [f for f in files if 'template' not in os.path.basename(f)]
+    if not files:
+        return None
+    def num(fp):
+        m = re.search(r'sprint(\d+)', os.path.basename(fp))
+        return int(m.group(1)) if m else 0
+    return max(files, key=num)
+
+
+def _yaml_list_any(content, key):
+    """Parse a YAML list under `key` at any indentation (inline [] or block)."""
+    out = []
+    lines = content.split('\n')
+    i = 0
+    while i < len(lines):
+        m = re.match(r'^(\s*)' + re.escape(key) + r':\s*(.*)$', lines[i])
+        if not m:
+            i += 1
+            continue
+        indent = m.group(1)
+        tail = m.group(2).strip()
+        if tail.startswith('['):
+            inner = tail[1:-1].strip()
+            if inner:
+                out.extend(x.strip().strip('"\'')
+                           for x in inner.split(',')
+                           if x.strip().strip('"\''))
+            i += 1
+        else:
+            prefix = indent + '  '
+            j = i + 1
+            while j < len(lines) and lines[j].startswith(prefix + '- '):
+                item = lines[j].strip()[2:].strip().strip('"\'')
+                if item:
+                    out.append(item)
+                j += 1
+            i = j
+    return out
+
+
+# c15: Intent scope 越界检查
+def c15():
+    import subprocess
+    intent = _current_intent_yaml()
+    if not intent:
+        print('\n  no intent file found')
+        return False
+    content = open(intent, encoding='utf-8').read()
+    scopes = _yaml_list_any(content, 'allowed_files') or _yaml_list_any(content, 'scope_paths')
+    if not scopes:
+        print('\n  intent 缺少 scope.allowed_files / scope_paths')
+        return False
+    r = subprocess.run(['git', 'status', '--porcelain'], cwd=BASE,
+                       capture_output=True, text=True)
+    r2 = subprocess.run(['git', 'diff', '--name-only', 'HEAD'], cwd=BASE,
+                        capture_output=True, text=True)
+    changed = set()
+    for line in (r.stdout + '\n' + r2.stdout).splitlines():
+        if not line.strip():
+            continue
+        p = line[3:] if len(line) > 3 and line[2] == ' ' else line
+        if ' -> ' in p:
+            p = p.split(' -> ')[-1]
+        changed.add(p)
+    bad = []
+    for p in sorted(changed):
+        if p.startswith(USER_LOCAL_PATHS):
+            continue
+        if any(p == s or p.startswith(s.rstrip('/') + '/') for s in scopes):
+            continue
+        bad.append(p)
+    if bad:
+        for b in bad:
+            print(f'\n  OUT OF INTENT SCOPE: {b}')
+        return False
+    return True
+check('Intent范围', c15)
+
+
+# c16: 业务规则表结构检查
+def c16():
+    fp = os.path.join(BASE, 'docs/context/business/business_rules.yaml')
+    if not os.path.exists(fp):
+        print('\n  business_rules.yaml not found')
+        return False
+    content = open(fp, encoding='utf-8').read()
+    required = ['BR-01', 'BR-04', 'BR-08', 'BR-09', 'BR-12',
+                'status: CONFIRMED', 'status: ASSUMPTION',
+                'status: UNKNOWN', 'status: DECISION_CONFIRMED']
+    missing = [r for r in required if r not in content]
+    if missing:
+        print(f'\n  RULES REGISTRY MISSING: {missing}')
+        return False
+    return True
+check('规则表结构', c16)
+
+
+# c17: business/* 变更必须同步 decision_note
+def c17():
+    import subprocess
+    r = subprocess.run(['git', 'status', '--porcelain', 'docs/context/business'],
+                       cwd=BASE, capture_output=True, text=True)
+    if not r.stdout.strip():
+        return True
+    r2 = subprocess.run(
+        ['git', 'status', '--porcelain', 'docs/context/history/decision_note.md'],
+        cwd=BASE, capture_output=True, text=True)
+    if not r2.stdout.strip():
+        print('\n  business/* 变更必须同步 history/decision_note.md')
+        return False
+    return True
+check('业务决策同步', c17)
+
+
+# c18: UNKNOWN 未确认不得进入代码开发
+def c18():
+    intent = _current_intent_yaml()
+    if not intent:
+        return False
+    content = open(intent, encoding='utf-8').read()
+    if not re.search(r'^(\s*)unresolved_unknowns\s*:', content, re.MULTILINE):
+        print('\n  intent 缺少 unresolved_unknowns')
+        return False
+    unresolved = _yaml_list_any(content, 'unresolved_unknowns')
+    if 'mymodules/' in content and unresolved:
+        print(f'\n  UNRESOLVED UNKNOWNS: {unresolved}')
+        return False
+    return True
+check('UNKNOWN拦截', c18)
 
 print(f'\n========== 结果: {passed} pass, {failed} fail ==========')
 if failed == 0: print('  ALL CHECKS PASSED \U0001f7e2')

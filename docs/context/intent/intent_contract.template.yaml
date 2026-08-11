@@ -1,15 +1,20 @@
 # ==============================================================
-# 【Intent 控制工程 · 标准化执行模板（v3.0）】
+# 【Intent 控制工程 · 标准化执行模板（v3.2）】
 # 适用项目：Odoo19 Freight 中国天津出口代理货代
-# 版本：3.0 — 对齐 5.x Intent Driven AI Engineering 最终规范
+# 版本：3.2 — Harness 可执行 Intent 结构（含菜单断言）
 # ==============================================================
 #
 # 使用说明：
 #   1. 新建 Intent 时复制本文件完整填充
 #   2. intent_work_type 和 intent_change_type 决定 Profile 和校验策略
-#   3. asset_snapshot_profile 引用 profiles/*.yaml
-#   4. loop_policy 管控多轮迭代上限和增量重试范围
-#   5. ACCEPTED 后自动生成 Asset Proposal → 人工审核后方可更新基线
+#   3. context_binding.asset_snapshot_profile 引用 profiles/*.yaml
+#   4. scope.allowed_files 是允许修改的文件白名单（含 Context 记录）
+#   5. change_boundary 区分功能代码 / 翻译 / Context 审计
+#   6. scope.forbidden_paths / forbidden_changes 是 commit_guard 与 verify 越界依据
+#   7. unknown_policy 规定执行中发现新 UNKNOWN 必须停止并升级
+#   8. stop_condition 区分 success 与 hard_stop
+#   9. menu_assertions / success_definition 供 Harness 机械判断完成度
+#   10. ACCEPTED 后自动生成 Asset Proposal → 人工审核后方可更新基线
 #
 # Work Type 与 Profile 映射：
 #   Development    → profiles/development.yaml
@@ -19,48 +24,138 @@
 # ==============================================================
 
 intent_id: ""
+sprint_version: ""
 intent_work_type: ""
 intent_change_type: ""
 title: ""
 target_scope: ""
-accept_criteria:
-  - ""
 
-source:
-  type: ""
-  origin_team: ""
+context_binding:
+  bind_context_version: ""
+  asset_snapshot_profile: ""
 
-asset_snapshot_profile: ""
-asset_snapshot_mode: "human"
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: ""
+    origin_team: ""
+    confirmation_ref: ""
+  confirmed_decisions:
+    - id: ""
+      decision_ref: ""
+      decision_status: "CONFIRMED"
+      statement: ""
+      rule_refs: []
+  unresolved_unknowns: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: false
+  newly_discovered_unknown_action: "stop_and_escalate"
+
+scope:
+  allowed_files:
+    - ""
+  forbidden_paths:
+    - ""
+  allowed_changes:
+    - ""
+  forbidden_changes:
+    - ""
+
+change_boundary:
+  functional_code: []
+  translation: []
+  context_audit: []
+
+technical_constraints: []
+menu_relocation:
+  target: ""
+  parent: ""
+  groups: []
+translation_constraints: []
+
+invariants:
+  unchanged_menu_roots: []
+  unchanged_menu_semantics: []
+  moved_menu_groups: []
+  unchanged_business_behavior: []
+  unchanged_permissions: []
+  forbidden_menu_changes: []
+
+acceptance_criteria:
+  functional: []
+  non_regression: []
+  validation: []
+
+validation:
+  context: []
+  static: []
+  build: []
+  runtime: []
+  business_review: []
+  snapshot:
+    verify_gate_count: 0
+    note: ""
+
+menu_assertions:
+  archive:
+    exists: false
+    parent: ""
+    children: []
+  invoicing:
+    exists: false
+    parent: ""
+    children: []
+  unchanged: []
+  invoice_actions:
+    receivable:
+      action: ""
+      domain: ""
+    payable:
+      action: ""
+      domain: ""
 
 loop_policy:
   max_iteration: 5
   retry_scope:
     mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
   escalation:
     after_failed_iteration: 3
     require_human: true
   stop_condition:
-    - all_validation_pass
-    - human_accept
-    - risk_block
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
 
 affected_assets:
   business: []
   architecture: []
   governance: []
+  history: []
 
-validation_strategy:
-  layers:
-    - static_check
-    - build_verify
-    - auto_test
-    - runtime_validate
-    - business_review
-  required_pass: all
+execution_artifacts:
+  intent_records: []
+  validation_records: []
+  context_version: []
+
+success_definition: []
 
 deliverables:
   - ""
 
-limit_constraints: ""
-risk_precheck: ""
+audit:
+  intent_records: ""
+
+risk_precheck: []

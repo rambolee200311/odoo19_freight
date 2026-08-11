@@ -3,12 +3,90 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.10
+context_version: 0.1.18
 update_time: 2026-08-11
 adapt_sprint: Sprint0-Context-Baseline
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.18:
+    update_content: |
+      Sprint1 执行完成：
+      - Archive/Invoicing 菜单结构与应收/应付发票入口落地
+      - 新增 menu-scoped act_window wrapper 实现发票 domain（决策14）
+      - zh_CN.po 菜单文案更新
+      - intent_records/INT-FREIGHT-SPRINT1-001/ 执行记录归档
+    update_type: Sprint1 开发执行
+    effect_scope: tk_freight menus + zh_CN.po + intent_records
+
+  0.1.17:
+    update_content: |
+      Sprint1 契约第二轮 Harness 化修订：
+      - 新增 change_boundary / menu_relocation / translation_constraints / menu_assertions / success_definition
+      - account action 明确为“引用”而非修改
+      - Archive / Invoicing parent 明确为 tk_freight.freight_root
+      - affected_assets 与 execution_artifacts 分离
+      - stop_condition 拆分 success / hard_stop
+      - confirmed_decisions 改用 B-13/B-14，保留 U-10/U-11 追溯
+    update_type: Intent 契约 Harness 化
+    effect_scope: intent_sprint1 + intent_template + knowledge_classification + cognition_consistency_check
+
+  0.1.16:
+    update_content: |
+      Sprint1 契约 Harness 化修订：
+      - scope_paths 收窄为 scope.allowed_files + forbidden_paths
+      - 新增 invariants / unknown_policy / context_policy / technical_constraints
+      - 验收与验证分离，停止条件增加 scope_violation / new_unknown
+      - development Profile 补充 required 资产语义
+      - verify/context_loader 兼容新旧 Intent 结构
+    update_type: Intent 契约 Harness 化
+    effect_scope: intent_sprint1 + profiles + verify + context_loader
+
+  0.1.15:
+    update_content: |
+      Sprint1 契约细化：Archive 收拢范围限定为
+      Customers/Vendors/Fleets/Services 四个菜单；
+      Packages、Configurations 与其他菜单保持不变（B-13/BR-13 同步更新）。
+    update_type: Intent 契约细化
+    effect_scope: intent_sprint1 + business_rules + knowledge_classification
+
+  0.1.14:
+    update_content: |
+      Sprint1 菜单范围确认：
+      - U-10：保留独立 Packages 菜单，档案维护收拢到单一顶层菜单（B-13/BR-13）
+      - U-11：应收/应付发票仅显示 freight_operation_id 有值单据（B-14/BR-14）
+      - intent unresolved_unknowns 清空，契约进入可开发状态
+    update_type: Intent 范围确认
+    effect_scope: intent_sprint1 + business_rules + knowledge_classification
+
+  0.1.13:
+    update_content: |
+      Sprint1 Intent 补充 i18n 范围：
+      - scope_paths 增加 mymodules/tk_freight/i18n/
+      - 验收与交付物增加 i18n/zh_CN.po 菜单文案更新
+    update_type: Intent 契约修订
+    effect_scope: intent_sprint1
+
+  0.1.12:
+    update_content: |
+      起草 Sprint1 Intent（INT-FREIGHT-SPRINT1-001）：
+      - 菜单整理：档案维护收拢到单一顶层菜单
+      - 新增 Invoicing 一级菜单：应收发票/应付发票二级菜单
+      - 登记开放项 U-10 / U-11，未确认前不进入代码开发
+    update_type: Intent 起草
+    effect_scope: intent + business UNKNOWN 登记
+
+  0.1.11:
+    update_content: |
+      补齐防偏离 Guard：
+      - 新增 business/business_rules.yaml 机器可读规则表
+      - verify.py 新增 c15 Intent 范围 / c16 规则表结构 / c17 业务决策同步 / c18 UNKNOWN 拦截
+      - c13 利润口径对比改为读取 business_rules.yaml BR-04
+      - intent 模板与 sprint0 增加 scope_paths / unresolved_unknowns
+      - 治理规则增加“每个 Sprint 结束执行独立审计对账”
+    update_type: 防偏离机制补齐
+    effect_scope: verify + business_rules + intent 契约
+
   0.1.10:
     update_content: |
       新增中国出口货代行业 Domain Reference（REFERENCE_ONLY）：

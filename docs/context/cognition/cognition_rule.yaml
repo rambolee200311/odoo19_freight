@@ -17,7 +17,7 @@ pre_dev_load_order:
   7: "读取 history/decision_note.md 历史架构决策"
   8: "读取 history/bug_record.md 历史缺陷规避"
   9: "读取 constraints/forbidden_change.yaml 刚性约束"
-  10: "读取本次意图契约，核对 work_type/change_type/accept_criteria"
+  10: "读取本次意图契约，核对 work_type/change_type/acceptance_criteria"
 
 profile_isolation:
   - Development/Maintenance: 加载业务域资产，按需引入基础配置

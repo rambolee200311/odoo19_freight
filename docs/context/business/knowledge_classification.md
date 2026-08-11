@@ -26,14 +26,17 @@
 | B-10 | 数据检查用 odoo shell，禁止直连数据库 | 2026-08-11 用户确认 |
 | B-11 | 模块升级常驻 + XML-RPC + log 检查 | 2026-08-11 用户确认 |
 | B-12 | 业务范围：客户主体=中国天津出口代理货代；核心业务=报价/订舱/货运单全生命周期；财务核心=收入/成本/应收/应付核算与对账 | 项目初始约束（用户 2026-08-11） |
+| B-13 | 菜单范围：Customers/Vendors/Fleets/Services 收拢到 Archive 菜单，Packages 保留独立入口，其他菜单不动 | 2026-08-11 用户确认（U-10） |
+| B-14 | Invoicing 菜单范围：应收/应付发票仅显示 freight_operation_id 有值单据 | 2026-08-11 用户确认（U-11） |
 
 ## 引用规范
 
 - `B-*`：已确认业务事实/决策（本文件 B 清单）；`B-08` 为当前阶段决策，范围=当前项目/当前阶段，未来可重新讨论。
 - `TD-*`：技术债（`mymodules/tk_freight/docs/technical_debt.md`），分类见该文件。
-- `U-*`：UNKNOWN / 未确认需求（本文件 U 清单）。
+- `U-*`：历史 UNKNOWN / 未确认需求编号（本文件 U 清单）；已确认项收敛为 `B-*`（如 U-10 → B-13、U-11 → B-14），不再以 U 编号表达 CONFIRMED 决策。
 - `CODE_FACT`：代码现状，不代表业务规定。
 - `DOMAIN_REFERENCE`：行业通用参考（`business/reference/`），仅用于理解领域，不等于项目需求、决策、代码事实或 Forbidden Change。
+- `BR-*`：机器可读业务规则（`business/business_rules.yaml`），状态 CONFIRMED / ASSUMPTION / UNKNOWN / DECISION_CONFIRMED，供 verify 对比器使用。
 
 ## 推测/方案（ASSUMPTION / NEEDS_CONFIRMATION）
 

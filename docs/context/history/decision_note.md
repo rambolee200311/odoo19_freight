@@ -38,3 +38,27 @@
 ### 决策8：事实与推测分类基线
 
 **决策**: 建立 `business/knowledge_classification.md`，对业务知识统一标注 CODE_FACT / BUSINESS_FACT / DECISION / CONSTRAINT / TECHNICAL_DEBT / UNKNOWN / ASSUMPTION；决策6 中的汇率与利润默认口径标记为 ASSUMPTION / NEEDS_CONFIRMATION，不再作为已确认事实表述。
+
+### 决策9：防偏离 Guard 补齐
+
+**决策**: 新增五项防偏离机制：intent scope 越界检查（c15）、机器可读业务规则表 `business_rules.yaml` 与口径对比（c13/c16）、`business/*` 变更强制同步 decision_note（c17）、UNKNOWN 未确认不得进入代码开发（c18）、每个 Sprint 结束执行独立审计对账（治理规则）。这些机制只约束开发流程，不改变已确认业务口径。
+
+### 决策10：Sprint1 Intent 起草
+
+**决策**: 起草 `INT-FREIGHT-SPRINT1-001`（菜单整理 + Invoicing 应收/应付发票菜单）。登记开放项 U-10（档案收拢范围）与 U-11（发票菜单范围），未确认前不得进入代码开发；本迭代仅限视图/菜单层。
+
+### 决策11：Sprint1 菜单范围确认
+
+**决策**: U-10 确认：Customers/Vendors/Fleets/Services 收拢到 Archive 菜单，Packages 保留独立入口，其他菜单不动。U-11 确认：应收/应付发票菜单仅显示 `freight_operation_id` 有值的货代相关发票。登记为 B-13 / B-14 / BR-13 / BR-14，契约进入可开发状态。
+
+### 决策12：Sprint1 契约 Harness 化修订
+
+**决策**: 按独立评审将 `INT-FREIGHT-SPRINT1-001` 重构为可执行结构：`scope_paths` 收窄为 `scope.allowed_files`，新增 `forbidden_paths` / `forbidden_changes` / `invariants` / `unknown_policy` / `context_policy`，验收与验证分离，停止条件增加 `scope_violation` / `new_unknown`。development Profile 补充 `required` 资产语义，verify / context_loader 兼容新旧 Intent 结构。业务范围与 B-13 / B-14 / BR-13 / BR-14 不变。
+
+### 决策13：Sprint1 契约第二轮 Harness 化修订
+
+**决策**: 按第二轮评审消除契约歧义：新增 `change_boundary` / `menu_relocation` / `translation_constraints` / `menu_assertions` / `success_definition`；明确 account action 为“引用”而非修改；明确 Archive / Invoicing parent 为 `tk_freight.freight_root`；`affected_assets` 与 `execution_artifacts` 分离；`stop_condition` 拆分 `success / hard_stop`；confirmed_decisions 改用 B-13 / B-14 并保留 U-10 / U-11 追溯。业务范围不变。
+
+### 决策14：Sprint1 发票菜单 domain 技术实现
+
+**决策**: Odoo 19 `menuitem` 不支持 `domain` 属性。为满足应收/应付发票菜单 domain 限定，在 `views/menus.xml` 新增两个 menu-scoped `ir.actions.act_window` wrapper：`action_freight_invoice_receivable` / `action_freight_invoice_payable`，复用 account 标准视图与 move_type domain，追加 `freight_operation_id != False` 过滤。不新增模型/业务逻辑，不修改 account action。

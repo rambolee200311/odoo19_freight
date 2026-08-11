@@ -14,3 +14,15 @@
 **验收**: 待 context_loader / verify 执行确认。
 
 **下一步**: 按技术债优先级修复 P0 财务问题（TD-001/002/003/004/005/008/009）。
+
+## Sprint1-Menu-Consolidation-Invoicing (2026-08-11)
+
+**目标**: 整理 tk_freight 菜单，将 Customers/Vendors/Fleets/Services 收拢到 Archive，并新增 Invoicing 应收/应付发票入口。
+
+**成果**:
+- Archive 一级菜单建立，Customers/Vendors/Fleets/Services 及其子菜单收拢至 Archive
+- Invoicing 一级菜单 + 应收发票/应付发票二级菜单
+- 应收/应付发票通过 menu-scoped act_window wrapper 限定 `freight_operation_id` 有值单据
+- zh_CN.po 新增 档案/发票管理/应收发票/应付发票 菜单文案
+
+**验收**: verify.py 17/18 PASS（c15 受工作区存量越界变更影响）；XML-RPC 模块升级与菜单断言 PASS。

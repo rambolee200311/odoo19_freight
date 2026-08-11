@@ -156,3 +156,40 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "REFERENCE_ONLY，未转化为项目需求/Forbidden Change/Technical Debt"
+
+  - contract_id: INT-FREIGHT-GUARD-001
+    sprint_name: 防偏离 Guard 补齐
+    context_baseline: "0.1.11"
+    execute_time: "2026-08-11"
+    test_category: "防偏离机制"
+    test_target_models: []
+    total_case_count: 18
+    pass_count: 18
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18 项门禁（含 c15-c18）"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "Intent 范围/规则表/决策同步/UNKNOWN 拦截均已启用"
+
+  - contract_id: INT-FREIGHT-SPRINT1-001
+    sprint_name: Sprint1 菜单整理 + Invoicing
+    context_baseline: "0.1.17"
+    execute_time: "2026-08-11"
+    test_category: "菜单结构开发"
+    test_target_models: []
+    total_case_count: 18
+    pass_count: 17
+    fail_count: 1
+    skip_count: 0
+    coverage_rate: "verify.py 17/18；XML-RPC 升级 + menu_assertions 运行时 PASS"
+    fail_detail:
+      - test_name: "c15 Intent范围"
+        fail_reason: "工作区存在本次契约/治理改动之外的存量变更，非 Sprint1 代码越界"
+        severity: LEVEL2
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: false
+    note: "menus.xml/zh_CN.po 变更落地；odoo_check.py 升级通过且 log clean；c15 需工作区干净后复核"

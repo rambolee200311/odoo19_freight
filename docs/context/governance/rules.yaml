@@ -30,6 +30,7 @@ upgrade_redline:
 knowledge_redline:
   - 每次迭代启动时必须先执行 context_loader.py
   - 数据检查必须使用 odoo shell，禁止直连数据库操作（铁律）
+  - 每个 Sprint 结束必须执行一次独立审计对账（context_readiness_review 或等价）
   - 提交前必须更新 decision_note.md 与 context_version.yaml
   - 跑了测试必须更新 validation/test_exec_records.yaml
   - 发现 Bug 必须更新 history/bug_record.md

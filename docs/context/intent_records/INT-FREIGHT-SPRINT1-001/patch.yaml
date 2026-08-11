@@ -1,0 +1,14 @@
+intent_id: INT-FREIGHT-SPRINT1-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/views/menus.xml
+  - mymodules/tk_freight/i18n/zh_CN.po
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/validation/test_exec_records.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT1-001/
+
+scope_notes:
+  - "Odoo menuitem 不支持 domain，新增 menu-scoped act_window wrapper（决策14）"

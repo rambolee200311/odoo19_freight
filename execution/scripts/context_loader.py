@@ -81,6 +81,24 @@ def _yaml_list(text, key, default=None):
     return items
 
 
+def _yaml_nested_val(text, parent, key, default=''):
+    """提取嵌套块中的 key 值，例如 context_binding.bind_context_version"""
+    lines = text.split('\n')
+    in_parent = False
+    for line in lines:
+        if re.match(rf'^{re.escape(parent)}:\s*$', line):
+            in_parent = True
+            continue
+        if in_parent:
+            if line and not line.startswith(' '):
+                in_parent = False
+            else:
+                m = re.match(rf'^\s+{re.escape(key)}\s*:\s*(.+)$', line)
+                if m:
+                    return m.group(1).strip().strip('"').strip("'")
+    return default
+
+
 # -----------------------------------------------------------
 # 版本与意图
 # -----------------------------------------------------------
@@ -102,9 +120,11 @@ def read_intent():
     name = os.path.basename(best)
     raw = _read(best)
     sv = _yaml_val(raw, 'sprint_version', '')
-    bv = _yaml_val(raw, 'bind_context_version', '')
+    bv = _yaml_nested_val(raw, 'context_binding', 'bind_context_version', '')
+    bv = bv or _yaml_val(raw, 'bind_context_version', '')
     # 5.x 新字段: asset_snapshot_profile, 向后兼容: context_load_profile
-    apf = _yaml_val(raw, 'asset_snapshot_profile', '')
+    apf = _yaml_nested_val(raw, 'context_binding', 'asset_snapshot_profile', '')
+    apf = apf or _yaml_val(raw, 'asset_snapshot_profile', '')
     pf = apf or _yaml_val(raw, 'context_load_profile', 'full')
     return (name, sv, bv, pf)
 
@@ -121,6 +141,7 @@ def read_profile(profile_name):
 
     include = _yaml_list(raw, 'include')
     exclude = _yaml_list(raw, 'exclude')
+    required = _yaml_list(raw, 'required')
     ls_raw = _read(fpath)
     # 解析 load_strategy
     ls = {'mode': 'selective', 'summary': {'enabled': True},
@@ -131,7 +152,8 @@ def read_profile(profile_name):
     forbidden = _yaml_list(ls_raw, '  forbidden', default=None)
     if forbidden is not None:
         ls['forbidden'] = forbidden
-    return {'name': profile_name, 'include': include, 'exclude': exclude, 'load_strategy': ls}
+    return {'name': profile_name, 'include': include, 'exclude': exclude,
+            'load_strategy': ls, 'required': required}
 
 
 # -----------------------------------------------------------
@@ -503,6 +525,16 @@ def main():
         domains.append(result)
         if result['status'] != 'PASS':
             all_pass = False
+
+    # Profile required 资产存在性
+    required_missing = []
+    for req in (profile_cfg or {}).get('required', []):
+        if not os.path.exists(os.path.join(CTX, req)):
+            required_missing.append(req)
+    if required_missing:
+        for req in required_missing:
+            print(f'  MISSING REQUIRED ASSET: {req}')
+        all_pass = False
 
     # ── 4. 风险加载 ──
     risks = load_risks()

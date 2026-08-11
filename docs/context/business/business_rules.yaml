@@ -1,0 +1,128 @@
+# 机器可读业务规则表（供 verify 对比器使用）
+# BR-* 引用语义见 knowledge_classification.md
+version: 0.1.0
+updated: 2026-08-11
+
+rules:
+  - id: BR-01
+    category: finance
+    status: CONFIRMED
+    source: B-01
+    statement: "收入 = shipper + consignee 服务行开票金额；成本 = vendor 服务行账单金额"
+  - id: BR-02
+    category: finance
+    status: CONFIRMED
+    source: B-02
+    statement: "费用可分可合，费用行指定开票对象"
+  - id: BR-03
+    category: finance
+    status: CONFIRMED
+    source: B-03
+    statement: "本位币人民币，允许外币报价/开票"
+  - id: BR-04
+    category: finance
+    status: CONFIRMED
+    source: B-07
+    statement: "利润 = 已开票收入 − 已确认成本 − 税费"
+    note: "税费净额解释未确认，见 A-3"
+  - id: BR-05
+    category: process
+    status: CONFIRMED
+    source: B-05
+    statement: "开票时点由操作员决定"
+  - id: BR-06
+    category: process
+    status: CONFIRMED
+    source: B-06
+    statement: "收付款登记，不做复杂核销"
+  - id: BR-07
+    category: process
+    status: CONFIRMED
+    source: B-10
+    statement: "数据检查一律使用 odoo shell，禁止直连数据库"
+  - id: BR-08
+    category: process
+    status: CONFIRMED
+    source: B-11
+    statement: "模块升级常驻 + XML-RPC + log 检查"
+  - id: BR-09
+    category: scope
+    status: DECISION_CONFIRMED
+    source: B-08
+    scope: "当前项目/当前阶段"
+    statement: "价目表/标准费率/报价审批当前阶段不建设"
+  - id: BR-10
+    category: scope
+    status: DECISION_CONFIRMED
+    source: B-08
+    scope: "当前项目/当前阶段"
+    statement: "不强制状态机，不做精细报价管理"
+  - id: BR-11
+    category: scope
+    status: CONFIRMED
+    source: B-09
+    statement: "报表需求、角色权限后续确定，遗留兼容保留"
+  - id: BR-12
+    category: tax
+    status: CONFIRMED
+    source: B-04
+    statement: "不含税单价 + 税率录入；税额/含税金额可手工修改；费用类型可配置默认税率"
+  - id: BR-13
+    category: menu
+    status: DECISION_CONFIRMED
+    source: B-13
+    statement: "Customers/Vendors/Fleets/Services 收拢到 Archive 菜单，Packages 保留独立入口，其他菜单不动"
+  - id: BR-14
+    category: menu
+    status: DECISION_CONFIRMED
+    source: B-14
+    statement: "应收/应付发票菜单仅显示 freight_operation_id 有值单据"
+
+assumptions:
+  - id: A-1
+    status: ASSUMPTION
+    statement: "费用行整行进一张发票，不做行级分批"
+  - id: A-2
+    status: ASSUMPTION
+    statement: "收入/成本按单据日汇率，收付款按登记日汇率"
+  - id: A-3
+    status: ASSUMPTION
+    statement: "税费净额 = 销项税 − 进项税"
+  - id: A-4
+    status: ASSUMPTION
+    statement: "手工税额开票用定额税码"
+  - id: A-5
+    status: ASSUMPTION
+    statement: "开票生成 Odoo 草稿单据"
+  - id: A-6
+    status: ASSUMPTION
+    statement: "服务行缺 partner 禁止开票"
+  - id: A-7
+    status: ASSUMPTION
+    statement: "发票状态变化回写服务行与货单账务"
+  - id: A-8
+    status: ASSUMPTION
+    statement: "财务字段按本位币展示、发票不改口径"
+
+unknowns:
+  - id: U-01
+    status: UNKNOWN
+    statement: "费用行分批开票是否允许"
+  - id: U-02
+    status: UNKNOWN
+    statement: "汇率折算日期口径"
+  - id: U-03
+    status: UNKNOWN
+    statement: "利润公式中税费的净税解释"
+  - id: U-04
+    status: UNKNOWN
+    statement: "手工税额开票机制"
+  - id: U-05
+    status: UNKNOWN
+    statement: "收付款登记货单入口、报价转订舱价格锁定"
+  - id: U-06
+    status: UNKNOWN
+    statement: "报表需求、角色权限、门户写权限"
+  - id: U-07
+    status: UNKNOWN
+    statement: "U8C/外部财务接口是否恢复"

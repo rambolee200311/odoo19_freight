@@ -3050,6 +3050,11 @@ msgid "Air Carriage Details"
 msgstr "空运详情"
 
 #. module: tk_freight
+#: model:ir.ui.menu,name:tk_freight.menu_freight_archive
+msgid "Archive"
+msgstr "档案"
+
+#. module: tk_freight
 #: model_terms:ir.ui.view,arch_db:tk_freight.res_config_settings_view_form_freight
 msgid "Air Ratio"
 msgstr "空运比率"
@@ -5552,6 +5557,23 @@ msgstr "已开票"
 #: model_terms:ir.ui.view,arch_db:tk_freight.freight_shipment_form_view
 msgid "Invoices"
 msgstr "发票"
+
+#. module: tk_freight
+#: model:ir.ui.menu,name:tk_freight.menu_freight_invoicing
+msgid "Invoicing"
+msgstr "发票管理"
+
+#. module: tk_freight
+#: model:ir.actions.act_window,name:tk_freight.action_freight_invoice_payable
+#: model:ir.ui.menu,name:tk_freight.menu_freight_invoice_payable
+msgid "Payable Invoices"
+msgstr "应付发票"
+
+#. module: tk_freight
+#: model:ir.actions.act_window,name:tk_freight.action_freight_invoice_receivable
+#: model:ir.ui.menu,name:tk_freight.menu_freight_invoice_receivable
+msgid "Receivable Invoices"
+msgstr "应收发票"
 
 #. module: tk_freight
 #. odoo-javascript

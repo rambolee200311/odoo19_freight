@@ -25,10 +25,13 @@ check_rule_set:
   intent_check:
     - intent_work_type 必填
     - intent_change_type 必须匹配 Work Type
-    - asset_snapshot_profile 必须匹配 work_type
+    - context_binding.asset_snapshot_profile 必须匹配 work_type
     - loop_policy 必填
-    - validation_strategy.layers 至少包含 static_check + build_verify + auto_test
-    - accept_criteria 至少包含一条可量化验收标准
+    - scope.allowed_files / scope.forbidden_paths 必填
+    - validation 至少包含 static + build + runtime + business_review
+    - acceptance_criteria 至少包含一条可量化验收标准
+    - success_definition 必填
+    - stop_condition 必须包含 success 与 hard_stop
     - affected_assets 必填
     - 禁止 Development/Infrastructure 任务跳过 human_accept
 

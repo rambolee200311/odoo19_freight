@@ -1,0 +1,270 @@
+# ==============================================================
+# Intent: Sprint1 菜单整理 + Invoicing 一级菜单
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT1-001"
+sprint_version: "Sprint1-Menu-Consolidation-Invoicing"
+intent_work_type: "Development"
+intent_change_type: "New Feature"
+title: "整理 tk_freight 菜单：Customers/Vendors/Fleets/Services 收拢到 Archive + 新增 Invoicing 应收/应付发票菜单"
+target_scope: "mymodules/tk_freight/views/menus.xml 菜单结构 + i18n/zh_CN.po 菜单文案；不涉及模型与业务逻辑；仅移动指定菜单"
+
+context_binding:
+  bind_context_version: "0.1.17"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "current conversation confirmation"
+  confirmed_decisions:
+    - id: "B-13"
+      decision_ref: "U-10"
+      decision_status: "CONFIRMED"
+      statement: "保留独立 Packages 菜单；Customers/Vendors/Fleets/Services 收拢到 Archive 菜单"
+      rule_refs: ["BR-13"]
+    - id: "B-14"
+      decision_ref: "U-11"
+      decision_status: "CONFIRMED"
+      statement: "应收/应付发票菜单仅显示 freight_operation_id 有值的货代相关发票"
+      rule_refs: ["BR-14"]
+  unresolved_unknowns: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: false
+  newly_discovered_unknown_action: "stop_and_escalate"
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT1-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "mymodules/tk_freight/models/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "菜单层级：仅移动 Customers/Vendors/Fleets/Services 到 Archive"
+    - "菜单新增：Invoicing 一级菜单 + 应收发票/应付发票二级菜单"
+    - "菜单文案：zh_CN.po 仅更新本 Intent 涉及文案"
+    - "Context 审计记录：decision_note / sprint_log / context_version / intent_records / test_exec_records"
+  forbidden_changes:
+    - "模型 / 业务逻辑 / 业务口径"
+    - "权限：security / ir.model.access / record rules / groups"
+    - "portal"
+    - "reports"
+    - "services / workflows"
+    - "declared scope 之外的既有菜单"
+    - "无关翻译变更"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/views/menus.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT1-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+technical_constraints:
+  - "仅允许在 menus.xml 中新增/修改 ir.ui.menu 和本模块声明的菜单引用"
+  - "允许引用 account 模块既有 ir.actions.act_window：account.action_move_out_invoice_type / account.action_move_in_invoice_type"
+  - "禁止修改 account 模块 action 定义"
+  - "禁止创建新的业务逻辑 action；允许新增 menu-scoped ir.actions.act_window wrapper（仅用于应收/应付发票菜单 domain，引用 account 标准视图/动作，不含业务逻辑）"
+  - "Invoicing 为 tk_freight 一级菜单，parent 为 tk_freight.freight_root"
+  - "Archive 为新增 tk_freight 一级菜单，parent 为 tk_freight.freight_root；若执行时已存在同名 Archive 则复用，不新增第二个"
+  - "应收/应付发票菜单 domain 限定 [('freight_operation_id','!=',False)]"
+
+menu_relocation:
+  target: "Archive"
+  parent: "tk_freight.freight_root"
+  groups:
+    - name: "Customers"
+      children: ["Shippers", "Consignees"]
+    - name: "Vendors"
+      children: ["Agents", "Vendors", "Notify"]
+    - name: "Fleets"
+      children: ["Land", "Ocean", "Air"]
+    - name: "Services"
+      children: []
+
+translation_constraints:
+  - "仅允许新增/修改本 Intent 新增或移动菜单涉及的 msgid/msgstr"
+  - "禁止批量重新翻译其他菜单"
+  - "禁止修改非菜单翻译"
+
+invariants:
+  unchanged_menu_roots:
+    - Packages
+    - Configurations
+    - Dashboard
+    - Quotation
+    - Bookings
+    - Shipments
+  unchanged_menu_semantics:
+    - "上述菜单的层级、action、groups、parent 保持不变"
+    - "除本 Intent 明确声明的菜单外，不新增、删除、移动或修改其他菜单"
+  moved_menu_groups:
+    - Customers
+    - Vendors
+    - Fleets
+    - Services
+  unchanged_business_behavior:
+    - "不修改模型 / 业务规则 / 业务口径"
+    - "不改变既有菜单 action 指向"
+  unchanged_permissions:
+    - "security / ir.model.access / record rules / groups 保持不变"
+  forbidden_menu_changes:
+    - "declared scope 之外的菜单层级"
+    - "Invoicing / Archive 之外的菜单动作"
+    - "菜单访问组 / 可见性规则"
+    - "菜单名称之外的无关注入"
+
+acceptance_criteria:
+  functional:
+    - "新增 Archive 一级菜单（parent=tk_freight.freight_root），Customers（含 Shippers/Consignees）、Vendors（含 Agents/Vendors/Notify）、Fleets（含 Land/Ocean/Air）、Services 收拢到 Archive 下"
+    - "新增 Invoicing 一级菜单（parent=tk_freight.freight_root），包含二级菜单：应收发票、应付发票，分别引用 account.action_move_out_invoice_type / account.action_move_in_invoice_type"
+    - "应收/应付发票菜单 domain 限定 [('freight_operation_id','!=',False)]"
+    - "新增/调整菜单文案（Invoicing、应收发票、应付发票、Archive 相关菜单名）同步更新 mymodules/tk_freight/i18n/zh_CN.po"
+  non_regression:
+    - "Packages、Configurations、Dashboard、Quotation、Bookings、Shipments 的菜单层级、action、groups、parent 保持不变"
+    - "除本 Intent 明确声明的菜单外，不新增、删除、移动或修改其他菜单"
+    - "不修改模型、不改变业务行为、不新增业务规则"
+    - "权限 / security / ir.model.access / record rules / groups 保持不变"
+    - "功能代码变更仅落在 mymodules/tk_freight/views/menus.xml"
+  validation:
+    - "context_loader.py 基线 PASS"
+    - "verify.py 当前版本全部强制门禁 PASS"
+    - "宿主机常驻 + XML-RPC 升级验证通过（odoo_check.py）"
+    - "menu_assertions 全部 PASS"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 当前版本全部强制门禁 PASS"
+  build:
+    - "menus.xml XML 结构 / Odoo19 兼容 / menuitem 顺序校验 PASS"
+  runtime:
+    - "宿主机常驻 + XML-RPC 升级验证通过（odoo_check.py）"
+    - "Archive 存在且 Customers/Vendors/Fleets/Services 位于 Archive 下"
+    - "Invoicing 存在且包含应收发票/应付发票二级菜单"
+    - "应收/应付发票引用 action 与 domain 正确"
+    - "既有菜单 parent/action 未改变"
+  business_review:
+    - "业务负责人人工验收通过"
+  snapshot:
+    verify_gate_count: 18
+    note: "历史快照，仅记录执行时门禁数量，不作为验收标准"
+
+menu_assertions:
+  archive:
+    exists: true
+    parent: "tk_freight.freight_root"
+    children:
+      - Customers
+      - Vendors
+      - Fleets
+      - Services
+  invoicing:
+    exists: true
+    parent: "tk_freight.freight_root"
+    children:
+      - "应收发票"
+      - "应付发票"
+  unchanged:
+    - Packages
+    - Configurations
+    - Dashboard
+    - Quotation
+    - Bookings
+    - Shipments
+  invoice_actions:
+    receivable:
+      action: "tk_freight.action_freight_invoice_receivable"
+      based_on: "account.action_move_out_invoice_type"
+      domain: "[('move_type','in',['out_invoice','out_refund','out_receipt']),('freight_operation_id','!=',False)]"
+    payable:
+      action: "tk_freight.action_freight_invoice_payable"
+      based_on: "account.action_move_in_invoice_type"
+      domain: "[('move_type','in',['in_invoice','in_refund','in_receipt']),('freight_operation_id','!=',False)]"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  escalation:
+    after_failed_iteration: 3
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business: []
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT1-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "Archive 菜单结构正确（Customers/Vendors/Fleets/Services 位于其下）"
+  - "Invoicing 菜单结构正确（应收发票/应付发票位于其下）"
+  - "发票 action/domain 正确"
+  - "既有菜单结构未发生非授权变化"
+  - "权限未发生变化"
+  - "业务代码未发生变化"
+  - "Context 审计记录完整"
+  - "所有强制验证通过"
+
+deliverables:
+  - "mymodules/tk_freight/views/menus.xml 菜单结构调整（唯一功能代码变更文件）"
+  - "Invoicing 一级菜单 + 应收发票/应付发票二级菜单"
+  - "mymodules/tk_freight/i18n/zh_CN.po 菜单文案翻译更新"
+  - "docs/context/history/decision_note.md 与 docs/context/context_version.yaml 更新"
+  - "完整 Intent 执行记录（docs/context/intent_records/INT-FREIGHT-SPRINT1-001/）"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT1-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 当前版本全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "禁止路径变更检查（models/security/controllers/report/wizard/data/static）"
