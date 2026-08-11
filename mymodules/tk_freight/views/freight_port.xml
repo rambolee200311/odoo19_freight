@@ -44,7 +44,7 @@
                                            required="1" string="Street"/>
                                     <field name="street2" placeholder="Address Line 2....." class="o_address_street" string="Street 2"/>
                                     <field name="city" placeholder="City" class="o_address_city" required="1" string="City"/>
-                                    <field name="state_id" class="o_address_state" placeholder="State" required="1"
+                                    <field name="state_id" class="o_address_state" placeholder="State"
                                            options="{'no_open': True, 'no_create': True}" string="State"/>
                                     <field name="zip" placeholder="ZIP" class="o_address_zip" string="ZIP"/>
                                     <field name="country_id" placeholder="Country" class="o_address_country"

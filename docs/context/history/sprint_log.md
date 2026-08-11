@@ -26,3 +26,14 @@
 - zh_CN.po 新增 档案/发票管理/应收发票/应付发票 菜单文案
 
 **验收**: verify.py 17/18 PASS（c15 受工作区存量越界变更影响）；XML-RPC 模块升级与菜单断言 PASS。
+
+## Sprint2-Port-State-Optional (2026-08-11)
+
+**目标**: 取消 freight.port 表单 State 字段必填。
+
+**成果**:
+- 确认模型层 `state_id` 无 `required`，必填约束仅存在于 `port_form_view`
+- 移除视图层 `state_id required="1"`，State 可留空
+- Name/Code/Street/City/Country 必填约束保持不变
+
+**验收**: verify.py 17/18 PASS（c15 仅 flag Sprint2 Intent 契约文件本身）；XML-RPC 模块升级与视图 arch 断言 PASS。

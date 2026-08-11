@@ -3,12 +3,28 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.18
+context_version: 0.1.20
 update_time: 2026-08-11
 adapt_sprint: Sprint0-Context-Baseline
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.20:
+    update_content: |
+      Sprint2 执行完成：
+      - freight.port 表单 State 字段取消必填（决策16）
+      - 仅移除视图层 required，模型层不变
+      - intent_records/INT-FREIGHT-SPRINT2-001/ 执行记录归档
+    update_type: Sprint2 开发执行
+    effect_scope: tk_freight views/freight_port.xml + intent_records
+
+  0.1.19:
+    update_content: |
+      Sprint2 契约起草：freight.port 表单 State 字段取消必填（INT-FREIGHT-SPRINT2-001）。
+      待业务负责人确认后进入编码执行。
+    update_type: Sprint2 契约起草
+    effect_scope: intent_sprint2
+
   0.1.18:
     update_content: |
       Sprint1 执行完成：

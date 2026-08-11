@@ -1,0 +1,13 @@
+intent_id: INT-FREIGHT-SPRINT2-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/views/freight_port.xml
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/validation/test_exec_records.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT2-001/
+
+scope_notes:
+  - "仅移除视图层 state_id required，模型层未变更"

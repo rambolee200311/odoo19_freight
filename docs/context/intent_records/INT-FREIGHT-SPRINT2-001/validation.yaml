@@ -1,0 +1,10 @@
+intent_id: INT-FREIGHT-SPRINT2-001
+context_baseline: "0.1.19"
+execution_time: "2026-08-11"
+
+static_gates:
+  verify: "17/18 PASS（c15 仅 flag 新 Sprint2 Intent 契约文件本身，提交后即通过）"
+
+runtime:
+  odoo_check: "tk_freight upgraded, log clean"
+  form_required: "state_id required removed in port_form_view（XML-RPC 视图 arch 确认）"

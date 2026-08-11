@@ -193,3 +193,23 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: false
     note: "menus.xml/zh_CN.po 变更落地；odoo_check.py 升级通过且 log clean；c15 需工作区干净后复核"
+
+  - contract_id: INT-FREIGHT-SPRINT2-001
+    sprint_name: Sprint2 Port State 必填取消
+    context_baseline: "0.1.19"
+    execute_time: "2026-08-11"
+    test_category: "视图字段约束调整"
+    test_target_models: ["freight.port"]
+    total_case_count: 18
+    pass_count: 17
+    fail_count: 1
+    skip_count: 0
+    coverage_rate: "verify.py 17/18；XML-RPC 升级 + 视图 arch 断言 PASS"
+    fail_detail:
+      - test_name: "c15 Intent范围"
+        fail_reason: "新 Sprint2 Intent 契约文件本身在 allowed_files 之外，提交后通过"
+        severity: LEVEL2
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: false
+    note: "freight_port.xml state_id required 已移除；模型层未变更；c15 待提交后复核"

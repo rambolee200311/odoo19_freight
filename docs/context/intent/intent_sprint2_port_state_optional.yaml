@@ -1,0 +1,185 @@
+# ==============================================================
+# Intent: Sprint2 Port State 必填取消
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT2-001"
+sprint_version: "Sprint2-Port-State-Optional"
+intent_work_type: "Development"
+intent_change_type: "Configuration Change"
+title: "freight.port 表单 State 字段取消必填"
+target_scope: "mymodules/tk_freight/views/freight_port.xml；仅移除视图层 state_id 必填约束"
+
+context_binding:
+  bind_context_version: "0.1.19"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "current conversation confirmation"
+  confirmed_decisions: []
+  unresolved_unknowns: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: false
+  newly_discovered_unknown_action: "stop_and_escalate"
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/views/freight_port.xml"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT2-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "mymodules/tk_freight/models/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "freight_port.xml：移除 port 表单 state_id 的 required 属性"
+    - "Context 审计记录更新"
+  forbidden_changes:
+    - "模型字段定义"
+    - "权限 / security"
+    - "业务逻辑"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/views/freight_port.xml"
+  translation: []
+  context_audit:
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT2-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+technical_constraints:
+  - "仅移除视图层 required，不修改模型字段 required 定义"
+
+menu_relocation:
+  target: ""
+  parent: ""
+  groups: []
+
+translation_constraints: []
+
+invariants:
+  unchanged_menu_roots: []
+  unchanged_menu_semantics: []
+  moved_menu_groups: []
+  unchanged_business_behavior:
+    - "不修改模型 / 业务规则 / 业务口径"
+  unchanged_permissions:
+    - "权限保持不变"
+  forbidden_menu_changes: []
+
+acceptance_criteria:
+  functional:
+    - "freight.port 表单中 State 字段不再必填"
+  non_regression:
+    - "Name/Code/Street/City/Country 必填约束不变"
+    - "模型字段 required 定义不变"
+  validation:
+    - "verify.py 当前版本全部强制门禁 PASS"
+    - "XML 结构 / Odoo19 兼容校验 PASS"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 当前版本全部强制门禁 PASS"
+  build:
+    - "freight_port.xml XML 结构校验 PASS"
+  runtime:
+    - "宿主机常驻 + XML-RPC 升级验证通过（odoo_check.py）"
+  business_review:
+    - "业务负责人人工验收通过"
+  snapshot:
+    verify_gate_count: 18
+    note: "历史快照，仅记录执行时门禁数量，不作为验收标准"
+
+menu_assertions:
+  archive:
+    exists: false
+    parent: ""
+    children: []
+  invoicing:
+    exists: false
+    parent: ""
+    children: []
+  unchanged: []
+  invoice_actions:
+    receivable:
+      action: ""
+      domain: ""
+    payable:
+      action: ""
+      domain: ""
+
+loop_policy:
+  max_iteration: 3
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  escalation:
+    after_failed_iteration: 2
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business: []
+  architecture: []
+  governance: []
+  history: []
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT2-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "Port 表单 State 字段可留空保存"
+  - "其他必填字段约束不变"
+  - "模型层字段定义未变化"
+  - "Context 审计记录完整"
+  - "所有强制验证通过"
+
+deliverables:
+  - "mymodules/tk_freight/views/freight_port.xml state_id required 移除"
+  - "docs/context/history/decision_note.md 与 docs/context/context_version.yaml 更新"
+  - "完整 Intent 执行记录（docs/context/intent_records/INT-FREIGHT-SPRINT2-001/）"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT2-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 当前版本全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "禁止路径变更检查（models/security/controllers/report/wizard/data/static）"

@@ -62,3 +62,11 @@
 ### 决策14：Sprint1 发票菜单 domain 技术实现
 
 **决策**: Odoo 19 `menuitem` 不支持 `domain` 属性。为满足应收/应付发票菜单 domain 限定，在 `views/menus.xml` 新增两个 menu-scoped `ir.actions.act_window` wrapper：`action_freight_invoice_receivable` / `action_freight_invoice_payable`，复用 account 标准视图与 move_type domain，追加 `freight_operation_id != False` 过滤。不新增模型/业务逻辑，不修改 account action。
+
+### 决策15：Sprint2 Intent 起草
+
+**决策**: 起草 `INT-FREIGHT-SPRINT2-001`：取消 `freight.port` 表单 State 字段必填。检查确认模型层 `state_id` 无 `required`，必填仅来自 `port_form_view` 视图层 `required="1"`；拟定仅移除视图层约束，不修改模型定义。待业务负责人确认后进入编码。
+
+### 决策16：Sprint2 执行确认
+
+**决策**: 业务负责人确认 Sprint2 契约后下达开发指令。执行完成：移除 `port_form_view` 中 `state_id` 的 `required="1"`，模型层与其他必填字段保持不变。
