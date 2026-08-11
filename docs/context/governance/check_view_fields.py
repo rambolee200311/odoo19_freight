@@ -135,10 +135,10 @@ def extract_model_fields():
             field_map[iname] = set(BASE_MODEL_FIELDS)
         field_map[iname].update(fields)
 
-    return field_map
+    return field_map, set(model_defs)
 
 
-def extract_view_fields(filepath):
+def extract_view_fields(filepath, owned_models):
     """从视图 XML 中提取 {model_name: {field_name, ...}}
     跳过 inline list 内嵌字段（它们属于 line model，不属于 parent model）"""
     views = {}
@@ -153,9 +153,9 @@ def extract_view_fields(filepath):
         if model_elem is None or not model_elem.text:
             continue
         model_name = model_elem.text.strip()
-        if not (model_name.startswith('tlmp.') or model_name.startswith('transport.')
-                or model_name.startswith('pickup.') or model_name.startswith('schedule.')
-                or model_name.startswith('container.')):
+        # 只校验 tk_freight 自有模型；继承视图（account.move/sale.order 等）无法
+        # 在不阅读官方源码的前提下验证标准字段，跳过并保持 DOCUMENT_ONLY。
+        if model_name not in owned_models:
             continue
         arch = record.find("./field[@name='arch']")
         if arch is not None:
@@ -189,11 +189,11 @@ def extract_view_fields(filepath):
 
 
 def main():
-    field_map = extract_model_fields()
+    field_map, owned_models = extract_model_fields()
     errors = []
 
     for f in sorted(glob.glob(os.path.join(VIEWS_DIR, '*.xml'))):
-        view_fields = extract_view_fields(f)
+        view_fields = extract_view_fields(f, owned_models)
         for model_name, fnames in view_fields.items():
             model_fields = field_map.get(model_name, set())
             for fn in sorted(fnames):

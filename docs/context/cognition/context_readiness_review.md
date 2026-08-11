@@ -262,3 +262,16 @@ F8（中）Git 未纳入（docs/execution/technical_debt 未 add/commit），与
 - 同步改造 `execution/scripts/odoo_check.py`（XML-RPC 版）与 `docs/skills/odo-validate-loop/SKILL.md`，并清理 `docs/skills/odoo_shell_query.md` 旧项目残留。
 - 补齐 TMS 执行侧参考（context_version 0.1.4）：新增根目录 `git_commit.sh` 发布门禁，结构对齐 odoo18_tms；本工作区沙箱 `.git` 只读且 `require_escalated` 策略为 never，发布门禁需宿主机执行或由用户调整权限后由 agent 执行。
 - 上述登记不改变本报告第 1~14 节结论；进入 READY 的 Required Fixes 仍有效。
+
+## 16. Fix Implementation (2026-08-11)
+
+已实施第 12 节 Required Fixes 中的文件级修复（context_version 0.1.5）：
+
+- F2：`governance/check_view_fields.py` 改为只校验 tk_freight 自有模型，旧前缀过滤已移除；实测通过。
+- F3：`verify.py` 新增 SQL 直写、Context 完整性、业务锚点、版本刷新 4 项检查；旧项目名检查扩展 `odoo18_tms / odoo18e_tms / tlmp.`。
+- F7：`constraints/forbidden_change.yaml` 增加受保护模型/字段/状态值/接口契约/用户确认清单，并显式标注 DOCUMENT_ONLY 项。
+- F6：Asset Map 补全 `context_version.yaml`、`README.md`、`prompt_template.md`、`governance/check_view_fields.py`。
+- 技术债：`technical_debt.md` 增加 Known Debt / Risk / Confirmed Bug / Unknown 分类。
+- 业务 Context：`freight_rule.md` / `finance_flow.md` 完成事实/推测重分类，新增 `business/knowledge_classification.md`（B/A/U/C 分类 + UNKNOWN 登记）。
+
+未实施项：业务代码技术债修复（按 Review 范围不实施）、运行时 `-u` 验证（需宿主机）、Git 提交（需宿主机或 Full access 线程）。

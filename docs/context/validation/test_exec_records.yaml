@@ -54,3 +54,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: false
     note: "完整结论见 docs/context/cognition/context_readiness_review.md；最终判定 NOT READY"
+
+  - contract_id: INT-FREIGHT-FIX-001
+    sprint_name: 验收 Required Fixes 文件级修复
+    context_baseline: "0.1.5"
+    execute_time: "2026-08-11"
+    test_category: "引擎与 Context 修复"
+    test_target_models: []
+    total_case_count: 12
+    pass_count: 12
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 12 项门禁 + context_loader 基线"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "见 docs/context/cognition/context_readiness_review.md 第16节"

@@ -53,7 +53,8 @@ check('首行空格', c3)
 # c4: 模块名一致性
 def c4():
     matches = []
-    old_names = ['wd_tlms', 'transport_logistics_management']
+    old_names = ['wd_tlms', 'transport_logistics_management', 'odoo18_tms',
+                 'odoo18e_tms', 'tlmp.']
     for root, dirs, files in os.walk(os.path.join(BASE, 'mymodules/tk_freight')):
         dirs[:] = [d for d in dirs if d != '__pycache__']
         for fn in files:
@@ -77,14 +78,14 @@ def c5():
                 for i, line in enumerate(open(os.path.join(root, fn)), 1):
                     if pat in line:
                         print(f'\n  {fn}:{i}: {pat}'); return False
-    # view_mode 中包含 tree（Odoo 18 需改为 list）
+    # view_mode 中包含 tree（Odoo 19 需改为 list）
     import re
     for root, dirs, files in os.walk(VIEWS):
         for fn in files:
             if not fn.endswith('.xml'): continue
             for i, line in enumerate(open(os.path.join(root, fn)), 1):
                 if re.search(r'view_mode\s*=\s*"[^"]*\btree\b[^"]*"', line):
-                    print(f'\n  {fn}:{i}: view_mode contains "tree" (use "list" in Odoo 18)'); return False
+                    print(f'\n  {fn}:{i}: view_mode contains "tree" (use "list" in Odoo 19)'); return False
     return True
 check('Odoo19 兼容', c5)
 
@@ -139,6 +140,87 @@ def c8():
         return False
     return True
 check('Menuitem顺序', c8)
+
+
+# c9: 禁止 SQL 直写（cr.execute INSERT/UPDATE/DELETE 等）
+def c9():
+    import re
+    pattern = re.compile(
+        r"cr\.execute\s*\(\s*['\"](INSERT|UPDATE|DELETE|ALTER|DROP|CREATE|TRUNCATE)",
+        re.IGNORECASE,
+    )
+    hits = []
+    for root, dirs, files in os.walk(os.path.join(BASE, 'mymodules/tk_freight')):
+        dirs[:] = [d for d in dirs if d != '__pycache__']
+        for fn in files:
+            if not fn.endswith('.py'):
+                continue
+            fp = os.path.join(root, fn)
+            for i, line in enumerate(open(fp), 1):
+                if pattern.search(line):
+                    hits.append(f'{fn}:{i}')
+    if hits:
+        for h in hits:
+            print(f'\n  SQL WRITE: {h}')
+        return False
+    return True
+check('SQL直写', c9)
+
+
+# c10: Context 资产完整性（关键文件必须存在）
+REQUIRED_CONTEXT = [
+    'docs/context/context_version.yaml',
+    'docs/context/cognition/cognition_asset_map.md',
+    'docs/context/constraints/forbidden_change.yaml',
+    'docs/context/business/freight_rule.md',
+    'docs/context/business/knowledge_classification.md',
+    'docs/context/history/decision_note.md',
+    'docs/context/history/bug_record.md',
+    'docs/context/governance/check_view_fields.py',
+    'mymodules/tk_freight/docs/technical_debt.md',
+]
+
+
+def c10():
+    missing = [p for p in REQUIRED_CONTEXT if not os.path.exists(os.path.join(BASE, p))]
+    if missing:
+        for m in missing:
+            print(f'\n  MISSING CONTEXT: {m}')
+        return False
+    return True
+check('Context完整性', c10)
+
+
+# c11: 业务铁律锚点（防止把 Context 改空）
+def c11():
+    rule_path = os.path.join(BASE, 'docs/context/business/freight_rule.md')
+    if not os.path.exists(rule_path):
+        return False
+    content = open(rule_path, encoding='utf-8').read()
+    anchors = ['收入 =', '成本 =', '本位币', '利润 =', 'odoo shell']
+    missing = [a for a in anchors if a not in content]
+    if missing:
+        print(f'\n  MISSING BUSINESS ANCHOR: {missing}')
+        return False
+    return True
+check('业务锚点', c11)
+
+
+# c12: Context 版本刷新（docs/context 有变更时必须同步 context_version.yaml）
+def c12():
+    import subprocess
+    r = subprocess.run(
+        ['git', 'status', '--porcelain', 'docs/context'],
+        cwd=BASE, capture_output=True, text=True,
+    )
+    changed = [line[3:] for line in r.stdout.splitlines() if line.strip()]
+    if not changed:
+        return True
+    if 'docs/context/context_version.yaml' not in changed:
+        print('\n  docs/context 有变更但未同步 context_version.yaml')
+        return False
+    return True
+check('版本刷新', c12)
 
 print(f'\n========== 结果: {passed} pass, {failed} fail ==========')
 if failed == 0: print('  ALL CHECKS PASSED \U0001f7e2')

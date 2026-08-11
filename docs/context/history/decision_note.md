@@ -34,3 +34,7 @@
 ### 决策7：模块升级铁律
 
 **决策**: 模块升级一律用常驻方式启动 Odoo，通过 XML-RPC 调用 `button_immediate_upgrade` 升级；升级失败必须检查 `debug_logs/odoo_190.log`；禁止仅用 `-u --stop-after-init` 作为最终验证。同步改造 `odoo_check.py` 与 `odo-validate-loop` 技能。
+
+### 决策8：事实与推测分类基线
+
+**决策**: 建立 `business/knowledge_classification.md`，对业务知识统一标注 CODE_FACT / BUSINESS_FACT / DECISION / CONSTRAINT / TECHNICAL_DEBT / UNKNOWN / ASSUMPTION；决策6 中的汇率与利润默认口径标记为 ASSUMPTION / NEEDS_CONFIRMATION，不再作为已确认事实表述。

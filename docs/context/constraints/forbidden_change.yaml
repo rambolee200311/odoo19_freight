@@ -95,3 +95,54 @@ module_upgrade:
   - target: "最终验证"
     rule: "禁止仅用 `-u --stop-after-init` 作为模块升级最终验证"
     risk: "无法复现人类工程师升级过程"
+
+# ========== 受保护模型/字段/状态/接口清单（机器可读） ==========
+protected_models:
+  - "freight.shipment"
+  - "freight.service"
+  - "shipment.quotation"
+  - "shipment.freight.booking"
+  - "account.move（仅允许 tk_freight 扩展字段）"
+  - "sale.order"
+  - "stock.picking"
+  - "res.partner"
+
+protected_fields:
+  - "freight.shipment.name"
+  - "freight.shipment.direction"
+  - "freight.shipment.transport"
+  - "freight.shipment.operation"
+  - "freight.service.sale"
+  - "freight.service.cost"
+  - "freight.service.currency_id"
+  - "account.move.freight_operation_id"
+  - "sale.order.freight_id"
+  - "stock.picking.freight_shipment_id"
+  - "stock.picking.shipment_route_id"
+
+protected_state_values:
+  - "shipment.freight.booking.state: draft/converted/cancel"
+  - "shipment.quotation.status: q/qs/c"
+  - "freight.service.status: pending/bill/invoice"
+  - "custom.department.state: pass/in_process/cancel"
+
+interface_contracts:
+  - "account.move.freight_operation_id -> freight.shipment"
+  - "sale.order.freight_id -> freight.shipment"
+  - "stock.picking.freight_shipment_id -> freight.shipment"
+  - "stock.picking.shipment_route_id -> freight.route"
+  - "freight.service.customer_invoice_id / vendor_invoice_id -> account.move"
+
+require_user_confirmation:
+  - "修改已确认业务口径（见 business/knowledge_classification.md）"
+  - "删除/重命名遗留兼容字段、方法、向导"
+  - "调整 security group / portal 权限"
+  - "实施未定需求（报表、角色权限、U8C）"
+
+# ========== 无法程序化验证的约束（DOCUMENT_ONLY） ==========
+document_only:
+  - "禁止阅读 Odoo 官方源码"
+  - "禁止删除 security group / 调整 portal 权限（verify 未实现 ACL 差异检查）"
+  - "禁止改变业务口径（需规则对比器，未实现）"
+  - "数据检查必须用 odoo shell（无 shell 调用审计）"
+  - "模块升级必须 XML-RPC（odoo_check.py 已实现运行时校验，但沙箱内不可执行）"
