@@ -309,3 +309,29 @@ F8（中）Git 未纳入（docs/execution/technical_debt 未 add/commit），与
 | odoo_check 运行时验证 | OPEN | 沙箱内无法执行；宿主机常驻 + XML-RPC 后补 |
 
 `verify.py` 升级为 14 项门禁；无探针时基线 14/14 PASS。
+
+## 19. Business Coverage Fix (2026-08-11)
+
+补齐业务缺口：新增 `docs/context/business/export_freight_coverage.md`，按能力域总结 tk_freight 现有功能与出口货代业务覆盖状态：
+
+- 报价管理：已覆盖，缺价目表/审批（业务确认不建设）与转订舱价格锁定（UNKNOWN）。
+- 订舱流程：已覆盖，转换校验与取消校验不足（TD-016）。
+- 货运单全生命周期：较全，地址落库/合计/报关状态/路由映射存在缺陷（TD-010/012/014）。
+- 财务核算与对账：核心薄弱，成本未启用、多币种、发票断链、税费缺失、报表缺失（TD-001/002/003/008/023）。
+- 单证报表：单据类已覆盖，财务类缺失。
+- 门户/基础资料：已覆盖，写权限待收敛（TD-019）。
+
+覆盖矩阵已纳入 verify REQUIRED_CONTEXT（c10）。
+
+## 20. Business Coverage Evidence Fix (2026-08-11)
+
+按独立评审收紧业务覆盖资产，不扩张业务内容：
+
+- `export_freight_coverage.md` 重定位为 Capability Coverage Audit，明确“Not authoritative for business requirements”。
+- 业务范围来源标注为 B-12（项目初始约束）。
+- 覆盖状态拆为 `CODE_PRESENT / FUNCTIONALLY_COVERED / PARTIALLY_COVERED / NOT_IMPLEMENTED`。
+- 覆盖表增加 Code Evidence / Code Status / Business Coverage / Source 四列。
+- 定义 `B-* / TD-* / U-*` 引用语义。
+- “不建设价目表/审批”改为当前阶段决策（B-08，范围=当前项目/当前阶段，未来可重新讨论）。
+- 缺口分类严格区分 CONFIRMED_BUG / TECHNICAL_DEBT / MISSING_FEATURE / RISK / UNKNOWN；未实现 ≠ 技术债。
+- `technical_debt.md` 同步严格分类；`knowledge_classification.md` 增加 B-12 与引用规范。

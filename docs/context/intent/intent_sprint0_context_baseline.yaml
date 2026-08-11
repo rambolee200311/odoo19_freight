@@ -4,7 +4,7 @@
 
 intent_id: "INT-FREIGHT-SPRINT0-001"
 sprint_version: "Sprint0-Context-Baseline"
-bind_context_version: "0.1.7"
+bind_context_version: "0.1.9"
 asset_snapshot_profile: "infrastructure"
 
 intent_work_type: "Infrastructure"

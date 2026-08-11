@@ -105,3 +105,37 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "独立审计 12 项发现中 11 项已闭环，odoo_check 运行时验证 OPEN"
+
+  - contract_id: INT-FREIGHT-FIX-002
+    sprint_name: 业务覆盖矩阵补齐
+    context_baseline: "0.1.8"
+    execute_time: "2026-08-11"
+    test_category: "业务资产补齐"
+    test_target_models: []
+    total_case_count: 14
+    pass_count: 14
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 14 项门禁（含 export_freight_coverage 完整性）"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "业务覆盖缺口已闭环"
+
+  - contract_id: INT-FREIGHT-FIX-003
+    sprint_name: 业务覆盖证据链收紧
+    context_baseline: "0.1.9"
+    execute_time: "2026-08-11"
+    test_category: "业务资产认知修正"
+    test_target_models: []
+    total_case_count: 14
+    pass_count: 14
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 14 项门禁 + context_loader 基线"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "覆盖矩阵按 6 项评审要求收紧，未新增业务规则"
