@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="cmr_bill">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-if="o.transport=='land'">
+                        <t t-call="web.internal_layout">
+                            <div class="page">
+                                <h2 align="center">Convention on the International Carriage of Goods
+                                    by Road(CMR)
+                                </h2>
+                            </div>
+                            <div>
+                                <table class="table table-borderless m-0">
+                                    <tbody>
+                                        <tr>
+                                            <td>Transport Via</td>
+                                            <td>
+                                                <strong>
+                                                    <span t-field="o.transport"/>
+                                                </strong>
+                                            </td>
+                                            <td rowspan="3">
+                                                <table class="table table-condensed" align="right"
+                                                       style="border-bottom: 0px solid white !important;width: 3in;">
+                                                    <div class="col-xs-4" style="padding:0;">
+                                                        <tr style="width: 1in;">
+                                                            <td
+                                                                    style="border: 2px solid black;text-align: center; vertical-align: middle;"
+                                                                    class="col-xs-5">
+                                                                <t t-if="o.barcode">
+                                                                    <img
+                                                                            t-attf-src="/report/barcode/?barcode_type=Code128&amp;value={{o.barcode}}&amp;width=168&amp;height=100&amp;humanreadable=1&amp;quiet=0"
+                                                                            width="150" height="75"
+                                                                            alt="QR Code"/>
+                                                                </t>
+                                                            </td>
+                                                        </tr>
+                                                    </div>
+                                                </table>
+                                            </td>
+                                            <tr>
+                                                <td>Tracking No.</td>
+                                                <td>
+                                                    <strong>
+                                                        <span t-field="o.tracking_number"/>
+                                                    </strong>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>Type</td>
+                                                <td>
+                                                    <t t-if="o.inland_shipment_type=='ftl'">
+                                                        <spna>
+                                                            <strong>
+                                                                Full Truckload(FTL)
+                                                            </strong>
+                                                        </spna>
+                                                    </t>
+                                                    <t t-else="">
+                                                        <spna>
+                                                            <strong>
+                                                                Less than Truckload(LTL)
+                                                            </strong>
+                                                        </spna>
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <table width="100%" style="margin-top:25px"
+                                       class="table table-bordered">
+                                    <tr>
+                                        <td>
+                                            <strong>Shipper:</strong>
+                                            <br/>
+                                            <span t-esc="o.shipper_id.name"/>
+                                            <br/>
+                                            <span t-esc="o.shipper_id.street"/>
+                                            <br/>
+                                            <span t-esc="o.shipper_id.city"/>
+                                            <br/>
+                                            <span t-esc="o.shipper_id.state_id.name"/>
+                                            <span t-esc="o.shipper_id.country_id.name"/>
+                                            <br/>
+                                        </td>
+                                        <td>
+                                            <strong>Consignee:</strong>
+                                            <br/>
+                                            <span t-esc="o.consignee_id.name"/>
+                                            <br/>
+                                            <span t-esc="o.consignee_id.street"/>
+                                            <br/>
+                                            <span t-esc="o.consignee_id.city"/>
+                                            <br/>
+                                            <span t-esc="o.consignee_id.state_id.name"/>
+                                            <span t-esc="o.consignee_id.country_id.name"/>
+                                            <br/>
+                                        </td>
+                                    </tr>
+                                </table>
+                                <table width="100%" style="margin-top:25px"
+                                       class="table table-bordered">
+                                    <tr>
+                                        <td>
+                                            <strong>CMR/RWB</strong>
+                                        </td>
+                                        <td>
+                                            <span t-esc="o.truck_ref"/>
+                                        </td>
+                                        <td>
+                                            <strong>Vehicle</strong>
+                                        </td>
+                                        <td>
+                                            <span t-esc="o.trucker.model_id.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Reference</strong>
+                                        </td>
+                                        <td>
+                                            <span t-esc="o.trucker_number"/>
+                                        </td>
+                                        <td>
+                                            <strong>Distance</strong>
+                                        </td>
+                                        <td>
+                                            <span t-esc="o.distance"/>
+                                            KM
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Estimate Pickup</strong>
+                                        </td>
+                                        <td>
+                                            <span t-esc="o.pickup_datetime"/>
+                                        </td>
+                                        <td>
+                                            <strong>Estimate Arrival</strong>
+                                        </td>
+                                        <td>
+                                            <span t-esc="o.arrival_datetime"/>
+                                            KM
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <table width="100%" style="margin-top:25px" class="table table-bordered">
+                                <tr>
+                                    <td colspan="8" align="center">Order Information</td>
+                                </tr>
+                                <tr>
+                                    <th style="padding:10px;">CONTAINER NO.</th>
+                                    <th style="padding:10px;">SEAL NO.</th>
+                                    <th style="padding:10px;">SIZE</th>
+                                    <th style="padding:10px;">TYPE</th>
+                                    <th style="padding:10px;">QTY</th>
+                                    <th style="padding:10px;">GW</th>
+                                    <th style="padding:10px;">NW</th>
+                                    <th style="padding:10px;">CBM</th>
+                                </tr>
+                                <tbody>
+                                    <tr t-foreach="o.freight_packages" t-as="p">
+                                        <td>
+                                            <span>
+                                                <span t-field="p.name"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <span t-field="p.seal_number"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <span t-field="p.package"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <span t-field="p.container_type"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <span t-field="p.qty"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <span t-field="p.gross_weight"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <span t-field="p.net_weight"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span>
+                                                <span t-field="p.volume"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </t>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <record id="cmr_lading_shipment_report" model="ir.actions.report">
+            <field name="name">CMR</field>
+            <field name="model">freight.shipment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">tk_freight.cmr_bill</field>
+            <field name="report_file">tk_freight.cmr_bill</field>
+        </record>
+    </data>
+</odoo>

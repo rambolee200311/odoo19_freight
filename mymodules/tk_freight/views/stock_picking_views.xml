@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Inherit Form View to Modify it -->
+    <record id="freight_stock_picking_view_form" model="ir.ui.view">
+        <field name="name">freight.stock.picking.view.form</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='backorder_id']" position="after">
+                <field name="freight_shipment_id" invisible="not freight_shipment_id" readonly="1"/>
+                <field name="shipment_route_id" invisible="1" readonly="1"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

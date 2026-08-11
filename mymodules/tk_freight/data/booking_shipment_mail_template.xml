@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="booking_shipment_mail_template" model="mail.template">
+            <field name="name">Booking Shipment Mail Template</field>
+            <field name="model_id" ref="tk_freight.model_shipment_freight_booking"/>
+            <field name="subject">Your Booking {{ object.name }} is Converted to Shipment</field>
+            <field name="email_from">{{object.company_id.email}}</field>
+            <field name="partner_to">{{ object.consignee_id.id }}</field>
+            <field name="body_html" type="html">
+                <br/>
+                <span>
+                    <h5>
+                        Dear
+                    </h5>
+                    <h4>
+                        <span t-field="object.consignee_id.name"/>
+                    </h4>
+                </span>
+                <h6>
+                    Your Booking
+                    <span t-field="object.name"/>
+                    Converted to Shipment
+                </h6>
+                <hr/>
+                <ul>
+                    <li>
+                        Shipment Reference:
+                        <strong>
+                            <span t-field="object.freight_id.name"/>
+                        </strong>
+                    </li>
+                    <li>Date of Booking:
+                        <strong>
+                            <span t-field="object.freight_id.create_datetime"/>
+                        </strong>
+                    </li>
+                </ul>
+                <br/>
+                <p>
+                    Thank you for choosing our services. For any questions or require further assistance, please do not
+                    hesitate to contact our dedicated customer service team
+                </p>
+                <br/>
+                <h5>
+                    Best regards
+                </h5>
+                <h4>
+                    <strong>
+                        <t t-out="object.company_id.name"/>
+                    </strong>
+                </h4>
+                <hr/>
+                <span>
+                    <h6>
+                        <t t-out="object.company_id.name"/>
+                    </h6>
+                    <t t-out="object.company_id.phone"/>
+                    <br/>
+                    <t t-out="object.company_id.email"/>
+                    <br/>
+                    <t t-out="object.company_id.website"/>
+                </span>
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+    </data>
+</odoo>

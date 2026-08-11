@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="shipment_quot_form_view" model="ir.ui.view">
+            <field name="name">shipment.quot.form.view</field>
+            <field name="model">shipment.quotation</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="status" widget="statusbar"/>
+                        <button name="freight_quotation_sent" type="object" string="Sent Quotation"
+                                invisible="status in ['qs','c']"/>
+                        <button name="action_convert_booking" type="object" string="Convert to Booking"
+                                invisible="status in ['q','c']"/>
+                    </header>
+                    <sheet>
+                        <div class="row">
+                            <div class="col-8">
+                                <h1>
+                                    <field name="name" placeholder="Title" readonly="1" default_focus="1"/>
+                                </h1>
+                            </div>
+                            <div class="col-4" style="text-align:right;" invisible="not from_booking">
+                                <span class="badge text-bg-warning"
+                                      style="font-size: 15px; background: beige; border-radius: 3px;">From Website
+                                </span>
+                            </div>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="operation" string="Type" required="1" readonly="status == 'c'"/>
+                                <field name="booking_id" readonly="1" foce_Save="1" invisible="not booking_id"/>
+                            </group>
+                            <group>
+                                <field name="from_booking" readonly="1" force_save="1" invisible="1"/>
+                                <field name="date" readonly="status == 'c'"/>
+                                <field name="lead_id" readonly="1" force_save="1" invisible="not lead_id"/>
+                                <field name="quotation_id" readonly="1" force_save="1" invisible="not quotation_id"/>
+                            </group>
+                        </group>
+                        <group string="Transport Details">
+                            <group>
+                                <field name="transport" string="Transport Via" widget="radio"
+                                       options="{'horizontal': true}" required="1" readonly="status == 'c'"/>
+                            </group>
+                            <group>
+                                <field name="ocean_shipment_type" widget="radio" invisible="transport != 'ocean'"
+                                       options="{'horizontal': true}" required="transport == 'ocean'"
+                                       readonly="status == 'c'"/>
+                                <field name="inland_shipment_type" widget="radio" invisible="transport != 'land'"
+                                       options="{'horizontal': true}" required="transport == 'land'"
+                                       readonly="status == 'c'"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <field name="address_to" widget="radio" options="{'horizontal': true}"
+                                       readonly="status == 'c'"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Transporter">
+                                <field name="shipper_id" required="not from_booking" options="{'no_create':True}"
+                                       readonly="status == 'c'"/>
+                            </group>
+                            <group string="Customer">
+                                <field name="consignee_id" required="not from_booking" options="{'no_create':True}"
+                                       readonly="status == 'c'"/>
+                            </group>
+                        </group>
+                        <group string="Location Details" invisible="address_to != 'location_address'">
+                            <group>
+                                <label for="source_location_id" string="From" invisible="transport != 'land'"/>
+                                <div invisible="transport != 'land'">
+                                    <field name="source_location_id" options="{'no_create':True}"
+                                           readonly="status == 'c'" required="address_to == 'location_address'"/>
+                                </div>
+                                <label for="source_location_id" string="Loading Port" invisible="transport != 'ocean'"/>
+                                <div invisible="transport != 'ocean'">
+                                    <field name="source_location_id" options="{'no_create':True}"
+                                           readonly="status == 'c'" required="address_to == 'location_address'"/>
+                                </div>
+                                <label for="source_location_id" string="Gateway" invisible="transport != 'air'"/>
+                                <div invisible="transport != 'air'">
+                                    <field name="source_location_id" options="{'no_create':True}"
+                                           readonly="status == 'c'" required="address_to == 'location_address'"/>
+                                </div>
+                            </group>
+                            <group>
+                                <label for="destination_location_id" string="To" invisible="transport != 'land'"/>
+                                <div invisible="transport != 'land'">
+                                    <field name="destination_location_id" options="{'no_create':True}"
+                                           readonly="status == 'c'" required="address_to == 'location_address'"/>
+                                </div>
+                                <label for="destination_location_id" string="Discharge Port"
+                                       invisible="transport != 'ocean'"/>
+                                <div invisible="transport != 'ocean'">
+                                    <field name="destination_location_id" options="{'no_create':True}"
+                                           readonly="status == 'c'" required="address_to == 'location_address'"/>
+                                </div>
+                                <label for="destination_location_id" string="Destination"
+                                       invisible="transport != 'air'"/>
+                                <div invisible="transport != 'air'">
+                                    <field name="destination_location_id" options="{'no_create':True}"
+                                           readonly="status == 'c'" required="address_to == 'location_address'"/>
+                                </div>
+                            </group>
+                        </group>
+                        <group>
+                            <group>
+                                <span class="o_form_label o_td_label" name="address_name">
+                                    <b></b>
+                                </span>
+                                <div class="o_address_format">
+                                    <field name="s_street" placeholder="Address Line 1....." class="o_address_street"
+                                           required="0" readonly="status == 'c'"/>
+                                    <field name="s_street2" placeholder="Address Line 2....." class="o_address_street"
+                                           readonly="status == 'c'"/>
+                                    <field name="s_city" placeholder="City" class="o_address_city" required="0"
+                                           readonly="status == 'c'"/>
+                                    <field name="s_state_id" class="o_address_state" placeholder="State" required="0"
+                                           options="{'no_open': True, 'no_create': True}" readonly="status == 'c'"/>
+                                    <field name="s_zip" placeholder="ZIP" class="o_address_zip"
+                                           readonly="status == 'c'"/>
+                                    <field name="s_country_id" placeholder="Country" class="o_address_country"
+                                           required="0" options="{'no_open': True, 'no_create': True}"
+                                           readonly="status == 'c'"/>
+                                </div>
+                            </group>
+                            <group>
+                                <span class="o_form_label o_td_label" name="address_name">
+                                    <b></b>
+                                </span>
+                                <div class="o_address_format">
+                                    <field name="d_street" placeholder="Address Line 1....." class="o_address_street"
+                                           required="0" readonly="status == 'c'"/>
+                                    <field name="d_street2" placeholder="Address Line 2....." class="o_address_street"
+                                           readonly="status == 'c'"/>
+                                    <field name="d_city" placeholder="City" class="o_address_city" required="0"
+                                           readonly="status == 'c'"/>
+                                    <field name="d_state_id" class="o_address_state" placeholder="State" required="0"
+                                           options="{'no_open': True, 'no_create': True}" readonly="status == 'c'"/>
+                                    <field name="d_zip" placeholder="ZIP" class="o_address_zip"
+                                           readonly="status == 'c'"/>
+                                    <field name="d_country_id" placeholder="Country" class="o_address_country"
+                                           required="0" options="{'no_open': True, 'no_create': True}"
+                                           readonly="status == 'c'"/>
+                                </div>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Order Lines">
+                                <field name="order_line_ids" readonly="status != 'q'">
+                                    <list>
+                                        <field name="service_id" required="1"/>
+                                        <field name="name" required="1"/>
+                                        <field name="qty" required="1"/>
+                                        <field name="sale" required="1"/>
+                                        <field name="currency_id" required="1"/>
+                                        <field name="tax_ids" widget="many2many_tags"/>
+                                        <field name="package_type" optional="hide"/>
+                                        <field name="package" optional="hide"/>
+                                        <field name="length" optional="hide"/>
+                                        <field name="width" optional="hide"/>
+                                        <field name="height" optional="hide"/>
+                                        <field name="gross_weight" optional="hide" sum="gross_weight"/>
+                                        <field name="volume" optional="hide" sum="volume"/>
+                                        <field name="net_weight" optional="hide"/>
+                                        <field name="total_cbm" optional="hide"/>
+                                        <field name="weight_ratio" optional="hide"/>
+                                        <field name="chargeable_weight" optional="hide" sum="chargeable_weight"/>
+                                        <field name="final_weight" optional="hide"/>
+                                        <field name="total_amount"/>
+                                    </list>
+                                    <form>
+                                        <group>
+                                            <group string="Service Details">
+                                                <field name="service_id" required="1" options="{'no_create':True}"/>
+                                                <field name="name" required="1"/>
+                                                <field name="tax_ids" widget="many2many_tags"/>
+                                                <field name="qty" required="1" string="Qty"/>
+                                            </group>
+                                            <group string="Charges">
+                                                <field name="currency_id" required="1" options="{'no_create':True}"/>
+                                                <field name="sale" required="1"/>
+                                                <field name="total_amount"/>
+                                            </group>
+                                        </group>
+                                        <group string="Cargo Details">
+                                            <group>
+                                                <field name="package_type"/>
+                                                <field name="freight_package_ids" invisible="1"/>
+                                            </group>
+                                            <group invisible="not package_type">
+                                                <field name="package" options="{'no_create': True}"/>
+                                            </group>
+                                        </group>
+                                        <group invisible="not package">
+                                            <group string="Cargo Dimension">
+                                                <field name="length"/>
+                                                <field name="width"/>
+                                                <field name="height"/>
+                                            </group>
+                                            <group string="Weight &amp; Volume">
+                                                <field name="volume"/>
+                                                <field name="total_cbm"/>
+                                                <field name="gross_weight"/>
+                                                <field name="net_weight"/>
+                                            </group>
+                                        </group>
+                                        <group string="Chargeable Weight" invisible="not package">
+                                            <group>
+                                                <field name="weight_ratio"/>
+                                                <field name="chargeable_weight"/>
+                                            </group>
+                                            <group>
+                                                <field name="final_weight"/>
+                                            </group>
+                                        </group>
+                                    </form>
+                                </field>
+                                <div class="row">
+                                    <div class="col-10" style="text-align:right;">
+                                        <strong>
+                                            Total Amount
+                                        </strong>
+                                    </div>
+                                    <div class="col-2" style="padding-left: 70px;">
+                                        <strong>
+                                            <field name="total_text"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                            </page>
+                            <page string="Requested Details">
+                                <group string="Locations">
+                                    <group>
+                                        <field name="source" readonly="status != 'q'" string="Source Location"/>
+                                    </group>
+                                    <group>
+                                        <field name="destination" readonly="status != 'q'"
+                                               string="Destination Location"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group string="Cargo Dimension">
+                                        <field name="length" readonly="status != 'q'"/>
+                                        <field name="height" readonly="status != 'q'"/>
+                                        <field name="width" readonly="status != 'q'"/>
+                                        <field name="weight" readonly="status != 'q'" string="Estimate Weight"/>
+                                    </group>
+                                    <group string="Description">
+                                        <field name="dangerous_goods" readonly="status != 'q'"/>
+                                        <field name="dangerous_goods_notes" invisible="not dangerous_goods"
+                                               readonly="status != 'q'" required="dangerous_goods"/>
+                                        <field name="notes" readonly="status != 'q'"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+        <record id="shipment_quot_tree_view" model="ir.ui.view">
+            <field name="name">shipment.quot.list.view</field>
+            <field name="model">shipment.quotation</field>
+            <field name="arch" type="xml">
+                <list>
+                    <field name="name"/>
+                    <field name="operation"/>
+                    <field name="date"/>
+                    <field name="transport"/>
+                    <field name="address_to"/>
+                    <field name="shipper_id"/>
+                    <field name="consignee_id"/>
+                    <field name="status" widget="badge" decoration-success="status=='c'"
+                           decoration-danger="status=='q'"/>
+                </list>
+            </field>
+        </record>
+        <record id="shipment_quot_action" model="ir.actions.act_window">
+            <field name="name">Quotation</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">shipment.quotation</field>
+            <field name="view_mode">list,form,activity</field>
+        </record>
+    </data>
+</odoo>

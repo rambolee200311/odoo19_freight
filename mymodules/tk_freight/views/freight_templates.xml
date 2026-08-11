@@ -1,0 +1,1767 @@
+<?xml version="1.0"?>
+<odoo>
+    <!--Bread crumbs-->
+    <template id="portal_booking_orders_breadcrumbs" inherit_id="portal.portal_breadcrumbs"
+              name="Portal Breadcrumbs">
+        <xpath position="inside" expr="//ol[hasclass('o_portal_submenu')]">
+            <li t-if="page_name == 'bookings_list_page'" class="breadcrumb-item">Bookings
+            </li>
+            <li t-if="page_name == 'shipments_list_page'" class="breadcrumb-item">Shipments
+            </li>
+            <li t-if="page_name == 'quotations_list_page'" class="breadcrumb-item">Quotations
+            </li>
+            <li t-if="page_name in ['portal_booking_form_view']"
+                class="breadcrumb-item">
+                <a href="/freight/shipment/bookings">
+                    Bookings
+                </a>
+            </li>
+            <li t-if="page_name == 'portal_booking_form_view'" class="breadcrumb-item">
+                <span t-field="booking.name"/>
+            </li>
+
+            <li t-if="page_name in ['tracking_bookings_shipment']"
+                class="breadcrumb-item">
+                <a href="/freight/shipment/bookings">
+                    Bookings
+                </a>
+            </li>
+            <li t-if="page_name == 'tracking_bookings_shipment'" class="breadcrumb-item">
+                <a t-attf-href="/freight/shipment/booking/details/{{slug(freight.booking_id)}}">
+                    <span t-field="freight.booking_id.name"/>
+                </a>
+            </li>
+            <li t-if="page_name == 'tracking_bookings_shipment'" class="breadcrumb-item">
+                <span t-field="freight.name"/>
+            </li>
+
+            <li t-if="page_name in ['portal_shipments_form_view']"
+                class="breadcrumb-item">
+                <a href="/freight/shipment/shipment">
+                    Shipments
+                </a>
+            </li>
+            <li t-if="page_name == 'portal_shipments_form_view'" class="breadcrumb-item">
+                <span t-field="shipment.name"/>
+            </li>
+
+            <li t-if="page_name in ['tracking_shipments_shipment']"
+                class="breadcrumb-item">
+                <a href="/freight/shipment/shipment">
+                    Shipments
+                </a>
+            </li>
+            <li t-if="page_name == 'tracking_shipments_shipment'" class="breadcrumb-item">
+                <a t-attf-href="/freight/shipment/shipment/details/{{slug(freight)}}">
+                    <span t-field="freight.name"/>
+                </a>
+            </li>
+            <li t-if="page_name == 'tracking_shipments_shipment'" class="breadcrumb-item">
+                <span t-field="freight.name"/>
+            </li>
+
+            <li t-if="page_name in ['portal_quotation_form_view']"
+                class="breadcrumb-item">
+                <a href="/freight/shipment/quotation">
+                    Quotations
+                </a>
+            </li>
+            <li t-if="page_name == 'portal_quotation_form_view'" class="breadcrumb-item">
+                <span t-field="quot.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <!--TrackingDetails-->
+    <template id="track_shipment" name="Track Shipment">
+        <t t-call="website.layout">
+            <br/>
+            <div class="container">
+                <center>
+                    <div class="card" style="width: 100%;">
+                        <div class="card-body">
+                            <h5 class="card-title">Track Your Shipment</h5>
+                            <form action="/track/shipment" method="GET">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="form-group">
+                                    <input type="text" style="width:35rem;" class="form-control" id="tracking_number"
+                                           name="q" aria-describedby="emailHelp"
+                                           placeholder="Type Your Tracking Number, Example., DT/2022/06/05/00042"/>
+                                    <small id="emailHelp" class="form-text text-muted">Enter Your Tracking Number
+                                    </small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Track</button>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            <a href="/my/home" class="card-link">Home</a>
+                        </div>
+                    </div>
+                    <a href="/freight/shipment/booking/create" style="margin-top:10px" class="btn btn-outline-info">
+                        Quotation Inquiry
+                    </a>
+                </center>
+            </div>
+            <br/>
+        </t>
+    </template>
+    <template id="freight_success" name="Shipment Details">
+        <t t-call="portal.portal_layout">
+            <div class="container mt8">
+                <div class="row">
+                    <h5 class="text-primary text-start">
+                        Shipment Details:
+                        <span t-field="freight.name"/>
+                    </h5>
+                    <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+                    <div class="col-md-4 col-sm-12 mt-3 c-field">
+                        <span class="c-label text-muted">Source Location</span>
+                        <t t-if="freight.s_city">
+                            <span class="c-value" t-field="freight.s_city"/>
+                            -
+                        </t>
+                        <t t-if="freight.s_state_id">
+                            <span class="c-value" t-field="freight.s_state_id"/>
+                            -
+                        </t>
+                        <t t-if="freight.s_country_id">
+                            <span class="c-value" t-field="freight.s_country_id"/>
+                        </t>
+                    </div>
+                    <div class="col-md-4 col-sm-12 c-field">
+                        <span class="c-label text-muted">Destination Location</span>
+                        <t t-if="freight.d_city">
+                            <span class="c-value" t-field="freight.d_city"/>
+                            -
+                        </t>
+                        <t t-if="freight.d_state_id">
+                            <span class="c-value" t-field="freight.d_state_id"/>
+                            -
+                        </t>
+                        <t t-if="freight.d_country_id">
+                            <span class="c-value" t-field="freight.d_country_id"/>
+                        </t>
+                    </div>
+                    <div class="col-md-4 col-sm-12 c-field">
+                        <span class="c-label text-muted">Main Carriage Transport</span>
+                        <span class="c-value" t-field="freight.transport"/>
+                    </div>
+
+                    <t t-if="freight.freight_log">
+                        <br/>
+                        <br/>
+                        <div class="container mt-5">
+                            <div class="row text-center justify-content-center mb-5">
+                                <div class="col-xl-6 col-lg-8">
+                                    <h2 class="font-weight-bold">Tracking</h2>
+                                    <p class="text-muted">These are Estimate Tracking Details</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <div class="timeline-steps aos-init aos-animate" data-aos="fade-up">
+                                        <t t-foreach="freight.freight_log" t-as="log">
+                                            <t t-if="log.status=='complete'">
+                                                <div class="timeline-step">
+                                                    <div class="timeline-content" data-toggle="popover"
+                                                         data-trigger="hover" data-placement="top" title=""
+                                                         data-content="" data-original-title="">
+                                                        <div class="inner-circle"></div>
+                                                        <p class="h6 mt-3 mb-1">
+                                                            <span>
+                                                                <t t-esc="log.date"/>
+                                                                <t t-esc="log.time"
+                                                                   t-options="{'widget': 'float_time'}"/>
+                                                            </span>
+                                                        </p>
+                                                        <p class="h5 text-muted mb-0 mb-lg-0">
+                                                            <t t-esc="log.location_id.name"/>
+                                                        </p>
+                                                        <p class="h6 text-muted mb-0 mb-lg-0">
+                                                            <t t-esc="log.activity_id.name"/>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="row text-center justify-content-center mb-5">
+                            <div class="col-xl-6 col-lg-8">
+                                <h2 class="font-weight-bold">No Tracking Available</h2>
+
+                            </div>
+                        </div>
+                    </t>
+                    <br/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!--Quotation Details list-->
+    <template id="quotation_detail" name="Freight Quotation">
+        <t t-call="portal.portal_layout">
+            <div class="container mt8">
+                <t t-if="not quot">
+                    <p>There is no any quotation here.</p>
+                </t>
+                <t t-if="quot">
+                    <t t-call="portal.portal_table">
+                        <table class="table table-responsive">
+                            <thead>
+                                <tr class="p-3 mb-2">
+                                    <th>Quotation #</th>
+                                    <th class="text-right">Operation</th>
+                                    <th class="text-right">Transport</th>
+                                    <th class="text-right">Shipper</th>
+                                    <th class="text-right">Consignee</th>
+                                    <th class="text-right">Source</th>
+                                    <th class="text-right">Destination</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="quot" t-as="q">
+                                    <tr>
+                                        <td>
+                                            <a t-attf-href="/freight/shipment/quotation/details/{{ slug(q) }}">
+                                                <t t-esc="q.name"/>
+                                            </a>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="q.operation"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <t t-if="q.transport == 'ocean'">
+                                                <span style="font-size:15px;"
+                                                      class="badge rounded-pill py-1 px-2 text-bg-primary"
+                                                      t-field="q.transport"/>
+                                            </t>
+                                            <t t-if="q.transport == 'land'">
+                                                <span style="font-size:15px;"
+                                                      class="badge rounded-pill py-1 px-2 text-bg-success"
+                                                      t-field="q.transport"/>
+                                            </t>
+                                            <t t-if="q.transport == 'air'">
+                                                <span style="font-size:15px;"
+                                                      class="badge py-1 rounded-pill px-2 text-bg-danger"
+                                                      t-field="q.transport"/>
+                                            </t>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="q.shipper_id.name"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="q.consignee_id.name"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="q.source_location_id.name"/>
+                                        </td>
+                                        <td class="text-right">
+                                            <span t-field="q.destination_location_id.name"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </t>
+            </div>
+        </t>
+    </template>
+    <!--Quotation Details-->
+    <template id="portal_my_quotation_detail" name="My Quotation">
+        <t t-call="portal.portal_layout">
+            <t t-if="quot.status=='q'">
+                <div class="row">
+                    <h5 class="text-primary text-start">
+                        Quotation -
+                        <span t-field="quot.name"/>
+                    </h5>
+                    <hr/>
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <strong>Thank you for your inquiry! We have received it successfully. We will notify you soon
+                            with the approximate charges. Your patience is appreciated.
+                        </strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div class="row">
+                        <h6 class="text-primary text-start">
+                            <strong>
+                                Quotation Inquiry Details
+                            </strong>
+                        </h6>
+                        <hr class="border border-primary border-1 opacity-75"/>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="quot.source">
+                            <span class="c-label text-muted">Source Location</span>
+                            <strong>
+                                <span class="c-value" t-field="quot.source"/>
+                            </strong>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="quot.destination">
+                            <span class="c-label text-muted">Destination Location</span>
+                            <strong>
+                                <span class="c-value" t-field="quot.destination"/>
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
+                        <h6 class="text-primary text-start">
+                            <strong>
+                                Cargo Dimension
+                            </strong>
+                        </h6>
+                        <hr class="border border-primary border-1 opacity-75"/>
+
+                        <div class="col-md-3 col-sm-12 c-field" t-if="quot.length">
+                            <span class="c-label text-muted">Length(cm)</span>
+                            <strong>
+                                <span class="c-value" t-field="quot.length"/>
+                            </strong>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="quot.width">
+                            <span class="c-label text-muted">Width(cm)</span>
+                            <strong>
+                                <span class="c-value" t-field="quot.width"/>
+                            </strong>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="quot.height">
+                            <span class="c-label text-muted">Height(cm)</span>
+                            <strong>
+                                <span class="c-value" t-field="quot.height"/>
+                            </strong>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="quot.weight">
+                            <span class="c-label text-muted">Weight(cm)</span>
+                            <strong>
+                                <span class="c-value" t-field="quot.weight"/>
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2" style="margin-right:0px;padding-right:0px;">
+                        <t t-if="quot.dangerous_goods">
+                            <div class="col-md-6 col-sm-12 row" style="margin-right:0px;padding-right:0px;">
+                                <h6 class="text-primary text-start">
+                                    <strong>
+                                        Dangerous Goods Info
+                                    </strong>
+                                </h6>
+                                <hr class="border border-primary border-1 opacity-75 p-0" style="width:95%;"/>
+                                <div class="col-12">
+                                    <span class="c-value" t-field="quot.dangerous_goods_notes"/>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-12 row" style="margin-right:0px;padding-right:0px;">
+                                <h6 class="text-primary text-start">
+                                    <strong>
+                                        Notes
+                                    </strong>
+                                </h6>
+                                <hr class="border border-primary border-1 opacity-75 w-100"
+                                    style="margin-right:0px;padding-right:0px;"/>
+                                <div class="col-12">
+                                    <span class="c-value" t-field="quot.notes"/>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <h6 class="text-primary text-start">
+                                <strong>
+                                    Notes
+                                </strong>
+                            </h6>
+                            <hr class="border border-primary border-1 opacity-75"/>
+                            <div class="col-12">
+                                <span class="c-value" t-field="quot.notes"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="container">
+
+                    <div class="row">
+                        <h5 class="text-primary text-start">
+                            Quotation -
+                            <span t-field="quot.name"/>
+                        </h5>
+                        <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                        <t t-set="o" t-value="quot"/>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-12 c-field" t-if="o.transport">
+                                <span class="c-label text-muted">Transport Via</span>
+                                <strong>
+                                    <span class="c-value" t-field="o.transport"/>
+                                </strong>
+                            </div>
+
+                            <t t-if="o.transport in ['land','ocean']">
+                                <t t-if="o.transport == 'ocean' and o.ocean_shipment_type">
+                                    <div class="col-md-3 col-sm-12 c-field" t-if="o.ocean_shipment_type">
+                                        <span class="c-label text-muted">Ocean Shipment</span>
+                                        <strong>
+                                            <span class="c-value" t-field="o.ocean_shipment_type"/>
+                                        </strong>
+                                    </div>
+                                </t>
+                                <t t-if="o.transport == 'land' and o.inland_shipment_type">
+                                    <div class="col-md-3 col-sm-12 c-field" t-if="o.inland_shipment_type">
+                                        <span class="c-label text-muted">Land Shipment</span>
+                                        <strong>
+                                            <span class="c-value" t-field="o.inland_shipment_type"/>
+                                        </strong>
+                                    </div>
+                                </t>
+                            </t>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="o.address_to">
+                                <span class="c-label text-muted">Address</span>
+                                <strong>
+                                    <span class="c-value" t-field="o.address_to"/>
+                                </strong>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="o.date">
+                                <span class="c-label text-muted">Date</span>
+                                <strong>
+                                    <span class="c-value" t-field="o.date"/>
+                                </strong>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="o.operation">
+                                <span class="c-label text-muted">Operation</span>
+                                <strong>
+                                    <span class="c-value" t-field="o.operation"/>
+                                </strong>
+                            </div>
+                        </div>
+
+
+                        <div class="row mt-2">
+                            <div class="col-md-6 col-sm-12">
+                                <div class="row">
+                                    <h6 class="text-primary text-start">
+                                        <strong>
+                                            Transporter Details
+                                        </strong>
+                                    </h6>
+                                    <hr class="border border-primary border-1 opacity-75 mb-1"
+                                        style="width:98%;"/>
+
+                                    <div class="col-md-6 col-sm-12 c-field" t-if="o.shipper_id">
+                                        <span class="c-label text-muted">Shipper</span>
+                                        <strong>
+                                            <span class="c-value" t-field="o.shipper_id"/>
+                                        </strong>
+                                    </div>
+                                    <t t-if="o.address_to == 'location_address'">
+                                        <div class="col-md-6 col-sm-12 c-field" t-if="o.source_location_id">
+                                            <span class="c-label text-muted">From</span>
+                                            <strong>
+                                                <span class="c-value" t-field="o.source_location_id"/>
+                                            </strong>
+                                        </div>
+                                    </t>
+                                    <div class="col-md-12 col-sm-12 c-field" t-if="o.shipper_id">
+                                        <span class="c-label text-muted">From Address</span>
+                                        <strong>
+                                            <span class="c-value">
+                                                <span t-field="o.s_street"/>
+                                                <br/>
+                                                <t t-if="o.s_street2">
+                                                    <span t-field="o.s_street2"/>
+                                                    <br/>
+                                                </t>
+                                                <span t-field="o.s_city"/>
+                                                <span t-field="o.s_zip"/>
+                                                <br/>
+                                                <span t-field="o.s_state_id"/>
+                                                <span t-field="o.s_country_id"/>
+                                            </span>
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-sm-12">
+                                <div class="row">
+                                    <h6 class="text-primary text-start">
+                                        <strong>
+                                            Customer Details
+                                        </strong>
+                                    </h6>
+                                    <hr class="border border-primary border-1 opacity-75 mb-1 ms-2"/>
+
+                                    <div class="col-md-6 col-sm-12 c-field" t-if="o.consignee_id">
+                                        <span class="c-label text-muted">Consignee</span>
+                                        <strong>
+                                            <span class="c-value" t-field="o.consignee_id"/>
+                                        </strong>
+                                    </div>
+                                    <t t-if="o.address_to == 'location_address'">
+                                        <div class="col-md-6 col-sm-12 c-field" t-if="o.destination_location_id">
+                                            <span class="c-label text-muted">To</span>
+                                            <strong>
+                                                <span class="c-value" t-field="o.destination_location_id"/>
+                                            </strong>
+                                        </div>
+                                    </t>
+                                    <div class="col-md-12 col-sm-12 c-field" t-if="o.shipper_id">
+                                        <span class="c-label text-muted">To Address</span>
+                                        <strong>
+                                            <span class="c-value">
+                                                <span t-field="o.d_street"/>
+                                                <br/>
+                                                <t t-if="o.d_street2">
+                                                    <span t-field="o.d_street2"/>
+                                                    <br/>
+                                                </t>
+                                                <span t-field="o.d_city"/>
+                                                <span t-field="o.d_zip"/>
+                                                <br/>
+                                                <span t-field="o.d_state_id"/>
+                                                <span t-field="o.d_country_id"/>
+                                            </span>
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <ul class="nav nav-tabs border-primary mt-2 mb-3" id="quoteTab" role="tablist">
+                            <li class="nav-item" role="presentation" t-if="o.order_line_ids">
+                                <button class="nav-link active border-bottom-0 text-primary"
+                                        id="quote-lines-tab"
+                                        data-bs-toggle="tab" data-bs-target="#quote-lines-tab-pane"
+                                        type="button"
+                                        role="tab" aria-controls="quote-lines-tab-pane"
+                                        aria-selected="true">
+                                    Quotation Lines
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content overflow-auto" id="quoteLineTabContent">
+                            <!-- Package details tab-->
+                            <div class="tab-pane fade show active" id="quote-lines-tab-pane"
+                                 role="tabpanel" t-if="o.order_line_ids"
+                                 aria-labelledby="quote-lines-tab" tabindex="0">
+
+                                <t t-if="o.order_line_ids">
+                                    <t t-foreach="o.order_line_ids" t-as="l">
+                                        <div class="row">
+                                            <t t-if="l.package">
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <h6 class="text-primary text-start">
+                                                            <strong>
+                                                                Service Details -
+                                                                <span t-field="l.name"/>
+                                                            </strong>
+                                                        </h6>
+                                                        <hr class="border border-primary border-1 opacity-75 mb-1 mt-1 ms-2"/>
+                                                        <div class="col-md-3 col-sm-12 c-field" t-if="l.package_type">
+                                                            <span class="c-label text-muted">Package Type</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.package_type"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field" t-if="l.package">
+                                                            <span class="c-label text-muted">Size / Package</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.package"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field" t-if="l.qty">
+                                                            <span class="c-label text-muted">Cargo Qty</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.qty"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field"
+                                                             t-if="l.currency_id.name">
+                                                            <span class="c-label text-muted">Currency</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.currency_id.name"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field" t-if="l.sale">
+                                                            <span class="c-label text-muted">Price</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.sale"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field" t-if="l.tax_ids">
+                                                            <span class="c-label text-muted">Taxes</span>
+                                                            <strong>
+                                                                <span class="c-value"
+                                                                      t-out="', '.join(map(lambda x: (x.description or x.name), l.tax_ids))"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field" t-if="l.total_amount">
+                                                            <span class="c-label text-muted">Total Amount</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.total_amount"/>
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="row">
+                                                        <h6 class="text-primary text-start">
+                                                            <strong>
+                                                                Cargo Details -
+                                                                <span t-field="l.name"/>
+                                                            </strong>
+                                                        </h6>
+                                                        <hr class="border border-primary border-1 opacity-25 mb-1 mt-1 ms-2"/>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Length(cm)</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.length"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Width(cm)</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.width"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Height(cm)</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.height"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Volume(CBM)</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.volume"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Gross Weight(KG)</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.gross_weight"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Net Weight(KG)</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.net_weight"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Total CBM(CBM)</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.total_cbm"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Volumetric Weight</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.chargeable_weight"/>
+                                                            </strong>
+                                                        </div>
+                                                        <div class="col-md-3 col-sm-12 c-field">
+                                                            <span class="c-label text-muted">Chargeable Weight</span>
+                                                            <strong>
+                                                                <span class="c-value" t-field="l.final_weight"/>
+                                                            </strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <h6 class="text-primary text-start">
+                                                    <strong>
+                                                        Service Details -
+                                                        <span t-field="l.name"/>
+                                                    </strong>
+                                                </h6>
+                                                <hr class="border border-primary border-1 opacity-75 mb-1 mt-1 ms-2"/>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.name">
+                                                    <span class="c-label text-muted">Service</span>
+                                                    <strong>
+                                                        <span class="c-value" t-field="l.name"/>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.package_type">
+                                                    <span class="c-label text-muted">Package Type</span>
+                                                    <strong>
+                                                        <span class="c-value" t-field="l.package_type"/>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.package">
+                                                    <span class="c-label text-muted">Size / Package</span>
+                                                    <strong>
+                                                        <span class="c-value" t-field="l.package"/>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.qty">
+                                                    <span class="c-label text-muted">Cargo Qty</span>
+                                                    <strong>
+                                                        <span class="c-value" t-field="l.qty"/>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.currency_id.name">
+                                                    <span class="c-label text-muted">Currency</span>
+                                                    <strong>
+                                                        <span class="c-value" t-field="l.currency_id.name"/>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.sale">
+                                                    <span class="c-label text-muted">Price</span>
+                                                    <strong>
+                                                        <span class="c-value" t-field="l.sale"/>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.tax_ids">
+                                                    <span class="c-label text-muted">Taxes</span>
+                                                    <strong>
+                                                        <span class="c-value"
+                                                              t-out="', '.join(map(lambda x: (x.description or x.name), l.tax_ids))"/>
+                                                    </strong>
+                                                </div>
+                                                <div class="col-md-3 col-sm-12 c-field" t-if="l.total_amount">
+                                                    <span class="c-label text-muted">Total Amount</span>
+                                                    <strong>
+                                                        <span class="c-value" t-field="l.total_amount"/>
+                                                    </strong>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 text-end -value">
+                                Total :
+                                <span t-field="o.total_text" class="ms-1"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+            <div id="enquiry_content" class="col-12 col-lg">
+                <div id="enquiry_communication" class="mt-4">
+                    <h2>History</h2>
+                    <t t-call="portal.message_thread">
+                        <t t-set="object" t-value="quot"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!--Booking Details Tree-->
+    <template id="booking_details" name="Booking Details">
+        <t t-call="portal.portal_layout">
+            <div class="container mt8">
+                <a href="/freight/shipment/booking/create" style="margin-bottom:10px" class="btn btn-outline-info">
+                    Quotation Inquiry
+                </a>
+                <t t-if="not bookings">
+                    <p>There are currently no bookings for your account.</p>
+                </t>
+                <t t-if="bookings">
+                    <div>
+                        <t t-call="portal.portal_table">
+                            <table class="table table-responsive">
+                                <thead>
+                                    <tr class="p-3 mb-2">
+                                        <th style="width:25%;">Booking #</th>
+                                        <th class="text-right">Operation</th>
+                                        <th class="text-right">Transport</th>
+                                        <th class="text-right">Direction</th>
+                                        <th class="text-right">Shipper</th>
+                                        <th class="text-right">Consignee</th>
+                                        <th class="text-right">Source</th>
+                                        <th class="text-right">Destination</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="bookings" t-as="booking">
+                                        <tr>
+                                            <td>
+                                                <a t-attf-href="/freight/shipment/booking/details/{{ slug(booking) }}">
+                                                    <t t-esc="booking.name"/>
+                                                </a>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="booking.operation"/>
+                                            </td>
+
+                                            <td class="text-right">
+                                                <t t-if="booking.transport == 'ocean'">
+                                                    <span style="font-size:15px;"
+                                                          class="badge rounded-pill py-1 px-2 text-bg-primary"
+                                                          t-field="booking.transport"/>
+                                                </t>
+                                                <t t-if="booking.transport == 'land'">
+                                                    <span style="font-size:15px;"
+                                                          class="badge rounded-pill py-1 px-2 text-bg-success"
+                                                          t-field="booking.transport"/>
+                                                </t>
+                                                <t t-if="booking.transport == 'air'">
+                                                    <span style="font-size:15px;"
+                                                          class="badge py-1 rounded-pill px-2 text-bg-danger"
+                                                          t-field="booking.transport"/>
+                                                </t>
+                                            </td>
+
+                                            <td class="text-right">
+                                                <span t-field="booking.direction"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="booking.shipper_id.name"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="booking.consignee_id.name"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="booking.source_location_id.name"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="booking.destination_location_id.name"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </t>
+
+    </template>
+    <!--Booking Details-->
+    <template id="portal_my_booking_detail" name="My Booking Details">
+        <t t-call="portal.portal_layout">
+            <div class="container">
+                <t t-if="booking.state == 'draft'">
+                    <div id="wrap">
+                        <div class="container">
+                            <br/>
+                            <br/>
+                            <br/>
+                            <div class="col-md-12 text-center">
+                                <h1>Your Booking
+                                    <span t-field="booking.name"/>
+                                    has been created.
+                                </h1>
+                                <h3>
+                                    We are currently working on your request and will keep you updated on your booking.
+                                    Thank you for your patience.
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="booking.state == 'cancel'">
+                    <div class="container">
+                        <br/>
+                        <br/>
+                        <br/>
+                        <div class="card">
+                            <h5>Your Booking
+                                <span t-field="booking.name"/>
+                                has been Canceled.
+                            </h5>
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <span t-field="booking.cancellation_reason_head"/>
+                                </h5>
+                                <p class="card-text">
+                                    <span t-field="booking.cancellation_reason"/>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="booking.state == 'converted'">
+                    <div class="row">
+                        <h5 class="text-primary text-start">
+                            <span t-field="booking.name"/>
+                        </h5>
+                        <hr class="mb-2 mt-2"/>
+                        <div class="row">
+                            <h5 class="text-primary text-start mt-4">
+                                Shipment Details
+                            </h5>
+                            <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.freight_id">
+                                <span class="c-label text-muted">Tracking Number</span>
+                                <a t-attf-href="/track/shipment/booking?q=#{booking.freight_id.name}"
+                                   style="margin-top: -8px; margin-bottom: -8px;">
+                                    <span class="c-value" t-field="booking.freight_id.name"/>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.direction">
+                                <span class="c-label text-muted">Direction</span>
+                                <span class="c-value" t-field="booking.direction"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.transport">
+                                <span class="c-label text-muted">Transport Via</span>
+                                <span class="c-value" t-field="booking.transport"/>
+                            </div>
+                            <t t-if="booking.transport !='air'">
+                                <t t-if="booking.transport =='ocean'">
+                                    <div class="col-md-3 col-sm-12 c-field" t-if="booking.ocean_shipment_type">
+                                        <span class="c-label text-muted">Shipment Type</span>
+                                        <span class="c-value" t-field="booking.ocean_shipment_type"/>
+                                    </div>
+                                </t>
+                                <t t-if="booking.transport =='land'">
+                                    <div class="col-md-3 col-sm-12 c-field" t-if="booking.inland_shipment_type">
+                                        <span class="c-label text-muted">Shipment Type</span>
+                                        <span class="c-value" t-field="booking.inland_shipment_type"/>
+                                    </div>
+                                </t>
+                            </t>
+                        </div>
+                        <t t-if="booking.transport == 'air'">
+                            <div class="row">
+                                <h5 class="text-primary text-start mt-4">
+                                    Air Carriage Details
+                                </h5>
+                                <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.shipper_id">
+                                    <span class="c-label text-muted">Shipper</span>
+                                    <span class="c-value" t-field="booking.shipper_id.display_name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.consignee_id">
+                                    <span class="c-label text-muted">Consignee</span>
+                                    <span class="c-value" t-field="booking.consignee_id.display_name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.source_location_id">
+                                    <span class="c-label text-muted">Gateway</span>
+                                    <span class="c-value" t-field="booking.source_location_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.destination_location_id">
+                                    <span class="c-label text-muted">Destination</span>
+                                    <span class="c-value" t-field="booking.destination_location_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.mawb_no">
+                                    <span class="c-label text-muted">MAWB No.</span>
+                                    <span class="c-value" t-field="booking.mawb_no"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.airline_id">
+                                    <span class="c-label text-muted">Airline</span>
+                                    <span class="c-value" t-field="booking.airline_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.flight_no">
+                                    <span class="c-label text-muted">Flight No.</span>
+                                    <span class="c-value" t-field="booking.flight_no"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.distance">
+                                    <span class="c-label text-muted">Distance</span>
+                                    <span class="c-value" t-field="booking.distance"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.pickup_datetime">
+                                    <span class="c-label text-muted">Pickup Datetime</span>
+                                    <span class="c-value" t-field="booking.pickup_datetime"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.arrival_datetime">
+                                    <span class="c-label text-muted">Arrival Datetime</span>
+                                    <span class="c-value" t-field="booking.arrival_datetime"/>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="booking.transport == 'ocean'">
+                            <div class="row">
+                                <h5 class="text-primary text-start mt-4">
+                                    Ocean Carriage Details
+                                </h5>
+                                <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.shipper_id">
+                                    <span class="c-label text-muted">Shipper</span>
+                                    <span class="c-value" t-field="booking.shipper_id.display_name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.consignee_id">
+                                    <span class="c-label text-muted">Consignee</span>
+                                    <span class="c-value" t-field="booking.consignee_id.display_name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.source_location_id">
+                                    <span class="c-label text-muted">Loading Port</span>
+                                    <span class="c-value" t-field="booking.source_location_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.destination_location_id">
+                                    <span class="c-label text-muted">Discharge Port</span>
+                                    <span class="c-value" t-field="booking.destination_location_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.voyage_no">
+                                    <span class="c-label text-muted">Voyage No</span>
+                                    <span class="c-value" t-field="booking.voyage_no"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.vessel_id">
+                                    <span class="c-label text-muted">Vessel</span>
+                                    <span class="c-value" t-field="booking.vessel_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.obl">
+                                    <span class="c-label text-muted">OBL</span>
+                                    <span class="c-value" t-field="booking.obl"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.pickup_datetime">
+                                    <span class="c-label text-muted">Pickup Datetime</span>
+                                    <span class="c-value" t-field="booking.pickup_datetime"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.arrival_datetime">
+                                    <span class="c-label text-muted">Arrival Datetime</span>
+                                    <span class="c-value" t-field="booking.arrival_datetime"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.distance">
+                                    <span class="c-label text-muted">Distance</span>
+                                    <span class="c-value" t-field="booking.distance"/>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="booking.transport == 'land'">
+                            <div class="row">
+                                <h5 class="text-primary text-start mt-4">
+                                    Land Carriage Details
+                                </h5>
+                                <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.shipper_id">
+                                    <span class="c-label text-muted">Shipper</span>
+                                    <span class="c-value" t-field="booking.shipper_id.display_name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.consignee_id">
+                                    <span class="c-label text-muted">Consignee</span>
+                                    <span class="c-value" t-field="booking.consignee_id.display_name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.source_location_id">
+                                    <span class="c-label text-muted">From</span>
+                                    <span class="c-value" t-field="booking.source_location_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.destination_location_id">
+                                    <span class="c-label text-muted">To</span>
+                                    <span class="c-value" t-field="booking.destination_location_id.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.pickup_datetime">
+                                    <span class="c-label text-muted">Pickup Datetime</span>
+                                    <span class="c-value" t-field="booking.pickup_datetime"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.arrival_datetime">
+                                    <span class="c-label text-muted">Arrival Datetime</span>
+                                    <span class="c-value" t-field="booking.arrival_datetime"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.distance">
+                                    <span class="c-label text-muted">Distance</span>
+                                    <span class="c-value" t-field="booking.distance"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.truck_ref">
+                                    <span class="c-label text-muted">CMR/RWB#/PRO#</span>
+                                    <span class="c-value" t-field="booking.truck_ref"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.trucker">
+                                    <span class="c-label text-muted">Trucker</span>
+                                    <span class="c-value" t-field="booking.trucker.name"/>
+                                </div>
+                                <div class="col-md-3 col-sm-12 c-field" t-if="booking.trucker_number">
+                                    <span class="c-label text-muted">Truck No.</span>
+                                    <span class="c-value" t-field="booking.trucker_number"/>
+                                </div>
+                            </div>
+                        </t>
+                        <div class="row">
+                            <h5 class="text-primary text-start mt-4">
+                                General Information
+                            </h5>
+                            <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.barcode">
+                                <span class="c-label text-muted">Barcode</span>
+                                <span class="c-value" t-field="booking.barcode"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.agent_id">
+                                <span class="c-label text-muted">Agent</span>
+                                <span class="c-value" t-field="booking.agent_id.display_name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.operator_id">
+                                <span class="c-label text-muted">User</span>
+                                <span class="c-value" t-field="booking.operator_id.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.notes">
+                                <span class="c-label text-muted">Notes</span>
+                                <span class="c-value" t-field="booking.notes"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.move_type">
+                                <span class="c-label text-muted">Move Type</span>
+                                <span class="c-value" t-field="booking.move_type.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.tracking_number">
+                                <span class="c-label text-muted">Tracking No.</span>
+                                <span class="c-value" t-field="booking.tracking_number"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.incoterm">
+                                <span class="c-label text-muted">Incoterm</span>
+                                <span class="c-value" t-field="booking.incoterm.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="booking.dangerous_goods">
+                                <span class="c-label text-muted">Dangerous Good Info</span>
+                                <span class="c-value" t-field="booking.dangerous_goods_notes"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <div id="enquiry_content" class="col-12 col-lg">
+                    <div id="enquiry_communication" class="mt-4">
+                        <h2>History</h2>
+                        <t t-call="portal.message_thread">
+                            <t t-set="object" t-value="booking"/>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!--Booking Form-->
+    <template id="portal_booking_create" name="Booking Form">
+        <t t-call="website.layout">
+            <div class="container">
+                <div class="alert alert-danger mt-3 fw-bold text-danger d-none" id="validation-error"
+                     role="alert">
+                    Enter mandatory field name !
+                </div>
+                <div style="font-weight:bold;font-size: 147%" class="my-2 text-primary">Shipment</div>
+                <form action="/freight/shipment/booking/submit" id="quoteRequestForm" method="POST"
+                      enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="col-md-12 row">
+                            <div class="col-md-6 mb-2">
+                                <label for="operation" class="fw-bold">Type</label>
+                                <select id="operation" name="operation" required="True"
+                                        class="form-control mt-1">
+                                    <option value="direct">Direct</option>
+                                    <option value="master">Master</option>
+                                    <option value="house">House</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label for="transport" class="fw-bold">Transport</label>
+                                <div class="d-flex mt-1">
+                                    <div class="custom-control custom-radio custom-control-inline mx-1">
+                                        <input type="radio" id="air" name="transport"
+                                               class="custom-control-input transport-data"
+                                               value="air"/>
+                                        <label class="custom-control-label" for="air">Air
+                                        </label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline mx-1">
+                                        <input type="radio" id="ocean" name="transport"
+                                               class="custom-control-input transport-data"
+                                               value="ocean"/>
+                                        <label class="custom-control-label" for="ocean">Ocean
+                                        </label>
+                                    </div>
+                                    <div class="custom-control custom-radio custom-control-inline mx-1">
+                                        <input type="radio" id="land" name="transport"
+                                               class="custom-control-input transport-data"
+                                               value="land"/>
+                                        <label class="custom-control-label" for="land">Land
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div style="font-weight:bold;font-size: 147%" class="my-2 text-primary">
+                        Carriage
+                    </div>
+                    <div class="form-row">
+                        <div class="col-12 row row_hover" id="main_data">
+                            <div class="col-md-6">
+                                <label for="source" class="fw-bold">
+                                    Source Location
+                                </label>
+                                <input name="source" class="input-class mt-1 form-control" id="source"
+                                       required="1"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="destination" class="fw-bold">
+                                    Destination Location
+                                </label>
+                                <input name="destination" class="input-class mt-1 form-control" id="destination"
+                                       required="1"/>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+
+
+                    <div style="font-weight:bold;font-size: 147%" class="my-2 text-primary">Carriage
+                        Dimension
+                    </div>
+                    <div class="form-row">
+                        <div class="col-12 row row_hover">
+                            <div class="col-md-6">
+                                <label for="length" class="fw-bold">
+                                    Length(cm)
+                                </label>
+                                <input name="length" class="input-class mt-1 form-control" id="length"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="height" class="fw-bold">
+                                    Height(cm)
+                                </label>
+                                <input name="height" class="input-class mt-1 form-control" id="height"/>
+                            </div>
+
+                            <div class="col-md-6 mt-3">
+                                <label for="width" class="fw-bold">
+                                    Width(cm)
+                                </label>
+                                <input name="width" class="input-class mt-1 form-control" id="width"/>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label for="weight" class="fw-bold">
+                                    Weight(kg)
+                                </label>
+                                <input name="weight" class="input-class mt-1 form-control" id="weight"/>
+                            </div>
+                        </div>
+                    </div>
+                    <hr/>
+
+
+                    <div style="font-weight:bold;font-size: 147%" class="my-2 text-primary">General
+                        Information
+                    </div>
+                    <div class="form-row">
+                        <div class="col-12 row row_hover">
+                            <div class="col-md-6">
+                                <label for="danger" class="fw-bold">
+                                    Dangerous Goods
+                                </label>
+                                <input name="danger" class="mt-1 ms-1 form-check-input" id="danger" type="checkbox"/>
+                            </div>
+                            <div class="col-md-6 d-none" id="danger_info_div">
+                                <label for="dng_info" class="fw-bold">
+                                    Dangerous Goods Info
+                                </label>
+                                <textarea id="danger_info" style="resize: none;" name="danger_info"
+                                          class="form-control"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <label for="notes" style="margin-top: 4px;" class="text-primary">Notes</label>
+                            <textarea id="notes" name="notes" class="form-control" required="True"/>
+                        </div>
+                    </div>
+                    <div class="col-12 row">
+                        <div class="col-1">
+                        </div>
+                        <div class="col-4">
+                        </div>
+                        <div class="col-2" style="margin-top:10px;margin-left: 46px;padding-bottom: 43px;">
+                            <button type="submit" class="btn btn-outline-primary submit-form">Create</button>
+                        </div>
+                        <div class="col-4">
+                        </div>
+                        <div class="col-1">
+                        </div>
+                    </div>
+                    <hr/>
+                </form>
+            </div>
+        </t>
+    </template>
+    <template id="portal_booking_create_thankyou" name="Thank You">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container">
+                    <br/>
+                    <br/>
+                    <br/>
+                    <div class="col-md-12 text-center">
+                        <h1>Your Quotation Inquiry
+                            <span t-field="operation.name"/>
+                            has been created.
+                        </h1>
+                        <h3>
+                            We Contact you soon For Approx Charges of your Shipment Quotation.
+                        </h3>
+                        <h4>
+                            <a href="/freight/shipment/quotation">Click Here to track you inquiry</a>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+    <!--Shipment Details Tree-->
+    <template id="shipment_details" name="Shipment Details">
+        <t t-call="portal.portal_layout">
+            <div class="container mt8">
+                <a href="/freight/shipment/booking/create" style="margin-bottom:10px" class="btn btn-outline-info">
+                    Quotation Inquiry
+                </a>
+                <t t-if="not shipments">
+                    <p>There are currently no bookings for your account.</p>
+                </t>
+                <t t-if="shipments">
+                    <div>
+                        <t t-call="portal.portal_table">
+                            <table class="table table-responsive">
+                                <thead>
+                                    <tr class="p-3 mb-2">
+                                        <th style="width:25%;">Tracking No</th>
+                                        <th class="text-right">Operation</th>
+                                        <th class="text-right">Transport</th>
+                                        <th class="text-right">Direction</th>
+                                        <th class="text-right">Shipper</th>
+                                        <th class="text-right">Consignee</th>
+                                        <th class="text-right">Source</th>
+                                        <th class="text-right">Destination</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="shipments" t-as="s">
+                                        <tr>
+                                            <td>
+                                                <a t-attf-href="/freight/shipment/shipment/details/{{ slug(s) }}">
+                                                    <t t-esc="s.name"/>
+                                                </a>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="s.operation"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-if="s.transport == 'ocean'">
+                                                    <span style="font-size:15px;"
+                                                          class="badge rounded-pill py-1 px-2 text-bg-primary"
+                                                          t-field="s.transport"/>
+                                                </t>
+                                                <t t-if="s.transport == 'land'">
+                                                    <span style="font-size:15px;"
+                                                          class="badge rounded-pill py-1 px-2 text-bg-success"
+                                                          t-field="s.transport"/>
+                                                </t>
+                                                <t t-if="s.transport == 'air'">
+                                                    <span style="font-size:15px;"
+                                                          class="badge py-1 rounded-pill px-2 text-bg-danger"
+                                                          t-field="s.transport"/>
+                                                </t>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="s.direction"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="s.shipper_id.name"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <span t-field="s.consignee_id.name"/>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-if="s.address_to=='sc_address'">
+                                                    <span>
+                                                        <span t-field="s.s_city"/>
+                                                        -
+                                                        <span t-field="s.s_country_id.name"/>
+                                                    </span>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-field="s.source_location_id.name"/>
+                                                </t>
+                                            </td>
+                                            <td class="text-right">
+                                                <t t-if="s.address_to=='sc_address'">
+                                                    <span>
+                                                        <span t-field="s.d_city"/>
+                                                        -
+                                                        <span t-field="s.d_country_id.name"/>
+                                                    </span>
+                                                </t>
+                                                <t t-else="">
+                                                    <span t-field="s.destination_location_id.name"/>
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+    <!-- Shipment Details-->
+    <template id="portal_my_shipment_details" name="My Shipment Details">
+        <t t-call="portal.portal_layout">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <h5>
+                            <span t-field="shipment.name" class="text-primary"/>
+                        </h5>
+                        <hr/>
+                    </div>
+                    <div class="row">
+                        <h5 class="text-primary text-start mt-4">
+                            Shipment Details
+                        </h5>
+                        <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.name">
+                            <span class="c-label text-muted">Tracking Number</span>
+                            <a t-attf-href="/track/shipment/shipment?q=#{shipment.name}"
+                               style="margin-top: -8px; margin-bottom: -8px;">
+                                <span class="c-value" t-field="shipment.name"/>
+                            </a>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.direction">
+                            <span class="c-label text-muted">Direction</span>
+                            <span class="c-value" t-field="shipment.direction"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.transport">
+                            <span class="c-label text-muted">Transport Via</span>
+                            <span class="c-value" t-field="shipment.transport"/>
+                        </div>
+
+                        <t t-if="shipment.transport !='air'">
+                            <t t-if="shipment.transport =='ocean'">
+                                <div class="col-md-3 col-sm-12 c-field" t-if="shipment.ocean_shipment_type">
+                                    <span class="c-label text-muted">Shipment Type</span>
+                                    <span class="c-value" t-field="shipment.ocean_shipment_type"/>
+                                </div>
+                            </t>
+                            <t t-if="shipment.transport =='land'">
+                                <div class="col-md-3 col-sm-12 c-field" t-if="shipment.inland_shipment_type">
+                                    <span class="c-label text-muted">Shipment Type</span>
+                                    <span class="c-value" t-field="shipment.inland_shipment_type"/>
+                                </div>
+                            </t>
+                        </t>
+                    </div>
+
+                    <div class="row">
+                        <h5 class="text-primary text-start mt-4">
+                            Source and Destination
+                        </h5>
+                        <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.direction">
+                            <t t-if="shipment.transport=='air'">
+                                <span class="c-label text-muted">Gateway</span>
+                            </t>
+                            <t t-if="shipment.transport=='ocean'">
+                                <span class="c-label text-muted">Loading Port</span>
+                            </t>
+                            <t t-if="shipment.transport=='land'">
+                                <span class="c-label text-muted">Source Location</span>
+                            </t>
+                            <t t-if="shipment.address_to=='location_address'">
+                                <span class="c-value" t-field="shipment.source_location_id.name"/>
+                            </t>
+                            <t t-else="">
+                                <span class="c-value">
+                                    <span t-field="shipment.s_city"/>
+                                    -
+                                    <span t-field="shipment.s_country_id.name"/>
+                                </span>
+                            </t>
+                        </div>
+
+                        <div class="col-md-3 col-sm-12 c-field"
+                             t-if="shipment.transport=='air' or shipment.transport=='ocean' or shipment.transport=='land'">
+                            <t t-if="shipment.transport=='air'">
+                                <span class="c-label text-muted">Destination</span>
+                            </t>
+                            <t t-if="shipment.transport=='ocean'">
+                                <span class="c-label text-muted">Discharge Port</span>
+                            </t>
+                            <t t-if="shipment.transport=='land'">
+                                <span class="c-label text-muted">Destination Location</span>
+                            </t>
+                            <t t-if="shipment.address_to=='location_address'">
+                                <span class="c-value" t-field="shipment.destination_location_id.name"/>
+                            </t>
+                            <t t-else="">
+                                <span>
+                                    <span t-field="shipment.d_city"/>
+                                    -
+                                    <span t-field="shipment.d_country_id.name"/>
+                                </span>
+                            </t>
+                        </div>
+                    </div>
+
+                    <t t-if="shipment.transport == 'air'">
+                        <div class="row">
+                            <h5 class="text-primary text-start mt-4">
+                                Air Carriage Details
+                            </h5>
+                            <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.shipper_id">
+                                <span class="c-label text-muted">Shipper</span>
+                                <span class="c-value" t-field="shipment.shipper_id.display_name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.consignee_id">
+                                <span class="c-label text-muted">Consignee</span>
+                                <span class="c-value" t-field="shipment.consignee_id.display_name"/>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.bl_number">
+                                <span class="c-label text-muted">B/L</span>
+                                <span class="c-value" t-field="shipment.bl_number"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.bl_number">
+                                <span class="c-label text-muted">Bill</span>
+                                <span class="c-value" t-field="shipment.freight_collect_prepaid"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.airline_owner_id">
+                                <span class="c-label text-muted">Airline Owner</span>
+                                <span class="c-value" t-field="shipment.airline_owner_id.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.airline_id">
+                                <span class="c-label text-muted">Airline</span>
+                                <span class="c-value" t-field="shipment.airline_id.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.flight_no">
+                                <span class="c-label text-muted">Flight No.</span>
+                                <span class="c-value" t-field="shipment.flight_no"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.mawb_no">
+                                <span class="c-label text-muted">MAWB No.</span>
+                                <span class="c-value" t-field="shipment.mawb_no"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.pickup_datetime">
+                                <span class="c-label text-muted">Pickup Datetime</span>
+                                <span class="c-value" t-field="shipment.pickup_datetime"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.arrival_datetime">
+                                <span class="c-label text-muted">Arrival Datetime</span>
+                                <span class="c-value" t-field="shipment.arrival_datetime"/>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="shipment.transport == 'ocean'">
+                        <div class="row">
+                            <h5 class="text-primary text-start mt-4">
+                                Ocean Carriage Details
+                            </h5>
+                            <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.shipper_id">
+                                <span class="c-label text-muted">Shipper</span>
+                                <span class="c-value" t-field="shipment.shipper_id.display_name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.consignee_id">
+                                <span class="c-label text-muted">Consignee</span>
+                                <span class="c-value" t-field="shipment.consignee_id.display_name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.bl_number">
+                                <span class="c-label text-muted">B/L</span>
+                                <span class="c-value" t-field="shipment.bl_number"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.freight_collect_prepaid">
+                                <span class="c-label text-muted">Bill</span>
+                                <span class="c-value" t-field="shipment.freight_collect_prepaid"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.ship_owner_id.name">
+                                <span class="c-label text-muted">Shipping Line</span>
+                                <span class="c-value" t-field="shipment.ship_owner_id.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.vessel_id.name">
+                                <span class="c-label text-muted">Vessel</span>
+                                <span class="c-value" t-field="shipment.vessel_id.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.voyage_no">
+                                <span class="c-label text-muted">Voyage No</span>
+                                <span class="c-value" t-field="shipment.voyage_no"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.obl">
+                                <span class="c-label text-muted">OBL</span>
+                                <span class="c-value" t-field="shipment.obl"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.transhipment_port.name">
+                                <span class="c-label text-muted">Transhipment Port</span>
+                                <span class="c-value" t-field="shipment.transhipment_port.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.distance">
+                                <span class="c-label text-muted">Distance</span>
+                                <span class="c-value" t-field="shipment.distance"/>
+                                KM
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.pickup_datetime">
+                                <span class="c-label text-muted">Pickup Datetime</span>
+                                <span class="c-value" t-field="shipment.pickup_datetime"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.arrival_datetime">
+                                <span class="c-label text-muted">Arrival Datetime</span>
+                                <span class="c-value" t-field="shipment.arrival_datetime"/>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="shipment.transport == 'land'">
+                        <div class="row">
+                            <h5 class="text-primary text-start mt-4">
+                                Land Carriage Details
+                            </h5>
+                            <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.shipper_id">
+                                <span class="c-label text-muted">Shipper</span>
+                                <span class="c-value" t-field="shipment.shipper_id.display_name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.consignee_id">
+                                <span class="c-label text-muted">Consignee</span>
+                                <span class="c-value" t-field="shipment.consignee_id.display_name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.bl_number">
+                                <span class="c-label text-muted">B/L</span>
+                                <span class="c-value" t-field="shipment.bl_number"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.freight_collect_prepaid">
+                                <span class="c-label text-muted">Bill</span>
+                                <span class="c-value" t-field="shipment.freight_collect_prepaid"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.pickup_datetime">
+                                <span class="c-label text-muted">Pickup Datetime</span>
+                                <span class="c-value" t-field="shipment.pickup_datetime"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.arrival_datetime">
+                                <span class="c-label text-muted">Arrival Datetime</span>
+                                <span class="c-value" t-field="shipment.arrival_datetime"/>
+                            </div>
+
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.distance">
+                                <span class="c-label text-muted">Distance</span>
+                                <span class="c-value" t-field="shipment.distance"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.truck_ref">
+                                <span class="c-label text-muted">CMR/RWB#/PRO#</span>
+                                <span class="c-value" t-field="shipment.truck_ref"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.trucker.name">
+                                <span class="c-label text-muted">Trucker</span>
+                                <span class="c-value" t-field="shipment.trucker.name"/>
+                            </div>
+                            <div class="col-md-3 col-sm-12 c-field" t-if="shipment.trucker_number">
+                                <span class="c-label text-muted">Truck No.</span>
+                                <span class="c-value" t-field="shipment.trucker_number"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <div class="row">
+                        <h5 class="text-primary text-start mt-4">
+                            General Information
+                        </h5>
+                        <hr class="border border-primary border-1 opacity-75 mb-2 mt-2"/>
+
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.barcode">
+                            <span class="c-label text-muted">Barcode</span>
+                            <span class="c-value" t-field="shipment.barcode"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.agent_id.display_name">
+                            <span class="c-label text-muted">Agent</span>
+                            <span class="c-value" t-field="shipment.agent_id.display_name"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.move_type">
+                            <span class="c-label text-muted">Move Type</span>
+                            <span class="c-value" t-field="shipment.move_type.name"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.booking_id">
+                            <span class="c-label text-muted">Booking No.</span>
+                            <span class="c-value" t-field="shipment.booking_id.name"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.operator_id">
+                            <span class="c-label text-muted">User</span>
+                            <span class="c-value" t-field="shipment.operator_id.name"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.incoterm">
+                            <span class="c-label text-muted">Incoterm</span>
+                            <span class="c-value" t-field="shipment.incoterm.name"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.bl_document_type">
+                            <span class="c-label text-muted">B/L Document Type</span>
+                            <span class="c-value" t-field="shipment.bl_document_type"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.freight_payable">
+                            <span class="c-label text-muted">Freight Payable at</span>
+                            <span class="c-value" t-field="shipment.freight_payable"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.no_bill">
+                            <span class="c-label text-muted">No Bill</span>
+                            <span class="c-value" t-field="shipment.no_bill"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.si_issue_date">
+                            <span class="c-label text-muted">S/I Issue Date</span>
+                            <span class="c-value" t-field="shipment.si_issue_date"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.dangerous_goods">
+                            <span class="c-label text-muted">Dangerous Good Info</span>
+                            <span class="c-value" t-field="shipment.dangerous_goods_notes"/>
+                        </div>
+                        <div class="col-md-3 col-sm-12 c-field" t-if="shipment.notes">
+                            <span class="c-label text-muted">Notes</span>
+                            <span class="c-value" t-field="shipment.notes"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="enquiry_content" class="col-12 col-lg">
+                    <div id="enquiry_communication" class="mt-4">
+                        <h2>History</h2>
+                        <t t-call="portal.message_thread">
+                            <t t-set="object" t-value="shipment"/>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+        </t>
+    </template>
+    <!--Portal-->
+    <template id="portal_home" inherit_id="portal.portal_my_home" name="My Portal">
+        <xpath expr="//div[@id='portal_common_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Freight Booking</t>
+                <t t-set="icon" t-value="'/tk_freight/static/src/img/logistics.png'"/>
+                <t t-set="url" t-value="'/freight/shipment/bookings'"/>
+                <t t-set="placeholder_count" t-value="'freight_count'"/>
+                <t t-set="text">View your freight booking</t>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Freight Shipment</t>
+                <t t-set="icon" t-value="'/tk_freight/static/src/img/cargo-ship.png'"/>
+                <t t-set="url" t-value="'/freight/shipment/shipment'"/>
+                <t t-set="placeholder_count" t-value="'shipment_count'"/>
+                <t t-set="text">View your freight shipments</t>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Freight Quotation</t>
+                <t t-set="icon" t-value="'/tk_freight/static/src/img/dock.png'"/>
+                <t t-set="url" t-value="'/freight/shipment/quotation'"/>
+                <t t-set="placeholder_count" t-value="'quotation_count'"/>
+                <t t-set="text">View your freight quotation</t>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--Sequence -->
+        <record id="sequence_direct" model="ir.sequence">
+            <field name="name">Direct</field>
+            <field name="code">operation.direct</field>
+            <field name="prefix">/%(year)s/%(month)s/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="sequence_master" model="ir.sequence">
+            <field name="name">MASTER</field>
+            <field name="code">operation.master</field>
+            <field name="prefix">/%(year)s/%(month)s/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="sequence_house" model="ir.sequence">
+            <field name="name">House</field>
+            <field name="code">operation.house</field>
+            <field name="prefix">/%(year)s/%(month)s/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="sequence_bookings" model="ir.sequence">
+            <field name="name">Booking</field>
+            <field name="code">shipment.freight.booking</field>
+            <field name="prefix">/%(year)s/%(month)s/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="sequence_quotation" model="ir.sequence">
+            <field name="name">Quotation</field>
+            <field name="code">shipment.quot</field>
+            <field name="prefix">/%(year)s/%(month)s/</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <record id="menu_bookings" model="website.menu">
+            <field name="name">Freight</field>
+            <field name="url">/shipment</field>
+            <field name="parent_id" ref="website.main_menu"/>
+            <field name="sequence" type="int">60</field>
+        </record>
+
+        <!--Stages-->
+        <record id="stage_data_1" model="freight.shipment.stages">
+            <field name="name">Draft</field>
+            <field name="sequence">1</field>
+        </record>
+        <record id="stage_data_2" model="freight.shipment.stages">
+            <field name="name">Ready</field>
+            <field name="sequence">2</field>
+        </record>
+        <record id="stage_data_3" model="freight.shipment.stages">
+            <field name="name">In Progress</field>
+            <field name="sequence">3</field>
+        </record>
+        <record id="stage_data_4" model="freight.shipment.stages">
+            <field name="name">In Transit</field>
+            <field name="sequence">4</field>
+        </record>
+        <record id="stage_data_5" model="freight.shipment.stages">
+            <field name="name">Delivered</field>
+            <field name="sequence">5</field>
+        </record>
+
+        <!--Move Types-->
+        <record id="move_type_1" model="freight.move.type">
+            <field name="name">Door To Door</field>
+            <field name="code">DTD</field>
+            <field name="active">True</field>
+        </record>
+        <record id="move_type_2" model="freight.move.type">
+            <field name="name">Warehouse To Warehouse</field>
+            <field name="code">WTW</field>
+            <field name="active">True</field>
+        </record>
+        <record id="move_type_3" model="freight.move.type">
+            <field name="name">Airport To Airport</field>
+            <field name="code">ATA</field>
+            <field name="active">True</field>
+        </record>
+        <record id="move_type_4" model="freight.move.type">
+            <field name="name">Warehouse To House</field>
+            <field name="code">W2H</field>
+            <field name="active">True</field>
+        </record>
+        <record id="move_type_5" model="freight.move.type">
+            <field name="name">Airport To Door</field>
+            <field name="code">ATD</field>
+            <field name="active">True</field>
+        </record>
+
+        <!--Incoterms-->
+        <record id="incoterm_1" model="freight.incoterms">
+            <field name="name">Cost and Freight</field>
+            <field name="code">CF</field>
+            <field name="active">True</field>
+        </record>
+
+        <!--Product-->
+        <record id="charges_product_1" model="product.product">
+            <field name="name">Freight Charges</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="type">service</field>
+        </record>
+        <record id="policy_product_1" model="product.product">
+            <field name="name">Policy Charges</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="type">service</field>
+        </record>
+        <record id="route_product_1" model="product.product">
+            <field name="name">Route Charges</field>
+            <field name="sale_ok">True</field>
+            <field name="purchase_ok">True</field>
+            <field name="type">service</field>
+        </record>
+        <record id="freight_order_1" model="product.product">
+            <field name="name">Freight Order</field>
+            <field name="type">service</field>
+        </record>
+    </data>
+</odoo>

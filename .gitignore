@@ -1,0 +1,23 @@
+# 虚拟环境
+venv/
+**/__pycache__/
+*.pyc
+*.pyo
+
+# Odoo运行日志、缓存、数据
+debug_logs/
+eh_log/
+logs/
+filestore/
+sessions/
+
+*.dump
+*.sql
+
+# 本地配置（密钥、数据库地址敏感信息）
+odoo.conf
+.env
+
+# Mac系统隐藏文件
+.DS_Store
+Thumbs.db

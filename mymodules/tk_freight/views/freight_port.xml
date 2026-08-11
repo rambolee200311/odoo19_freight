@@ -1,0 +1,90 @@
+<odoo>
+    <data>
+    <!--Port & Locations-->
+        <record id="port_search_view" model="ir.ui.view">
+            <field name="name">port.search.view</field>
+            <field name="model">freight.port</field>
+            <field name="arch" type="xml">
+                <search string="Search Operations">
+                    <field name="code" string="Code"/>
+                    <field name="name" string="Name"/>
+                </search>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="port_form_view">
+            <field name="name">port.form.view</field>
+            <field name="model">freight.port</field>
+            <field name="arch" type="xml">
+                <form string="Ports">
+                    <sheet>
+                        <div class="oe_title mb24">
+                            <h1>
+                                <field class="text-break" name="name" default_focus="1"
+                                       placeholder="Name" required="1" string="Name"/>
+                            </h1>
+                            <h3>
+                                <span class="d-inline-block">
+                                    <field name="active" string="Active"/>
+                                    <label for="active" string="Active"/>
+                                </span>
+                            </h3>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="code" required="1" string="Code"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Address Details">
+                                <span class="o_form_label o_td_label" name="address_name">
+                                    <b>Address</b>
+                                </span>
+                                <div class="o_address_format">
+                                    <field name="street" placeholder="Address Line 1....." class="o_address_street"
+                                           required="1" string="Street"/>
+                                    <field name="street2" placeholder="Address Line 2....." class="o_address_street" string="Street 2"/>
+                                    <field name="city" placeholder="City" class="o_address_city" required="1" string="City"/>
+                                    <field name="state_id" class="o_address_state" placeholder="State" required="1"
+                                           options="{'no_open': True, 'no_create': True}" string="State"/>
+                                    <field name="zip" placeholder="ZIP" class="o_address_zip" string="ZIP"/>
+                                    <field name="country_id" placeholder="Country" class="o_address_country"
+                                           required="1"
+                                           options="{'no_open': True, 'no_create': True}" string="Country"/>
+                                </div>
+                            </group>
+                            <group string="Service Details">
+                                <field name="air" string="Air"/>
+                                <field name="ocean" string="Ocean"/>
+                                <field name="land" string="Land"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <record model="ir.ui.view" id="port_tree_view">
+            <field name="name">port.list.view</field>
+            <field name="model">freight.port</field>
+            <field name="arch" type="xml">
+                <list string="Ports">
+                    <field name="code" string="Code"/>
+                    <field name="name" string="Name"/>
+                    <field name="air" string="Air"/>
+                    <field name="ocean" string="Ocean"/>
+                    <field name="land" string="Land"/>
+                    <field name="active" string="Active"/>
+                </list>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="freight_port_action">
+            <field name="name">Ports &amp; Locations</field>
+            <field name="res_model">freight.port</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new port.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="freight_crm_inherit_view" model="ir.ui.view">
+            <field name="name">freight.crm.inherit.view</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.crm_lead_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//header" position="inside">
+                   <button name="action_create_freight_quotation" type="object" string="Create Freight Quotation"
+                    class="btn btn-primary" icon="fa-arrow-right"
+                    invisible="freight_quotation_id"/>
+                </xpath>
+                <xpath expr="//group[@name='opportunity_partner']" position="inside">
+                    <field name="id" invisible="1"/>
+                    <field name="freight_quotation_id" invisible="not freight_quotation_id" readonly="1"
+                           force_save="1"/>
+                </xpath>
+                <xpath expr="//notebook" position="inside">
+                    <page string="Cargo Details">
+                        <group>
+                            <group>
+                                <field name="source"/>
+                            </group>
+                            <group>
+                                <field name="destination"/>
+                            </group>
+                        </group>
+                        <group string="Dimension">
+                            <group>
+                                <field name="height"/>
+                                <field name="width"/>
+                            </group>
+                            <group>
+                                <field name="length"/>
+                                <field name="weight"/>
+                            </group>
+                        </group>
+                        <group string="Description">
+                            <group>
+                                <field name="dangerous_goods"/>
+                                <field name="dangerous_goods_notes" invisible="not dangerous_goods"/>
+                            </group>
+                            <group>
+                                <field name="freight_note"/>
+                            </group>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

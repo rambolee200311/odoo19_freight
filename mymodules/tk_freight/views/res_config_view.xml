@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="res_config_settings_view_form_freight" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.freight</field>
+            <field name="model">res.config.settings</field>
+            <field name="priority" eval="40"/>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form" position="inside">
+                    <app data-string="Freight" string="Freight" name="tk_freight">
+                        <h2>Sequences</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-lg-12 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Sequence</span>
+                                    <div class="text-muted">
+                                        Set Sequence prefix for quotation, booking, air shipment, ocean shipment and
+                                        land shipment
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="air_seq" class="col-lg-3 o_light_label" string="Air Sequence"/>
+                                            <field name="air_seq" required="1" string="Air Sequence"/>
+                                        </div>
+                                        <div class="row mt16">
+                                            <label for="ocean_seq" class="col-lg-3 o_light_label" string="Ocean Sequence"/>
+                                            <field name="ocean_seq" required="1" string="Ocean Sequence"/>
+                                        </div>
+                                        <div class="row mt16">
+                                            <label for="land_seq" class="col-lg-3 o_light_label" string="Land Sequence"/>
+                                            <field name="land_seq" required="1" string="Land Sequence"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <div class="row mt16">
+                                        <label for="quot_seq" class="col-lg-3 o_light_label" string="Quotation Sequence"/>
+                                        <field name="quot_seq" required="1" string="Quotation Sequence"/>
+                                    </div>
+                                    <div class="row mt16">
+                                        <label for="booking_seq" class="col-lg-3 o_light_label" string="Booking Sequence"/>
+                                        <field name="booking_seq" required="1" string="Booking Sequence"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h2>Chargeable Weight Divisor</h2>
+                        <div class="row mt16 o_settings_container">
+                            <div class="col-lg-12 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <span class="o_form_label">Chargeable Weight Divisor</span>
+                                    <div class="text-muted">
+                                        Set chargeable weight divisor ratio for air, ocean and land.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 o_setting_box">
+                                <div class="o_setting_left_pane">
+                                </div>
+                                <div class="o_setting_right_pane">
+                                    <div class="content-group">
+                                        <div class="row mt16">
+                                            <label for="air_ratio" class="col-lg-3 o_light_label" string="Air Ratio"/>
+                                            <field name="air_ratio" required="1" string="Air Ratio"/>
+                                        </div>
+                                        <div class="row mt16">
+                                            <label for="ocean_ratio" class="col-lg-3 o_light_label" string="Ocean Ratio"/>
+                                            <field name="ocean_ratio" required="1" string="Ocean Ratio"/>
+                                        </div>
+                                        <div class="row mt16">
+                                            <label for="land_ratio" class="col-lg-3 o_light_label" string="Land Ratio"/>
+                                            <field name="land_ratio" required="1" string="Land Ratio"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </app>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="shipping_bill_report_qweb_report">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.basic_layout">
+                        <div class="page">
+                            <div class="row">
+                                <div class="col-3"
+                                     style="text-align:center !important;">
+                                    <t t-if="o.company_id.logo">
+                                        <img t-att-src="image_data_uri(o.company_id.logo)" alt="Logo"
+                                             style="width:100px;height:100px;margin:2px;"/>
+                                    </t>
+                                </div>
+                                <div class="col-9"
+                                     style="text-align:center !important;">
+                                    <div t-if="o.barcode" t-field="o.barcode"
+                                         t-options="{'widget': 'barcode', 'width': 600, 'height': 120, 'img_style': 'max-height:50pt;max-width:100%;', 'img_align': 'left'}">
+                                        <span t-field="o.barcode"/>
+                                    </div>
+                                    <span t-field="o.barcode"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12" style="text-align:center !important;">
+                                    <h6>
+                                        <strong>
+                                            <span t-field="o.company_id.name"/>
+                                        </strong>
+                                    </h6>
+                                </div>
+                            </div>
+                            <hr class="mt-1 mb-2"/>
+                            <div class="row" style="border-bottom:1px solid black;margin-bottom:2px;">
+                                <div class="col-12">
+                                    <strong>Shipper :
+                                        <span t-field="o.shipper_id.name"/>
+                                    </strong>
+                                    <p style="font-size:13px;">
+                                        <t t-if="o.shipper_phone">
+                                            <span t-field="o.shipper_phone"/>,
+                                        </t>
+                                        <t t-if="o.shipper_email">
+                                            <span t-field="o.shipper_email"/>,
+                                        </t>
+                                        <br/>
+                                        <span t-field="o.s_street"/>
+                                        <t t-if="o.s_street2">
+                                            ,
+                                            <span t-field="o.s_street2"/>
+                                        </t>
+                                        <span t-field="o.s_city"/>
+                                        <t t-if="o.s_zip">
+                                            -
+                                            <span t-field="o.s_zip"/>
+                                        </t>
+                                        <span t-field="o.s_state_id"/>
+                                        <span t-field="o.s_country_id"/>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row" style="border-bottom:1px solid black;margin-top:2px;">
+                                <div class="col-12">
+                                    <strong>Consignee :
+                                        <span t-field="o.consignee_id.name"/>
+                                    </strong>
+                                    <p style="font-size:13px;">
+                                        <t t-if="o.consignee_phone">
+                                            <span t-field="o.consignee_phone"/>,
+                                        </t>
+                                        <t t-if="o.consignee_email">
+                                            <span t-field="o.consignee_email"/>,
+                                        </t>
+                                        <br/>
+                                        <span t-field="o.d_street"/>
+                                        <t t-if="o.d_street2">
+                                            ,
+                                            <span t-field="o.d_street2"/>
+                                        </t>
+                                        <span t-field="o.d_city"/>
+                                        <t t-if="o.d_zip">
+                                            -
+                                            <span t-field="o.d_zip"/>
+                                        </t>
+                                        <span t-field="o.d_state_id"/>
+                                        <span t-field="o.d_country_id"/>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row"
+                                 style="border-bottom:1px solid black;margin-bottom:2px;vertical-align:middle;">
+                                <div class="col-6 align-middle"
+                                     style="border-right:1px solid black;">
+                                    <h6 class="mb-0">
+                                        <span t-field="o.package_total_net"/>
+                                        KG
+                                        |
+                                        <span t-field="o.freight_amount"/>
+                                    </h6>
+                                </div>
+                                <div class="col-6 text-center">
+                                    <h6 class="mb-0">
+                                        <strong>
+                                            <t t-if="o.address_to == 'sc_address'">
+                                                <span t-field="o.s_city"/>
+                                                -
+                                                <span t-field="o.d_city"/>
+                                            </t>
+                                            <t t-if="o.address_to == 'location_address'">
+                                                <span t-field="o.source_location_id.code"/>
+                                                -
+                                                <span t-field="o.destination_location_id.code"/>
+                                            </t>
+                                        </strong>
+                                    </h6>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <record id="freight_shipment_bill_web_shipment_report" model="ir.actions.report">
+            <field name="name">Shipment Label</field>
+            <field name="model">freight.shipment</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">tk_freight.shipping_bill_report_qweb_report</field>
+            <field name="report_file">tk_freight.shipping_bill_report_qweb_report</field>
+            <field name="paperformat_id" ref="freight_paper_format_shipment_bill"/>
+        </record>
+    </data>
+</odoo>

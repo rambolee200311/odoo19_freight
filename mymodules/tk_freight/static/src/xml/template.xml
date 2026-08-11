@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="tk_freight.template_freight_dashboard" owl="1">
+        <section class="section tk_freight_dash">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 mt32">
+                        <h4 class="tk-primary">Statistics</h4>
+                        <hr class="border-primary"/>
+                    </div>
+                    <div class="col-md-2 mb-4 mt8 mb16" t-on-click="() => this.viewDashboardStatic('total_shipment')">
+                        <div class="card success-bg p-32">
+                            <div class="card-body success-bg tk-card-body-height">
+                                <img alt="users" width="40" src="/tk_freight/static/src/img/dash/cargo-boat.svg"/>
+                                <h4 class="tk-st-1 success-bg"> Shipments </h4>
+                                <h6 class="tk-st-2 success-bg" id="total_shipment">
+                                    <t t-esc="state.freightStats['total_shipment']"/>
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mt8 mb16" t-on-click="() => this.viewDashboardStatic('pending_quat')">
+                        <div class="card warn-bg p-32">
+                            <div class="card-body warn-bg tk-card-body-height">
+                                <img alt="users" width="40" src="/tk_freight/static/src/img/dash/quotation.svg"/>
+                                <h4 class="tk-st-1 warn-bg"> Pending Quotations </h4>
+                                <h6 class="tk-st-2 warn-bg" id="pending_quat">
+                                    <t t-esc="state.freightStats['pending_quat']"/>
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mt8 mb16" t-on-click="() => this.viewDashboardStatic('pending_booking')">
+                        <div class="card danger-bg p-32">
+                            <div class="card-body danger-bg tk-card-body-height">
+                                <img alt="users" width="40" src="/tk_freight/static/src/img/dash/checklist.svg"/>
+                                <h4 class="tk-st-1 danger-bg"> Pending Bookings </h4>
+                                <h6 class="tk-st-2 danger-bg" id="pending_booking">
+                                    <t t-esc="state.freightStats['pending_booking']"/>
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mt8 mb16" t-on-click="() => this.viewDashboardStatic('port')">
+                        <div class="card purple-bg p-32">
+                            <div class="card-body purple-bg tk-card-body-height">
+                                <img alt="users" width="40" src="/tk_freight/static/src/img/dash/port.svg"/>
+                                <h4 class="tk-st-1 purple-bg"> Ports </h4>
+                                <h6 class="tk-st-2 purple-bg" id="total_port">
+                                    <t t-esc="state.freightStats['total_port']"/>
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mt8 mb16" t-on-click="() => this.viewDashboardStatic('shipper')">
+                        <div class="card active-bg p-32">
+                            <div class="card-body active-bg tk-card-body-height">
+                                <img alt="users" width="40" src="/tk_freight/static/src/img/dash/shipper.svg"/>
+                                <h4 class="tk-st-1 active-bg"> Shipper </h4>
+                                <h6 class="tk-st-2 active-bg" id="shipper_count">
+                                    <t t-esc="state.freightStats['shipper_count']"/>
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mt8 mb16" t-on-click="() => this.viewDashboardStatic('consignee')">
+                        <div class="card info-bg p-32">
+                            <div class="card-body info-bg tk-card-body-height">
+                                <img alt="users" width="40" src="/tk_freight/static/src/img/dash/users.svg"/>
+                                <h4 class="tk-st-1 info-bg"> Consignee </h4>
+                                <h6 class="tk-st-2 info-bg" id="consignee_count">
+                                    <t t-esc="state.freightStats['consignee_count']"/>
+                                </h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4 mt8 mb16 align-items-stretch">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h4 class="tk-primary">Shipment Statics</h4>
+                                <hr class="border-primary"/>
+                            </div>
+                            <div class="col-md-4 mb-4 mt8 mb16 align-items-stretch"
+                                 t-on-click="() => this.viewDashboardStatic('house')">
+                                <div class="card success-bg p-32">
+                                    <div class="card-body success-bg tk-card-body">
+                                        <img alt="users" width="40" src="/tk_freight/static/src/img/dash/vehicle.svg"/>
+                                        <h4 class="tk-st-1 success-bg"> House </h4>
+                                        <h6 class="tk-st-2 success-bg" id="house_count">
+                                            <t t-esc="state.freightStats['house_count']"/>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4 mt8 mb16 align-items-stretch"
+                                 t-on-click="() => this.viewDashboardStatic('direct')">
+                                <div class="card info-bg p-32">
+                                    <div class="card-body info-bg tk-card-body">
+                                        <img alt="users" width="40" src="/tk_freight/static/src/img/dash/shipment.svg"/>
+                                        <h4 class="tk-st-1 info-bg"> Direct </h4>
+                                        <h6 class="tk-st-2 info-bg" id="direct_count">
+                                            <t t-esc="state.freightStats['direct_count']"/>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4 mt8 mb16 align-items-stretch"
+                                 t-on-click="() => this.viewDashboardStatic('master')">
+                                <div class="card danger-bg p-32">
+                                    <div class="card-body danger-bg tk-card-body">
+                                        <img alt="users" width="40" src="/tk_freight/static/src/img/dash/trade.svg"/>
+                                        <h4 class="tk-st-1 danger-bg"> Master </h4>
+                                        <h6 class="tk-st-2 danger-bg" id="master_count">
+                                            <t t-esc="state.freightStats['master_count']"/>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4 mt8 mb16 align-items-stretch"
+                                 t-on-click="() => this.viewDashboardStatic('air')">
+                                <div class="card purple-bg p-32">
+                                    <div class="card-body purple-bg tk-card-body">
+                                        <img alt="users" width="40" src="/tk_freight/static/src/img/dash/cargo.svg"/>
+                                        <h4 class="tk-st-1 purple-bg"> Air </h4>
+                                        <h6 class="tk-st-2 purple-bg" id="air">
+                                            <t t-esc="state.freightStats['air']"/>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4 mt8 mb16 align-items-stretch"
+                                 t-on-click="() => this.viewDashboardStatic('ocean')">
+                                <div class="card all-bg p-32">
+                                    <div class="card-body all-bg tk-card-body">
+                                        <img alt="users" width="40" src="/tk_freight/static/src/img/dash/ship.svg"/>
+                                        <h4 class="tk-st-1 all-bg"> Ocean </h4>
+                                        <h6 class="tk-st-2 all-bg" id="ocean">
+                                            <t t-esc="state.freightStats['ocean']"/>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4 mt8 mb16 align-items-stretch"
+                                 t-on-click="() => this.viewDashboardStatic('land')">
+                                <div class="card active-bg p-32">
+                                    <div class="card-body active-bg tk-card-body">
+                                        <img alt="users" width="40" src="/tk_freight/static/src/img/dash/delivery.svg"/>
+                                        <h4 class="tk-st-1 active-bg"> Land </h4>
+                                        <h6 class="tk-st-2 active-bg" id="land">
+                                            <t t-esc="state.freightStats['land']"/>
+                                        </h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-4 mt8 mb16 align-items-stretch">
+                        <div class="col-md-12">
+                            <h4 class="tk-center-primary">Direction</h4>
+                            <hr class="border-primary"/>
+                        </div>
+                        <div class="col-md-12 mb-4 mt8 mb16">
+                            <div class="tk-project-chart" id="direction" t-ref="freightDirection">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4 mt8 mb16 align-items-stretch">
+                        <div class="col-md-12">
+                            <h4 class="tk-center-primary">Status</h4>
+                            <hr class="border-primary"/>
+                        </div>
+                        <div class="col-md-12 mb-4 mt8 mb16">
+                            <div class="tk-project-chart" id="freight_stage" t-ref="freightStages">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="col-md-12 mt32">
+                            <h4 class="tk-center-primary">Shipment by Month</h4>
+                            <hr class="border-primary"/>
+                        </div>
+                        <div class="tk-os-chart" t-ref="shipmentMonth" id="shipment_month"></div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="col-md-12 mt32">
+                            <h4 class="tk-center-primary">Move Type</h4>
+                            <hr class="border-primary"/>
+                        </div>
+                        <div class="tk-os-chart" t-ref="moveType" id="move_type"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="col-md-12 mt32">
+                            <h4 class="tk-center-primary">Top 5 Shipper</h4>
+                            <hr class="border-primary"/>
+                        </div>
+                        <div class="tk-os-chart" t-ref="topShipper" id="top_shipper"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="col-md-12 mt32">
+                            <h4 class="tk-center-primary">Top 5 Consignee</h4>
+                            <hr class="border-primary"/>
+                        </div>
+                        <div class="tk-os-chart" t-ref="topConsignee" id="top_consignee"></div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="col-md-12 mt32">
+                            <h4 class="tk-center-primary">Invoices and Bills by Month</h4>
+                            <hr class="border-primary"/>
+                        </div>
+                        <div class="tk-os-chart" t-ref="invoiceBill" id="invoice_bill"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </t>
+</templates>

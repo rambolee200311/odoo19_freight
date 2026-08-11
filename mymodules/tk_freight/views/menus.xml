@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--Main Menu-->
+        <menuitem name="Freight"
+                  id="freight_root"
+                  web_icon="tk_freight,static/description/icon.png"
+                  sequence="1"/>
+
+        <!--Dashboard Menu-->
+        <menuitem name="Dashboard"
+                  id="dasboard_id"
+                  parent="tk_freight.freight_root"
+                  action="action_freight_dashboard"
+                  sequence="-1"/>
+
+        <menuitem name="Quotation"
+                  id="menu_shipment_quot"
+                  parent="freight_root"
+                  action="shipment_quot_action"
+                  sequence="2"/>
+
+        <!--Booking-->
+        <menuitem name="Bookings"
+                  parent="freight_root"
+                  id="freight_house_freight_booking"
+                  action="freight_booking_action"
+                  sequence="3"/>
+
+        <!--Shipment-->
+        <menuitem name="Shipments"
+                  parent="freight_root"
+                  id="menu_freight_shipment"
+                  sequence="4"/>
+        <menuitem name="All Shipments"
+                  parent="menu_freight_shipment"
+                  id="freight_all_operation"
+                  action="freight_shipment_all_action"
+                  sequence="1"/>
+
+        <menuitem name="Air"
+                  parent="menu_freight_shipment"
+                  id="freight_air_operation"
+                  action="freight_shipment_air_action"
+                  sequence="2"/>
+        <menuitem name="Ocean"
+                  parent="menu_freight_shipment"
+                  id="freight_ocean_operation"
+                  action="freight_shipment_ocean_action"
+                  sequence="3"/>
+        <menuitem name="Land"
+                  parent="menu_freight_shipment"
+                  id="freight_land_operation"
+                  action="freight_shipment_land_action"
+                  sequence="4"/>
+
+        <!--Packages-->
+        <menuitem name="Packages"
+                  parent="freight_root"
+                  id="menu_freight_package_id"
+                  action="freight_package_action"
+                  sequence="5"/>
+
+        <!--Consignee-->
+        <menuitem id="menu_consignee_customer"
+                  name="Customers"
+                  parent="freight_root"
+                  sequence="6"/>
+        <menuitem id="menu_shipper"
+                  name="Shippers"
+                  parent="menu_consignee_customer"
+                  action="shipper_partner_action"
+                  sequence="1"/>
+        <menuitem id="menu_consignee"
+                  name="Consignees"
+                  parent="menu_consignee_customer"
+                  action="consignee_partner_action"
+                  sequence="2"/>
+
+        <!--Vendors-->
+        <menuitem id="menu_vendors"
+                  name="Vendors"
+                  parent="freight_root"
+                  sequence="7"/>
+
+        <menuitem id="menu_agent"
+                  name="Agents"
+                  parent="menu_vendors"
+                  action="agent_partner_action"
+                  sequence="1"/>
+        <menuitem id="menu_partner_vendors"
+                  name="Vendors"
+                  parent="menu_vendors"
+                  action="vendor_partner_action"
+                  sequence="2"/>
+        <menuitem id="menu_partner_notify"
+                  name="Notify"
+                  parent="menu_vendors"
+                  action="notify_partner_action"
+                  sequence="3"/>
+
+        <!--Fleet-->
+        <menuitem id="menu_fleet"
+                  name="Fleets"
+                  parent="freight_root"
+                  sequence="8"/>
+        <!--Land-->
+        <menuitem id="menu_land"
+                  name="Land"
+                  parent="menu_fleet"
+                  sequence="1"/>
+        <menuitem id="menu_fleet_details"
+                  name="Vehicle Details"
+                  parent="menu_land"
+                  action="shipmen_fleet_action"
+                  sequence="1"/>
+
+        <!--Ocean-->
+        <menuitem id="menu_ocean"
+                  name="Ocean"
+                  parent="menu_fleet"
+                  sequence="2"/>
+        <menuitem name="Vessels/Ships"
+                  parent="menu_ocean"
+                  id="menu_freight_vessel_id"
+                  action="freight_vessel_action"
+                  sequence="1"/>
+
+        <!--Air-->
+        <menuitem id="menu_air"
+                  name="Air"
+                  parent="menu_fleet"
+                  sequence="3"/>
+        <menuitem name="Airlines"
+                  parent="menu_air"
+                  id="menu_freight_airline_id"
+                  action="freight_airline_action"
+                  sequence="1"/>
+
+
+        <menuitem action="service_product_action"
+                  name="Services"
+                  id="menu_services"
+                  parent="freight_root"
+                  sequence="9"/>
+
+        <!--Configuration-->
+        <menuitem name="Configurations"
+                  parent="freight_root"
+                  id="freight_configuration"
+                  sequence="10"/>
+
+        <!--Port Locations-->
+        <menuitem name="Port/Locations"
+                  id="menu_port_locations"
+                  parent="freight_configuration"
+                  sequence="2"/>
+        <menuitem name="Ports/Locations"
+                  parent="menu_port_locations"
+                  id="menu_freight_port_id"
+                  action="freight_port_action"
+                  sequence="1"/>
+        <menuitem name="Frequent Routes"
+                  parent="menu_port_locations"
+                  id="menu_freight_frequent_route"
+                  action="frequent_route_action"
+                  sequence="2"/>
+
+
+        <!--Other Details-->
+        <menuitem name="Other Details"
+                  id="menu_other_details"
+                  parent="freight_configuration"
+                  sequence="4"/>
+        <menuitem name="Move Types"
+                  parent="menu_other_details"
+                  id="menu_freight_move_type_id"
+                  action="freight_move_type_action"
+                  sequence="1"/>
+        <menuitem name="Document Types"
+                  parent="menu_other_details"
+                  id="menu_freight_document_type_id"
+                  action="document_type_action"
+                  sequence="2"/>
+        <menuitem name="Incoterms"
+                  parent="menu_other_details"
+                  id="menu_freight_incoterms_id"
+                  action="freight_incoterms_action"
+                  sequence="3"/>
+
+        <menuitem name="Stages Details"
+                  id="menu_stages_details"
+                  parent="freight_configuration"
+                  sequence="5"/>
+        <menuitem name="Stages"
+                  id="menu_stages"
+                  parent="menu_stages_details"
+                  action="stage_view_action"
+                  sequence="2"/>
+
+        <!--Policy Details-->
+        <menuitem name="Policy Details"
+                  id="menu_policy_details"
+                  parent="freight_configuration"
+                  sequence="6"/>
+        <menuitem name="Policy Company"
+                  id="menu_policy_company"
+                  parent="menu_policy_details"
+                  action="policy_company_action"
+                  sequence="1"/>
+        <menuitem name="Policy Risks"
+                  id="menu_policy_risk"
+                  parent="menu_policy_details"
+                  action="policy_risk_action"
+                  sequence="2"/>
+
+        <!--Shipment Tracking-->
+        <menuitem name="Shipment Tracking"
+                  id="menu_shipment_tracking"
+                  parent="freight_configuration"
+                  sequence="7"/>
+        <menuitem name="Tracking Location"
+                  id="menu_shipment_tracking_location"
+                  parent="menu_shipment_tracking"
+                  action="shipment_tracking_location_action"
+                  sequence="1"/>
+        <menuitem name="Tracking Activity"
+                  id="menu_shipment_tracking_activity"
+                  parent="menu_shipment_tracking"
+                  action="shipment_tracking_activity_action"
+                  sequence="2"/>
+        <menuitem name="Tracking Template"
+                  id="menu_shipment_tracking_template"
+                  parent="menu_shipment_tracking"
+                  action="shipment_tracking_template_action"
+                  sequence="3"/>
+
+    </data>
+</odoo>

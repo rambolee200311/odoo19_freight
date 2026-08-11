@@ -1,0 +1,1290 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="freight_shipment_form_view">
+            <field name="name">freight.shipment.form.view</field>
+            <field name="model">freight.shipment</field>
+            <field name="arch" type="xml">
+                <form>
+                    <field name="is_last_stage" invisible="1"/>
+                    <header>
+                        <field name="id" invisible="1"/>
+                        <field name="quotation_id" invisible="1" options="{'no_create':True}"/>
+                        <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'no_create': True}"/>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button class="oe_stat_button" name="button_services_quotes" type="object"
+                                    icon="fa-folder-open-o" invisible="not quotation_id">
+                                <field name="service_quote_count" string="Quotations" widget="statinfo" icon="fa-usd"/>
+                            </button>
+                            <button class="oe_stat_button" name="button_services_bookings" type="object"
+                                    icon="fa-calendar" invisible="service_booking_count == 0">
+                                <field name="service_booking_count" string="Booking" widget="statinfo" icon="fa-usd"/>
+                            </button>
+                            <button class="oe_stat_button" name="button_services" type="object" icon="fa-tasks"
+                                    invisible="service_count == 0">
+                                <field name="service_count" string="Services" widget="statinfo" icon="fa-usd"/>
+                            </button>
+                            <button class="oe_stat_button" name="button_customer_invoices" type="object" icon="fa-edit"
+                                    invisible="invoice_count == 0">
+                                <field name="invoice_count" string="Invoices" widget="statinfo" icon="fa-usd"/>
+                            </button>
+                            <button class="oe_stat_button" name="button_vendor_bills" type="object" icon="fa-money"
+                                    invisible="vendor_bill_count == 0">
+                                <field name="vendor_bill_count" string="Vendor Bills" widget="statinfo" icon="fa-usd"/>
+                            </button>
+                            <button class="oe_stat_button" type="object" name="action_freight_document" icon="fa-file">
+                                <field name="document_count" string='Documents' widget="statinfo"/>
+                            </button>
+                            <button class="oe_stat_button" type="object" name="action_view_receipts"
+                                    icon="fa-long-arrow-down text-success"
+                                    invisible="receipts_count == 0">
+                                <field name="receipts_count" string='In' widget="statinfo"/>
+                            </button>
+                            <button class="oe_stat_button" type="object" name="action_view_deliveries"
+                                    icon="fa-long-arrow-up text-danger"
+                                    invisible="deliveries_count == 0">
+                                <field name="deliveries_count" string='Out' widget="statinfo"/>
+                            </button>
+                            <button class="oe_stat_button" type="object" name="action_view_internal_transfer"
+                                    icon="fa-exchange text-warning"
+                                    invisible="internal_transfer_count == 0">
+                                <field name="internal_transfer_count" string='Internal' widget="statinfo"/>
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <h1>
+                                <field class="text-break" name="name" default_focus="1" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Direction">
+                                <field name="direction" widget="radio" required="1" options="{'horizontal': true}"
+                                       readonly="is_last_stage" string="Direction"/><!-- Added string -->
+                                <field name="operation" string="Type" required="1" readonly="is_last_stage"/>
+                            </group>
+                            <group string="Other">
+                                <field name="create_datetime" readonly="is_last_stage" string="Create Date"/><!-- Added string -->
+                                <field name="operator_id" string="Responsible" options="{'no_create': True}"
+                                       readonly="is_last_stage" widget="many2one_avatar_user"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Transport">
+                                <field name="transport" string="Transport Via" widget="radio"
+                                       options="{'horizontal': true}" required="1" readonly="is_last_stage"/>
+                                <field name="ocean_shipment_type" invisible="transport != 'ocean'"
+                                       required="transport == 'ocean'" readonly="is_last_stage" string="Ocean Shipment Type"/><!-- Added string -->
+                                <field name="inland_shipment_type" invisible="transport != 'land'"
+                                       required="transport == 'land'" readonly="is_last_stage" string="Inland Shipment Type"/><!-- Added string -->
+                            </group>
+                            <group string="Address Type">
+                                <field name="address_to" widget="radio" options="{'horizontal': true}"
+                                       readonly="is_last_stage" string="Address To"/><!-- Added string -->
+                                <field name="frequent_location_id" invisible="address_to != 'location_address'"
+                                       options="{'no_create':True}" readonly="is_last_stage" string="Frequent Location"/><!-- Added string -->
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Transporter">
+                                <field name="shipper_id" required="1" options="{'no_create':True}"
+                                       readonly="is_last_stage" string="Shipper"/><!-- Added string -->
+                                <field name="shipper_phone" widget="phone" placeholder="Shipper Phone" string="Phone"/>
+                                <field name="shipper_email" widget="email" placeholder="Shipper Email" string="Email"/>
+                            </group>
+                            <group string="Customer">
+                                <field name="consignee_id" required="1" options="{'no_create':True}"
+                                       readonly="is_last_stage" string="Consignee"/><!-- Added string -->
+                                <field name="consignee_phone" widget="phone" placeholder="Consignee Email"
+                                       string="Phone"/>
+                                <field name="consignee_email" widget="email" placeholder="Consignee Phone"
+                                       string="Email"/>
+                            </group>
+                        </group>
+                        <group string="Location Details" invisible="address_to != 'location_address'">
+                            <group>
+                                <field name="port_ids" invisible="1" options="{'no_create':True}"
+                                       readonly="is_last_stage"/>
+                                <label for="source_location_id" string="From" invisible="transport != 'land'"/>
+                                <div invisible="transport != 'land'">
+                                    <field name="source_location_id" required="address_to == 'location_address'"
+                                           options="{'no_create':True}" readonly="is_last_stage" string="Source Location"/><!-- Added string -->
+                                </div>
+                                <label for="source_location_id" string="Loading Port" invisible="transport != 'ocean'"/>
+                                <div invisible="transport != 'ocean'">
+                                    <field name="source_location_id" required="address_to == 'location_address'"
+                                           options="{'no_create':True}" readonly="is_last_stage" string="Source Location"/><!-- Added string -->
+                                </div>
+                                <label for="source_location_id" string="Gateway" invisible="transport != 'air'"/>
+                                <div invisible="transport != 'air'">
+                                    <field name="source_location_id" required="address_to == 'location_address'"
+                                           options="{'no_create':True}" readonly="is_last_stage" string="Source Location"/><!-- Added string -->
+                                </div>
+                            </group>
+                            <group>
+                                <label for="destination_location_id" string="To" invisible="transport != 'land'"/>
+                                <div invisible="transport != 'land'">
+                                    <field name="destination_location_id" required="address_to == 'location_address'"
+                                           options="{'no_create':True}" readonly="is_last_stage" string="Destination Location"/><!-- Added string -->
+                                </div>
+                                <label for="destination_location_id" string="Discharge Port"
+                                       invisible="transport != 'ocean'"/>
+                                <div invisible="transport != 'ocean'">
+                                    <field name="destination_location_id" required="address_to == 'location_address'"
+                                           options="{'no_create':True}" readonly="is_last_stage" string="Destination Location"/><!-- Added string -->
+                                </div>
+                                <label for="destination_location_id" string="Destination"
+                                       invisible="transport != 'air'"/>
+                                <div invisible="transport != 'air'">
+                                    <field name="destination_location_id" required="address_to == 'location_address'"
+                                           options="{'no_create':True}" readonly="is_last_stage" string="Destination Location"/><!-- Added string -->
+                                </div>
+                            </group>
+                        </group>
+                        <group string="Address">
+                            <group>
+                                <label for="source_location_id" string="Source"/>
+                                <div class="o_address_format">
+                                    <field name="s_street" placeholder="Address Line 1....." class="o_address_street"
+                                           required="0" readonly="is_last_stage" string="Street"/><!-- Added string -->
+                                    <field name="s_street2" placeholder="Address Line 2....." class="o_address_street"
+                                           readonly="is_last_stage" string="Street 2"/><!-- Added string -->
+                                    <field name="s_city" placeholder="City" class="o_address_city" required="0"
+                                           readonly="is_last_stage" string="City"/><!-- Added string -->
+                                    <field name="s_state_id" class="o_address_state" placeholder="State" required="0"
+                                           options="{'no_open': True, 'no_create': True}"
+                                           readonly="is_last_stage" string="State"/><!-- Added string -->
+                                    <field name="s_zip" placeholder="ZIP" class="o_address_zip"
+                                           readonly="is_last_stage" string="ZIP"/><!-- Added string -->
+                                    <field name="s_country_id" placeholder="Country" class="o_address_country"
+                                           required="0" options="{'no_open': True, 'no_create': True}"
+                                           readonly="is_last_stage" string="Country"/><!-- Added string -->
+                                </div>
+                            </group>
+                            <group>
+                                <label for="destination_location_id" string="Destination"/>
+                                <div class="o_address_format">
+                                    <field name="d_street" placeholder="Address Line 1....." class="o_address_street"
+                                           required="0" readonly="is_last_stage" string="Street"/><!-- Added string -->
+                                    <field name="d_street2" placeholder="Address Line 2....." class="o_address_street"
+                                           readonly="is_last_stage" string="Street 2"/><!-- Added string -->
+                                    <field name="d_city" placeholder="City" class="o_address_city" required="0"
+                                           readonly="is_last_stage" string="City"/><!-- Added string -->
+                                    <field name="d_state_id" class="o_address_state" placeholder="State" required="0"
+                                           options="{'no_open': True, 'no_create': True}"
+                                           readonly="is_last_stage" string="State"/><!-- Added string -->
+                                    <field name="d_zip" placeholder="ZIP" class="o_address_zip"
+                                           readonly="is_last_stage" string="ZIP"/><!-- Added string -->
+                                    <field name="d_country_id" placeholder="Country" class="o_address_country"
+                                           required="0" options="{'no_open': True, 'no_create': True}"
+                                           readonly="is_last_stage" string="Country"/><!-- Added string -->
+                                </div>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Notify Party">
+                                <field name="first_notify_id" options="{'no_create': True}" readonly="is_last_stage" string="First Notify Party"/><!-- Added string -->
+                                <field name="second_notify_id" invisible="0" options="{'no_create': True}"
+                                       readonly="is_last_stage" string="Second Notify Party"/><!-- Added string -->
+                            </group>
+                            <group string="Estimate Time">
+                                <field name="pickup_datetime" readonly="is_last_stage" string="Estimate Pickup"/>
+                                <field name="arrival_datetime" readonly="is_last_stage" string="Estimate Arrival"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Final Destination">
+                                <field name="final_destination_id" invisible="0" readonly="is_last_stage" string="Final Destination"/><!-- Added string -->
+                            </group>
+                            <group string="Freight Insurance">
+                                <field name="is_freight_insurance" readonly="is_last_stage" string="Is Freight Insurance"/><!-- Added string -->
+                            </group>
+                        </group>
+                        <div class="mb-5">
+                            <separator string="Download Reports"/>
+                            <button name="action_download_shipment_details" type="object" string="Shipment Details"
+                                    class="btn-primary mx-1" icon="fa-tasks"/>
+                            <button name="action_download_shipment_instruction" type="object"
+                                    string="Shipment Instruction"
+                                    class="btn-warning mx-1" icon="fa-gears"/>
+                            <button name="action_download_shipment_label" type="object" string="Shipment Label"
+                                    class="btn-outline-dark mx-1" icon="fa-barcode"/>
+                            <button name="action_download_bill_of_landing" type="object" string="Bill of Landing"
+                                    class="btn-info mx-1" invisible="transport != 'ocean'" icon="fa-ship"/>
+                            <button name="action_download_airway_bill" type="object" string="Airway Bill (AWB)"
+                                    class="btn-success mx-1" invisible="transport != 'air'" icon="fa-plane"/>
+                            <button name="action_download_cmr" type="object" string="CMR"
+                                    class="btn-success mx-1" invisible="transport != 'land'" icon="fa-truck"/>
+                            <button name="action_download_land_waybill" type="object" string="Waybill-Land"
+                                    class="btn-info mx-1" invisible="transport != 'land'" icon="fa-road"/>
+                        </div>
+                        <notebook>
+                            <page string="General Information">
+                                <group>
+                                    <group string="Tracking Details">
+                                        <field name="tracking_number" readonly="1" force_save="1" string="Tracking Number"/><!-- Added string -->
+                                        <field name="barcode" readonly="is_last_stage" string="Barcode"/><!-- Added string -->
+                                    </group>
+                                    <group string="Agent Details">
+                                        <field name="agent_id" options="{'no_create': True}" readonly="is_last_stage"
+                                               help="S/I Agent" string="Agent"/><!-- Added string -->
+                                    </group>
+                                </group>
+                                <group string="Logistics and Compliance">
+                                    <group>
+                                        <field name="move_type" options="{'no_create': True}" readonly="is_last_stage" string="Move Type"/><!-- Added string -->
+                                        <field name="incoterm" options="{'no_create': True}" readonly="is_last_stage" string="Incoterm"/><!-- Added string -->
+                                    </group>
+                                    <group>
+                                        <field name="dangerous_goods" readonly="is_last_stage" string="Dangerous Goods"/><!-- Added string -->
+                                        <field name="dangerous_goods_notes" invisible="not dangerous_goods"
+                                               readonly="is_last_stage" string="Dangerous Goods Notes"/><!-- Added string -->
+                                        <field name="notes" placeholder="Package Description..."
+                                               readonly="is_last_stage" string="Notes"/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Air Carriage" name="air_shipment" invisible="transport != 'air'">
+                                <group>
+                                    <group>
+                                        <field name="airline_owner_id" invisible="transport != 'air'"
+                                               options="{'no_create': True}" readonly="is_last_stage" string="Airline Owner"/><!-- Added string -->
+                                        <field name="airline_id" invisible="transport != 'air'"
+                                               options="{'no_create': True}" readonly="is_last_stage" string="Airline"/><!-- Added string -->
+                                        <label for="distance" class="mt-1"/>
+                                        <div name="distance">
+                                            <field name="distance" class="oe_inline" readonly="is_last_stage" string="Distance"/><!-- Added string -->
+                                            KM
+                                        </div>
+                                    </group>
+                                    <group>
+                                        <field name="mawb_no" invisible="transport != 'air'" readonly="is_last_stage" string="MAWB No."/><!-- Added string -->
+                                        <field name="flight_no" invisible="transport != 'air'"
+                                               readonly="is_last_stage" string="Flight No."/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Ocean Carriage" name="ocean_shipment"
+                                  invisible="transport != 'ocean'">
+                                <group>
+                                    <group>
+                                        <field name="ship_owner_id" invisible="transport != 'ocean'"
+                                               options="{'no_create': True}" readonly="is_last_stage" string="Ship Owner"/><!-- Added string -->
+                                        <field name="vessel_id" invisible="transport != 'ocean'"
+                                               options="{'no_create': True}" readonly="is_last_stage" string="Vessel"/><!-- Added string -->
+                                        <field name="transhipment_port" readonly="is_last_stage"
+                                               options="{'no_create': True}" string="Transhipment Port"/><!-- Added string -->
+                                        <label for="distance" class="mt-1"/>
+                                        <div name="distance">
+                                            <field name="distance" class="oe_inline" readonly="is_last_stage" string="Distance"/><!-- Added string -->
+                                            KM
+                                        </div>
+                                    </group>
+                                    <group>
+                                        <field name="obl" invisible="transport != 'ocean'" readonly="is_last_stage" string="OBL No."/><!-- Added string -->
+                                        <field name="voyage_no" invisible="transport != 'ocean'"
+                                               readonly="is_last_stage" string="Voyage No."/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Land Carriage" name="land_shipment" invisible="transport != 'land'">
+                                <group>
+                                    <group>
+                                        <field name="truck_ref" invisible="transport != 'land'"
+                                               readonly="is_last_stage" string="Truck Ref"/><!-- Added string -->
+                                        <field name="truck_owner_id" invisible="transport != 'land'"
+                                               options="{'no_create': True}" readonly="is_last_stage" string="Truck Owner"/><!-- Added string -->
+                                        <label for="distance" class="mt-1"/>
+                                        <div name="distance">
+                                            <field name="distance" class="oe_inline" readonly="is_last_stage" string="Distance"/><!-- Added string -->
+                                            KM
+                                        </div>
+                                    </group>
+                                    <group>
+                                        <field name="trucker" invisible="transport != 'land'"
+                                               options="{'no_create': True}" readonly="is_last_stage" string="Trucker"/><!-- Added string -->
+                                        <field name="trucker_number" invisible="transport != 'land'"
+                                               readonly="is_last_stage" string="Trucker Number"/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Report Fields">
+                                <span class="text-muted fst-italic oe_inline" colspan="2">
+                                    <strong>Note:</strong>
+                                    These fields are only for generating following reports
+                                    <strong>
+                                        Bill of Landing, Airway Bill(AWB), CMR, Shipment Instruction
+                                    </strong>
+                                </span>
+                                <hr/>
+                                <group>
+                                    <group>
+                                        <field name="bl_number" readonly="is_last_stage" string="BL Number"/><!-- Added string -->
+                                        <field name="freight_collect_prepaid" required="1" widget="radio"
+                                               options="{'horizontal':True}" readonly="is_last_stage" string="Freight Collect/Prepaid"/><!-- Added string -->
+                                        <field name="bl_document_type" readonly="is_last_stage" string="BL Document Type"/><!-- Added string -->
+                                        <field name="freight_payable" readonly="is_last_stage" string="Freight Payable"/><!-- Added string -->
+                                        <field name="no_bill" readonly="is_last_stage" string="No Bill"/><!-- Added string -->
+                                        <field name="special_instruction" placeholder="Special Instruction....."
+                                               readonly="is_last_stage" string="Special Instruction"/><!-- Added string -->
+
+                                    </group>
+                                    <group>
+                                        <field name="contact_place_of_receipt" invisible="address_to != 'sc_address'"
+                                               readonly="is_last_stage" string="Contact Place of Receipt"/><!-- Added string -->
+                                        <field name="location_place_of_receipt" readonly="is_last_stage"
+                                               invisible="address_to != 'location_address'" string="Location Place of Receipt"/><!-- Added string -->
+                                        <field name="contact_place_of_delivery" invisible="address_to != 'sc_address'"
+                                               readonly="is_last_stage" string="Contact Place of Delivery"/><!-- Added string -->
+                                        <field name="location_place_of_delivery" readonly="is_last_stage"
+                                               invisible="address_to != 'location_address'" string="Location Place of Delivery"/><!-- Added string -->
+                                        <field name="freight_amount" readonly="is_last_stage" string="Freight Amount"/><!-- Added string -->
+                                        <field name="si_issue_date" readonly="is_last_stage" string="SI Issue Date"/><!-- Added string -->
+                                        <field name="valid_date" readonly="is_last_stage" string="Valid Date"/><!-- Added string -->
+                                    </group>
+                                </group>
+                                <div>
+                                    <table class="table table-bordered">
+                                        <tbody>
+                                            <tr>
+                                                <td style="width:50%;text-align:center;">
+                                                    Mask and Numbers
+                                                </td>
+                                                <td style="width:50%;text-align:center;">
+                                                    Description and Packages &amp; Goods Particulars Furnished by
+                                                    Shipper
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width:50%">
+                                                    <field name="mask_numbers" readonly="is_last_stage"/>
+                                                </td>
+                                                <td style="width:50%">
+                                                    <field name="desc_pkg" readonly="is_last_stage"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width:50%;text-align:center;">
+                                                    Measurement
+                                                </td>
+                                                <td style="width:50%;text-align:center;">
+                                                    Remarks
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width:50%">
+                                                    <field name="measurement" readonly="is_last_stage"/>
+                                                </td>
+                                                <td style="width:50%">
+                                                    <field name="remark" readonly="is_last_stage"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </page>
+                            <page string="Package Details">
+                                <field name="freight_packages" nolabel="1"
+                                       readonly="is_last_stage">
+                                    <list string="Package">
+                                        <field name="name" required="1"/>
+                                        <field name="seal_number"/>
+                                        <field name="package_type"/>
+                                        <field name="package" required="1"/>
+                                        <field name="container_type" optional="hide"/>
+                                        <field name="qty" sum="Total Qty."/>
+                                        <field name="volume" sum="Total Volume"/>
+                                        <field name="gross_weight" sum="Total Gross"/>
+                                        <field name="net_weight" sum="Total Net"/>
+                                        <field name="total_cbm"/>
+                                        <field name="line_added" column_invisible="1"/>
+                                        <button name="action_insert_line_service" type="object" string="Add to Service"
+                                                icon="fa-plus-square-o" invisible="line_added"/>
+                                    </list>
+                                    <form string="Package">
+                                        <group>
+                                            <label for="package_type"/>
+                                            <div>
+                                                <field name="package_type" widget="radio"
+                                                       options="{'horizontal':True}"/>
+                                                <div class="font-italic text-muted" invisible="package_type">
+                                                    When Package type is Box/Pallet that mean it is small size
+                                                    package(Box/Pallet /Cargo), it mainly used for Land or Air
+                                                    Shipment but if Package Type is Container/Box that mean
+                                                    it is big shipment, and you see a tab that's show what is inside
+                                                    that Container/Box
+                                                </div>
+                                            </div>
+                                        </group>
+                                        <group invisible="package_type != 'container'">
+                                            <group string="Container / Box">
+                                                <field name="freight_package_ids" invisible="1"/>
+                                                <field name="package" required="1" options="{'no_create': True}"/>
+                                                <field name="name" required="1"/>
+                                                <field name="seal_number" required="1"/>
+                                                <field name="container_type" required="1"/>
+                                            </group>
+                                            <group string="Qty &amp; Type">
+                                                <field name="type"/>
+                                                <field name="cargo_type"/>
+                                                <field name="qty"/>
+                                                <field name="charges"/>
+                                            </group>
+                                        </group>
+                                        <group invisible="package_type != 'item'">
+                                            <group string="Box / Pallet / Cargo">
+                                                <field name="freight_package_ids" invisible="1"/>
+                                                <field name="package" required="1" options="{'no_create': True}"/>
+                                                <field name="name" required="1"/>
+                                                <field name="seal_number" required="1"/>
+                                                <field name="container_type" required="1"/>
+                                            </group>
+                                            <group string="Qty &amp; Type">
+                                                <field name="type"/>
+                                                <field name="cargo_type"/>
+                                                <field name="qty"/>
+                                                <field name="charges"/>
+                                            </group>
+                                        </group>
+                                        <group invisible="not package_type">
+                                            <group string="Dimension">
+                                                <field name="length"/>
+                                                <field name="width"/>
+                                                <field name="height"/>
+                                            </group>
+                                            <group string="Weight &amp; Volume">
+                                                <field name="gross_weight"/>
+                                                <field name="net_weight"/>
+                                                <field name="volume"/>
+                                                <field name="total_cbm"/>
+                                            </group>
+                                        </group>
+                                        <group invisible="not package_type" string="Chargeable Weight">
+                                            <group>
+                                                <field name="weight_ratio"/>
+                                                <field name="chargeable_weight"/>
+                                            </group>
+                                            <group>
+                                                <field name="final_weight"/>
+                                            </group>
+                                        </group>
+                                        <group invisible="not package_type">
+                                            <group string="Environmental Conditions">
+                                                <field name="harmonize"/>
+                                                <field name="temperature"/>
+                                                <field name="ventilation"/>
+                                                <field name="humidity"/>
+                                            </group>
+                                            <group string="Shipment Verification">
+                                                <field name="vgm"/>
+                                                <field name="carrier_seal"/>
+                                                <field name="reference"/>
+                                            </group>
+                                        </group>
+                                        <group>
+                                            <group invisible="not package_type" string="Dangerous Goods">
+                                                <field name="dangerous_goods"/>
+                                            </group>
+                                        </group>
+                                        <group invisible="not dangerous_goods or not package_type">
+                                            <group string="Regulatory Classification">
+                                                <field name="imdg_code"
+                                                       help="International Maritime Dangerous Goods code"/>
+                                                <field name="class_number" help="Hazard class"/>
+                                                <field name="Package_group"/>
+                                                <label for="un_number"/>
+                                                <div>
+                                                    <field name="un_number"/>
+                                                    <div class="font-italic text-muted" invisible="un_number">
+                                                        UN numbers are four-digit numbers that identify hazardous
+                                                        materials and articles in the framework of international
+                                                        transport
+                                                    </div>
+                                                </div>
+                                            </group>
+                                            <group string="Safety and Handling">
+                                                <field name="flash_point"/>
+                                                <field name="material_description"/>
+                                            </group>
+                                        </group>
+                                        <separator string="Container Items" invisible="package_type != 'container'"/>
+                                        <field name="freight_item_lines" nolabel="1" editable="top"
+                                               invisible="package_type != 'container'">
+                                            <list string="Items">
+                                                <field name="package"/>
+                                                <field name="name"/>
+                                                <field name="qty" sum="qty"/>
+                                                <field name="volume" sum="Total Volume"/>
+                                            </list>
+                                            <form string="Items">
+                                                <group>
+                                                    <group string="Item Details">
+                                                        <field name="freight_package_ids" invisible="1"/>
+                                                        <field name="package" required="1"
+                                                               options="{'no_create': True}"/>
+                                                        <field name="name" required="1"/>
+                                                        <field name="type" string="Type"/>
+                                                        <field name="qty" required="1"/>
+                                                    </group>
+                                                    <group string="Dimension">
+                                                        <field name="length"/>
+                                                        <field name="width"/>
+                                                        <field name="height"/>
+                                                        <field name="volume"/>
+                                                        <field name="gross_weight"/>
+                                                    </group>
+                                                </group>
+                                            </form>
+                                        </field>
+                                    </form>
+                                </field>
+                                <group>
+                                    <group class="oe_subtotal_footer" style="text-align:right;" string="Total">
+                                        <field name="package_total_volume" string="Volume(CBM)"
+                                               class="oe_subtotal_footer_separator"/>
+                                        <field name="package_total_gross" string="Gross Weight(KG)"
+                                               class="oe_subtotal_footer_separator"/>
+                                        <field name="package_total_net" string="Net Weight(KG)"
+                                               class="oe_subtotal_footer_separator"/>
+                                        <field name="final_charges" class="oe_subtotal_footer_separator"
+                                               string="Container Charges"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Routes">
+                                <field name="freight_routes" nolabel="1"
+                                       context="{'shipper_id':shipper_id,'consignee_id':consignee_id}"
+                                       readonly="is_last_stage">
+                                    <form>
+                                        <header>
+                                            <button name="action_create_delivery_order" type="object"
+                                                    class="oe_highlight" string="Create Delivery Order"
+                                                    invisible="(not pickup_from_warehouse and not delivery_to_warehouse and not internal_transfer) or delivery_order_id"/>
+                                        </header>
+                                        <sheet>
+                                            <group invisible="not main_carriage">
+                                                <group>
+                                                    <field name="main_carriage" widget="boolean_toggle" readonly="1"
+                                                           force_save="1"/>
+                                                    <field name="shipment_id" invisible="1"/>
+                                                </group>
+                                            </group>
+                                            <group>
+                                                <group string="Transport Type">
+                                                    <field name="transport" widget="radio"
+                                                           options="{'horizontal': true}"/>
+                                                    <field name="ocean_shipment_type" invisible="transport != 'ocean'"
+                                                           required="transport == 'ocean'" string="Ocean Shipment"/>
+                                                    <field name="inland_shipment_type" invisible="transport != 'land'"
+                                                           required="transport == 'land'" string="Inland Shipment"/>
+                                                </group>
+                                                <group invisible="main_carriage" string="Route Charges">
+                                                    <field name="type" readonly="delivery_order_id"/>
+                                                    <field name="pickup_from_warehouse" readonly="delivery_order_id"
+                                                           invisible="type != 'pickup'"/>
+                                                    <field name="delivery_to_warehouse" readonly="delivery_order_id"
+                                                           invisible="type != 'delivery'"/>
+                                                    <field name="internal_transfer" readonly="delivery_order_id"
+                                                           invisible="type != 'oncarriage'"/>
+
+                                                    <label for="partner_id" string="Receive From"
+                                                           invisible="not pickup_from_warehouse"/>
+                                                    <label for="partner_id" string="Delivery Address"
+                                                           invisible="not delivery_to_warehouse"/>
+                                                    <label for="partner_id" string="Contact"
+                                                           invisible="not internal_transfer"/>
+                                                    <field name="partner_id" options="{'no_create': True}" nolabel="1"
+                                                           required="pickup_from_warehouse or delivery_to_warehouse"
+                                                           readonly="delivery_order_id"
+                                                           invisible="not pickup_from_warehouse and not delivery_to_warehouse and not internal_transfer"/>
+
+                                                    <label for="source_warehouse_id" string="Warehouse"
+                                                           invisible="not pickup_from_warehouse and not delivery_to_warehouse"/>
+                                                    <label for="source_warehouse_id" string="Source Warehouse"
+                                                           invisible="not internal_transfer"/>
+                                                    <field name="source_warehouse_id" nolabel="1"
+                                                           options="{'no_create': True}"
+                                                           readonly="delivery_order_id"
+                                                           required="pickup_from_warehouse or delivery_to_warehouse or internal_transfer"
+                                                           invisible="not pickup_from_warehouse and not delivery_to_warehouse and not internal_transfer"/>
+
+                                                    <label for="destination_warehouse_id" string="Destination Warehouse"
+                                                           invisible="not internal_transfer"/>
+                                                    <field name="destination_warehouse_id" options="{'no_create': True}"
+                                                           invisible="not internal_transfer"
+                                                           readonly="delivery_order_id"
+                                                           required="internal_transfer" nolabel="1"/>
+
+                                                    <field name="delivery_order_id" invisible="not delivery_order_id"
+                                                           string="Order"
+                                                           readonly="1"/>
+                                                    <label for="charge_type" string="Charges"/>
+                                                    <div class="o_row">
+                                                        <field name="charge_type" required="1"/>
+                                                        <field name="total_charge" invisible="charge_type == 'f'"
+                                                               required="charge_type == 'p'"/>
+                                                    </div>
+                                                </group>
+                                            </group>
+                                            <group>
+                                                <group string="Address Type">
+                                                    <field name="address_to" widget="radio"
+                                                           options="{'horizontal': true}"/>
+                                                </group>
+                                                <group string="Estimate Time">
+                                                    <field name="pickup_datetime" string="Estimate Pickup"/>
+                                                    <field name="arrival_datetime" string="Estimate Arrival"/>
+                                                </group>
+                                            </group>
+                                            <group invisible="address_to != 'sc_address'">
+                                                <group string="Transporter">
+                                                    <field name="shipper_id" required="1" options="{'no_create':True}"/>
+                                                </group>
+                                                <group string="Customer">
+                                                    <field name="consignee_id" required="1"
+                                                           options="{'no_create':True}"/>
+                                                </group>
+                                            </group>
+                                            <group string="Location Details"
+                                                   invisible="address_to != 'location_address'">
+                                                <group>
+                                                    <label for="source_location_id" string="From"
+                                                           invisible="transport != 'land'"/>
+                                                    <div invisible="transport != 'land'">
+                                                        <field name="source_location_id" options="{'no_create': True}"
+                                                               required="address_to == 'location_address'"/>
+                                                    </div>
+                                                    <label for="source_location_id" string="Loading Port"
+                                                           invisible="transport != 'ocean'"/>
+                                                    <div invisible="transport != 'ocean'">
+                                                        <field name="source_location_id" options="{'no_create': True}"
+                                                               required="address_to == 'location_address'"/>
+                                                    </div>
+                                                    <label for="source_location_id" string="Gateway"
+                                                           invisible="transport != 'air'"/>
+                                                    <div invisible="transport != 'air'">
+                                                        <field name="source_location_id" options="{'no_create': True}"
+                                                               required="address_to == 'location_address'"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <label for="destination_location_id" string="To"
+                                                           invisible="transport != 'land'"/>
+                                                    <div invisible="transport != 'land'">
+                                                        <field name="destination_location_id"
+                                                               options="{'no_create': True}"
+                                                               required="address_to == 'location_address'"/>
+                                                    </div>
+                                                    <label for="destination_location_id" string="Discharge Port"
+                                                           invisible="transport != 'ocean'"/>
+                                                    <div invisible="transport != 'ocean'">
+                                                        <field name="destination_location_id"
+                                                               options="{'no_create': True}"
+                                                               required="address_to == 'location_address'"/>
+                                                    </div>
+                                                    <label for="destination_location_id" string="Destination"
+                                                           invisible="transport != 'air'"/>
+                                                    <div invisible="transport != 'air'">
+                                                        <field name="destination_location_id"
+                                                               options="{'no_create': True}"
+                                                               required="address_to == 'location_address'"/>
+                                                    </div>
+                                                </group>
+                                            </group>
+                                            <group string="Address">
+                                                <group>
+                                                    <label for="source_location_id" string="Source"/>
+                                                    <div class="o_address_format">
+                                                        <field name="s_street" placeholder="Address Line 1....."
+                                                               class="o_address_street"/>
+                                                        <field name="s_street2" placeholder="Address Line 2....."
+                                                               class="o_address_street"/>
+                                                        <field name="s_city" placeholder="City" class="o_address_city"
+                                                               required="1"/>
+                                                        <field name="s_state_id" class="o_address_state"
+                                                               placeholder="State" required="1"
+                                                               options="{'no_open': True, 'no_create': True}"/>
+                                                        <field name="s_zip" placeholder="ZIP" class="o_address_zip"/>
+                                                        <field name="s_country_id" placeholder="Country"
+                                                               class="o_address_country" required="1"
+                                                               options="{'no_open': True, 'no_create': True}"/>
+                                                    </div>
+                                                </group>
+                                                <group>
+                                                    <label for="destination_location_id" string="Destination"/>
+                                                    <div class="o_address_format">
+                                                        <field name="d_street" placeholder="Address Line 1....."
+                                                               class="o_address_street"/>
+                                                        <field name="d_street2" placeholder="Address Line 2....."
+                                                               class="o_address_street"/>
+                                                        <field name="d_city" placeholder="City" class="o_address_city"
+                                                               required="1"/>
+                                                        <field name="d_state_id" class="o_address_state"
+                                                               placeholder="State" required="1"
+                                                               options="{'no_open': True, 'no_create': True}"/>
+                                                        <field name="d_zip" placeholder="ZIP" class="o_address_zip"/>
+                                                        <field name="d_country_id" placeholder="Country"
+                                                               class="o_address_country" required="1"
+                                                               options="{'no_open': True, 'no_create': True}"/>
+                                                    </div>
+                                                </group>
+                                            </group>
+                                            <field name="company_id" invisible="1"/>
+                                            <field name="currency_id" invisible="1"/>
+                                            <group invisible="transport != 'air'">
+                                                <group string="Flight Details">
+                                                    <field name="airline_id" invisible="transport != 'air'"
+                                                           options="{'no_create': True}"/>
+                                                    <field name="mawb_no" invisible="transport != 'air'"/>
+                                                    <field name="flight_no" invisible="transport != 'air'"/>
+                                                </group>
+                                            </group>
+                                            <group invisible="transport != 'ocean'">
+                                                <group string="Vessel/Ship Details">
+                                                    <field name="vessel_id" invisible="transport != 'ocean'"
+                                                           options="{'no_create': True}"/>
+                                                    <field name="obl" invisible="transport != 'ocean'"/>
+                                                    <field name="voyage_no" invisible="transport != 'ocean'"/>
+                                                </group>
+                                            </group>
+                                            <group invisible="transport != 'land'">
+                                                <group string="Vehicle Details">
+                                                    <field name="truck_ref" invisible="transport != 'land'"/>
+                                                    <field name="trucker" invisible="transport != 'land'"
+                                                           options="{'no_create': True}"/>
+                                                    <field name="trucker_number" invisible="transport != 'land'"/>
+                                                </group>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                    <list>
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name" string="Carriage"/>
+                                        <field name="address_to"/>
+                                        <field name="transport"/>
+                                        <field name="charge_type"/>
+                                        <field name="total_charge"/>
+                                        <field name="line_added" column_invisible="1"/>
+                                        <button name="action_insert_line_service" type="object" string="Add to Service"
+                                                icon="fa-plus-square-o"
+                                                invisible="line_added or charge_type == 'f'"/>
+                                    </list>
+                                </field>
+                                <group class="oe_subtotal_footer oe_right" string="Total Route Charges"
+                                       style="text-align: right">
+                                    <field name="total_route_charge" class="oe_subtotal_footer_separator"/>
+                                </group>
+                            </page>
+
+                            <page string="Services">
+                                <div class="row mb-2" invisible="is_last_stage">
+                                    <div class="col-12">
+                                        <button name="action_create_vendor_bill" class="btn btn-outline-primary me-1"
+                                                type="object" string="Create Vendor Bill" invisible="not id"/>
+                                        <button name="action_create_invoice" class="btn btn-outline-primary"
+                                                type="object" string="Create Invoice" invisible="not id"/>
+                                    </div>
+                                </div>
+                                <field name="freight_services" nolabel="1"
+                                       context="{'shipper_id':shipper_id,'consignee_id':consignee_id}"
+                                       readonly="is_last_stage">
+                                    <list>
+                                        <field name="service_type" widget="badge"
+                                               decoration-warning="service_type=='shipper'"
+                                               decoration-success="service_type=='consignee'"
+                                               decoration-info="service_type=='vendor'"/>
+                                        <field name="service_id"/>
+                                        <field name="name"/>
+                                        <field name="qty"/>
+                                        <field name="sale"/>
+                                        <field name="currency_id" widget="badge"/>
+                                        <field name="status" widget="badge" decoration-success="status=='bill'"
+                                               decoration-info="status=='invoice'"
+                                               decoration-danger="status=='pending'"/>
+                                    </list>
+                                    <form>
+                                        <sheet>
+                                            <div class="oe_title">
+                                                <field name="service_type" options="{'horizontal':True}"
+                                                       widget="radio" readonly="invoiced or vendor_invoiced"
+                                                       force_save="1"/>
+                                                <field name="invoiced" invisible="1"/>
+                                                <field name="vendor_invoiced" invisible="1"/>
+                                                <h1>
+                                                    <field name="shipper_id" invisible="service_type != 'shipper'"
+                                                           required="service_type == 'shipper'" class="text-break"
+                                                           options="{'no_create': True,'line_breaks': False}"
+                                                           placeholder="Shipper"
+                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                    <field name="consignee_id" invisible="service_type != 'consignee'"
+                                                           required="service_type == 'consignee'" class="text-break"
+                                                           placeholder="Consignee"
+                                                           options="{'no_create': True,'line_breaks': False}"
+                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                    <field name="vendor_id" invisible="service_type != 'vendor'"
+                                                           required="service_type == 'vendor'" class="text-break"
+                                                           placeholder="Vendor"
+                                                           options="{'no_create': True,'line_breaks': False}"
+                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                </h1>
+                                            </div>
+                                            <group>
+                                                <group string="Service Details">
+                                                    <field name="service_id" required="1" options="{'no_create': True}"
+                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                    <field name="name" readonly="invoiced or vendor_invoiced"
+                                                           force_save="1"/>
+                                                </group>
+                                                <group string="Qty &amp; Charges">
+                                                    <field name="qty" readonly="invoiced or vendor_invoiced"
+                                                           force_save="1"/>
+                                                    <field name="sale" readonly="invoiced or vendor_invoiced"
+                                                           force_save="1"/>
+                                                    <field name="currency_id" invisible="0" required="1"
+                                                           placeholder="Currency"
+                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                </group>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Storage" name="storage">
+                                <field name="stock_picking_ids"/>
+                            </page>
+                            <page string="Customs Department">
+                                <field name="custom_ids" readonly="is_last_stage">
+                                    <list editable="bottom">
+                                        <field name="declaration" required="1" string="Declaration Number"/>
+                                        <field name="note"/>
+                                        <field name="date" required="1"/>
+                                        <field name="state" column_invisible="1"/>
+                                        <button name="action_pass" class="btn btn-outline-success" type="object"
+                                                string="Pass" invisible="state in ['pass']"/>
+                                        <button name="action_in_process" type="object" class="btn btn-outline-info"
+                                                string="Process" invisible="state in ['pass','in_process']"/>
+                                        <button name="action_cancel" type="object" class="btn btn-outline-danger"
+                                                string="Cancel" invisible="state in ['pass','cancel']"/>
+                                        <field name="file_name" column_invisible="1"/>
+                                        <field name="document" filename="file_name" widget="binary"/>
+                                        <field name="state" widget="badge" decoration-success="state=='pass'"
+                                               decoration-danger="state=='cancel'"
+                                               decoration-info="state=='in_process'"/>
+                                    </list>
+                                </field>
+                                <group>
+                                    <group>
+                                        <field name="pass_state" invisible="1" readonly="is_last_stage"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Insurance &amp; Policy" invisible="not is_freight_insurance">
+                                <div class="alert alert-info text-center" role="alert"
+                                     invisible="not policy_added">
+                                    Policy Added To Service Charge
+                                </div>
+                                <group>
+                                    <group string="Policy Details">
+                                        <field name="policy_no" required="is_freight_insurance"
+                                               readonly="is_last_stage" string="Policy No"/><!-- Added string -->
+                                        <field name="policy_name" required="is_freight_insurance"
+                                               readonly="is_last_stage" string="Policy Name"/><!-- Added string -->
+                                        <field name="policy_company_id" readonly="is_last_stage" string="Policy Company"/><!-- Added string -->
+                                        <field name="policy_holder_id" string="Policy Holder" readonly="is_last_stage"/>
+                                        <field name="company_id" invisible="1" readonly="is_last_stage"/>
+                                        <field name="currency_id" invisible="1" readonly="is_last_stage"/>
+                                    </group>
+                                    <group string="Issue Details">
+                                        <field name="date" required="is_freight_insurance" readonly="is_last_stage" string="Date"/><!-- Added string -->
+                                        <field name="issue_by" readonly="is_last_stage" string="Issue By"/><!-- Added string -->
+                                        <field name="total_charge" required="is_freight_insurance"
+                                               readonly="is_last_stage" string="Charges"/>
+                                        <span class="o_form_label o_td_label" name="address_name">
+                                            <b></b>
+                                        </span>
+                                        <div class="o_address_format">
+                                            <field name="policy_added" invisible="1"/>
+                                            <button name="add_policy" type="object"
+                                                    string="Add Policy to Service charge" invisible="policy_added"/>
+                                        </div>
+                                    </group>
+                                </group>
+                                <group string="Risk Covered">
+                                    <field name="risk_ids" readonly="is_last_stage">
+                                        <list create="0">
+                                            <field name="name"/>
+                                            <field name="desc"/>
+                                        </list>
+                                    </field>
+                                </group>
+                                <separator string="Policy Term &amp; Condition"/>
+                                <field name="term" nolabel="1" readonly="is_last_stage"/>
+                            </page>
+                            <page string="Shipment Tracking">
+                                <group>
+                                    <group>
+                                        <field name="tracking_template_id" options="{'no_create': True}"
+                                               readonly="is_last_stage" string="Tracking Template"/><!-- Added string -->
+                                    </group>
+                                </group>
+                                <field name="freight_log" nolabel="1" readonly="is_last_stage">
+                                    <list string="House" editable="bottom">
+                                        <field name="date" readonly="status == 'complete'"/>
+                                        <field name="time" widget="float_time" readonly="status == 'complete'"/>
+                                        <field name="location_id" options="{'no_create': True}"
+                                               readonly="status == 'complete'"/>
+                                        <field name="activity_id" options="{'no_create': True}"
+                                               readonly="status == 'complete'"/>
+                                        <field name="status" widget="badge" decoration-danger="status=='pending'"
+                                               decoration-success="status=='complete'"/>
+                                        <button name="action_complete" type="object" string="Complete"
+                                                invisible="status == 'complete'"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Accountancy">
+                                <div class="row" style="margin-bottom:10px;">
+                                    <div class="col-12" style="text-align:center;">
+                                        <strong>
+                                            <field name="accountancy_currency"/>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <th scope="col">#</th>
+                                            <th scope="col" class="table-active">Expected Amount</th>
+                                            <th scope="col" class="table-active">Received Amount</th>
+                                            <th scope="col" class="table-active">Due Amount</th>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <th scope="row" class="table-active">Customer Invoices(Receivables)</th>
+                                                <td>
+                                                    <field name="total_invoiced"/>
+                                                </td>
+                                                <td class="table-success">
+                                                    <field name="invoice_paid_amount"/>
+                                                </td>
+                                                <td class="table-danger">
+                                                    <field name="invoice_residual"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="table-active" scope="row">Vendor Bills(Payable)</th>
+                                                <td>
+                                                    <field name="total_bills"/>
+                                                </td>
+                                                <td class="table-success">
+                                                    <field name="bills_paid_amount"/>
+                                                </td>
+                                                <td class="table-danger">
+                                                    <field name="bills_residual"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <th scope="row" class="table-active">Margin</th>
+                                            <td>
+                                                <field name="margin"/>
+                                            </td>
+                                            <td>
+                                                <field name="actual_margin"/>
+                                            </td>
+                                            <td>
+                                                #
+                                            </td>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </page>
+                            <page string="Terms &amp; Conditions">
+                                <field name="term_condition" nolabel="1" placeholder="Terms &amp; Conditions....."
+                                       readonly="is_last_stage"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+        <!-- 列表、日历、搜索等视图的field未添加string，因其标签通常由列表定义或不需要额外翻译 -->
+        <record model="ir.ui.view" id="freight_shipment_tree_view">
+            <field name="name">freight.shipment.list.view</field>
+            <field name="model">freight.shipment</field>
+            <field name="arch" type="xml">
+                <list string="Operations">
+                    <field name="name"/>
+                    <field name="direction" widget="badge" decoration-success="direction=='export'"
+                           decoration-info="direction=='import'"/>
+                    <field name="shipper_id"/>
+                    <field name="consignee_id"/>
+                    <field name="operation"/>
+                    <field name="transport" widget="badge" decoration-success="transport=='land'"
+                           decoration-info="transport=='ocean'" decoration-primary="transport=='air'"/>
+                    <field name="address_to" widget="badge" decoration-success="address_to=='sc_address'"
+                           decoration-info="address_to=='location_address'"/>
+                    <field name="stage_id" widget="badge"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="freight_shipment_kanban_view" model="ir.ui.view">
+            <field name="name">freight.shipment.kanban.view</field>
+            <field name="model">freight.shipment</field>
+            <field name="priority">10</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="stage_id" class="o_kanban_small_column" highlight_color="color"
+                        quick_create="0" group_create="0" groups_draggable="0" records_draggable="0">
+                    <field name="name"/>
+                    <field name="direction"/>
+                    <field name="operation"/>
+                    <field name="color"/>
+                    <field name="create_datetime"/>
+                    <field name="transport"/>
+                    <field name="consignee_id"/>
+                    <field name="activity_ids"/>
+                    <field name="activity_state"/>
+                    <field name="pass_state"/>
+                    <field name="policy_added"/>
+                    <field name="address_to"/>
+                    <templates>
+                        <t t-name="menu">
+                            <t t-if="widget.editable">
+                                <a role="menuitem" type="open" class="dropdown-item">Edit</a>
+                            </t>
+                            <t t-if="widget.deletable">
+                                <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
+                            </t>
+                            <field name="color" widget="kanban_color_picker"/>
+                        </t>
+                        <t t-name="card">
+                            <strong>
+                                <h3 style="color:#714B67;">
+                                    <field name="name"/>
+                                </h3>
+                                <field name="direction"/>
+                            </strong>
+                            <div class="row mb4">
+                                <div class="col-6">
+                                    <strong>
+                                        <field name="operation"/>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="final_charges" widget="monetary"/>
+                                    </strong>
+                                </div>
+                                <div class="col-6 text-right">
+                                    <strong>
+                                        <i class="fa fa-clock-o" aria-label="Duration" role="img" title="Duration"/>
+                                        <field name="create_datetime"/>
+                                    </strong>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <strong>
+                                        <span>
+                                            <field name="move_type"/>
+                                        </span>
+                                    </strong>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <span>
+                                        <strong>
+                                            <t t-if="record.address_to.raw_value=='sc_address'">
+                                                <field name="s_city"/>
+                                            </t>
+                                            <t t-if="record.address_to.raw_value=='location_address'">
+                                                <field name="source_location_id"/>
+                                            </t>
+                                            <span class="svg-icon svg-icon-info svg-icon-muted svg-icon-2hx">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M14.4 11H3C2.4 11 2 11.4 2 12C2 12.6 2.4 13 3 13H14.4V11Z"
+                                                          fill="currentColor"/>
+                                                    <path opacity="0.3"
+                                                          d="M14.4 20V4L21.7 11.3C22.1 11.7 22.1 12.3 21.7 12.7L14.4 20Z"
+                                                          fill="currentColor"/>
+                                                </svg>
+                                            </span>
+                                            <t t-if="record.address_to.raw_value=='sc_address'">
+                                                <field name="d_city"/>
+                                            </t>
+                                            <t t-if="record.address_to.raw_value=='location_address'">
+                                                <field name="destination_location_id"/>
+                                            </t>
+                                        </strong>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <span>
+                                        <strong>
+                                            <field name="consignee_id"/>
+                                        </strong>
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="float-right">
+                                        <t t-if="record.policy_added.raw_value">
+                                            <span title="Policy Added" class="svg-icon svg-icon-muted svg-icon-2hx">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                     xmlns="http://www.w3.org/2000/svg">
+                                                    <path opacity="0.3" d="M10 4H21C21.6 4 22 4.4 22 5V7H10V4Z"
+                                                          fill="currentColor"/>
+                                                    <path opacity="0.3"
+                                                          d="M10.3 15.3L11 14.6L8.70002 12.3C8.30002 11.9 7.7 11.9 7.3 12.3C6.9 12.7 6.9 13.3 7.3 13.7L10.3 16.7C9.9 16.3 9.9 15.7 10.3 15.3Z"
+                                                          fill="currentColor"/>
+                                                    <path d="M10.4 3.60001L12 6H21C21.6 6 22 6.4 22 7V19C22 19.6 21.6 20 21 20H3C2.4 20 2 19.6 2 19V4C2 3.4 2.4 3 3 3H9.20001C9.70001 3 10.2 3.20001 10.4 3.60001ZM11.7 16.7L16.7 11.7C17.1 11.3 17.1 10.7 16.7 10.3C16.3 9.89999 15.7 9.89999 15.3 10.3L11 14.6L8.70001 12.3C8.30001 11.9 7.69999 11.9 7.29999 12.3C6.89999 12.7 6.89999 13.3 7.29999 13.7L10.3 16.7C10.5 16.9 10.8 17 11 17C11.2 17 11.5 16.9 11.7 16.7Z"
+                                                          fill="currentColor"/>
+                                                </svg>
+                                            </span>
+                                        </t>
+                                        <t t-if="record.pass_state.raw_value">
+                                            <span title="Shipment Proceed by Customs Department"
+                                                  class="svg-icon svg-icon-success svg-icon-muted svg-icon-2hx">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px"
+                                                     viewBox="0 0 24 24">
+                                                    <path d="M10.0813 3.7242C10.8849 2.16438 13.1151 2.16438 13.9187 3.7242V3.7242C14.4016 4.66147 15.4909 5.1127 16.4951 4.79139V4.79139C18.1663 4.25668 19.7433 5.83365 19.2086 7.50485V7.50485C18.8873 8.50905 19.3385 9.59842 20.2758 10.0813V10.0813C21.8356 10.8849 21.8356 13.1151 20.2758 13.9187V13.9187C19.3385 14.4016 18.8873 15.491 19.2086 16.4951V16.4951C19.7433 18.1663 18.1663 19.7433 16.4951 19.2086V19.2086C15.491 18.8873 14.4016 19.3385 13.9187 20.2758V20.2758C13.1151 21.8356 10.8849 21.8356 10.0813 20.2758V20.2758C9.59842 19.3385 8.50905 18.8873 7.50485 19.2086V19.2086C5.83365 19.7433 4.25668 18.1663 4.79139 16.4951V16.4951C5.1127 15.491 4.66147 14.4016 3.7242 13.9187V13.9187C2.16438 13.1151 2.16438 10.8849 3.7242 10.0813V10.0813C4.66147 9.59842 5.1127 8.50905 4.79139 7.50485V7.50485C4.25668 5.83365 5.83365 4.25668 7.50485 4.79139V4.79139C8.50905 5.1127 9.59842 4.66147 10.0813 3.7242V3.7242Z"
+                                                          fill="currentColor"/>
+                                                    <path d="M14.8563 9.1903C15.0606 8.94984 15.3771 8.9385 15.6175 9.14289C15.858 9.34728 15.8229 9.66433 15.6185 9.9048L11.863 14.6558C11.6554 14.9001 11.2876 14.9258 11.048 14.7128L8.47656 12.4271C8.24068 12.2174 8.21944 11.8563 8.42911 11.6204C8.63877 11.3845 8.99996 11.3633 9.23583 11.5729L11.3706 13.4705L14.8563 9.1903Z"
+                                                          fill="white"/>
+                                                </svg>
+                                            </span>
+                                        </t>
+                                        <field name="transport" widget="label_selection" class="d-inline mt-2 ms-2"
+                                               options="{'classes': {'air': 'info', 'land': 'success','ocean': 'warning'}}"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <record id="freight_shipment_calendar_view" model="ir.ui.view">
+            <field name="name">freight.shipment.calendar.view</field>
+            <field name="model">freight.shipment</field>
+            <field name="arch" type="xml">
+                <calendar date_start="create_datetime" mode="month" quick_create="False" hide_time="True"
+                          event_open_popup="True" color="direction">
+                    <field name="name"/>
+                    <field name="source_location_id"/>
+                    <field name="destination_location_id"/>
+                    <field name="shipper_id"/>
+                    <field name="consignee_id"/>
+                    <field name="direction" filters="1"/>
+                    <field name="transport" filters="1"/>
+                    <field name="operation" filters="1"/>
+                </calendar>
+            </field>
+        </record>
+
+        <record id="freight_shipment_search_view" model="ir.ui.view">
+            <field name="name">freight.shipment.search.view</field>
+            <field name="model">freight.shipment</field>
+            <field name="arch" type="xml">
+                <search string="Search Operations">
+                    <field name="shipper_id"/>
+                    <field name="consignee_id"/>
+                    <field name="agent_id"/>
+                    <field name="stage_id" domain="[]"/>
+                    <field name="operation"/>
+                    <field name="move_type"/>
+                    <filter string="Direct" domain="[('operation', '=', 'direct')]" name="direct"/>
+                    <filter string="House" domain="[('operation', '=', 'house')]" name="house"/>
+                    <filter string="Master" domain="[('operation', '=', 'master')]" name="master"/>
+                    <separator/>
+                    <group>
+                        <filter string="Shipper" name="shipper" domain="[]" context="{'group_by':'shipper_id'}"/>
+                        <filter string="Consignee" name="job" domain="[]" context="{'group_by':'consignee_id'}"/>
+                        <filter string="Agent" name="degree" domain="[]" context="{'group_by':'agent_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="freight_shipment_air_action">
+            <field name="name">Air Shipments</field>
+            <field name="res_model">freight.shipment</field>
+            <field name="view_mode">kanban,list,form,calendar,activity</field>
+            <field name="domain">[('transport','=','air')]</field>
+            <field name="context">{'default_transport':'air'}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new Air Shipment.
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="freight_shipment_ocean_action">
+            <field name="name">Ocean Shipments</field>
+            <field name="res_model">freight.shipment</field>
+            <field name="view_mode">kanban,list,calendar,form,activity</field>
+            <field name="domain">[('transport','=','ocean')]</field>
+            <field name="context">{'default_transport':'ocean'}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new Ocean Shipment.
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="freight_shipment_land_action">
+            <field name="name">Land Shipments</field>
+            <field name="res_model">freight.shipment</field>
+            <field name="view_mode">kanban,list,calendar,form,activity</field>
+            <field name="domain">[('transport','=','land')]</field>
+            <field name="context">{'default_transport':'land'}</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new Land Shipment.
+                </p>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="freight_shipment_all_action">
+            <field name="name">All Shipments</field>
+            <field name="res_model">freight.shipment</field>
+            <field name="view_mode">kanban,list,calendar,form,activity</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new Shipment.
+                </p>
+            </field>
+        </record>
+
+        <record id="ir_actions_server_freight_create_shipper_invoice" model="ir.actions.server">
+            <field name="name">Create Shipper Invoice</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_freight_shipment"/>
+            <field name="state">code</field>
+            <field name="code">
+                if records:
+                action = records.action_create_shipper_invoice()
+            </field>
+            <field name="binding_model_id" ref="tk_freight.model_freight_shipment"/>
+            <field name="binding_view_types">list</field>
+        </record>
+        <record id="ir_actions_server_freight_create_consignee_invoice" model="ir.actions.server">
+            <field name="name">Create Consignee Invoice</field>
+            <field name="type">ir.actions.server</field>
+            <field name="model_id" ref="model_freight_shipment"/>
+            <field name="state">code</field>
+            <field name="code">
+                if records:
+                action = records.action_create_consignee_invoice()
+            </field>
+            <field name="binding_model_id" ref="tk_freight.model_freight_shipment"/>
+            <field name="binding_view_types">list</field>
+        </record>
+    </data>
+</odoo>

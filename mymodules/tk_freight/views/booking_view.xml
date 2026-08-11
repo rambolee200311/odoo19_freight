@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="freight_booking_form_view">
+            <field name="name">freight.booking.form.view</field>
+            <field name="model">shipment.freight.booking</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <field name="id" invisible="1"/>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,converted"/>
+                        <button name="convert_to_operation" string="Convert To Shipment" type="object" default_focus="1"
+                                class="btn btn-outline-dark" invisible="not id or state in ['converted','cancel']"/>
+                        <button name="convert_to_cancel" string="Cancel" type="object" default_focus="1"
+                                class="btn btn-outline-dark" invisible="not id or state in ['converted','cancel']"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title mb4">
+                            <h1>
+                                <field class="text-break" name="name" default_focus="1" readonly="1"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group string="Direction">
+                                <field name="direction" widget="radio" required="1" options="{'horizontal': true}"
+                                       readonly="state == 'converted'" string="Direction"/><!-- Added string -->
+                                <field name="operation" string="Type" required="1" readonly="state == 'converted'"/>
+                            </group>
+                            <group string="Other">
+                                <field name="create_datetime" readonly="state == 'converted'" string="Create Date"/><!-- Added string -->
+                                <field name="quot_id" readonly="1" force_save="1" invisible="not quot_id"
+                                       options="{'no_create':True}" string="Quotation"/><!-- Added string -->
+                                <field name="freight_id" readonly="1" invisible="state == 'draft'"
+                                       options="{'no_create':True}" string="Freight Shipment"/><!-- Added string -->
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Transport">
+                                <field name="transport" string="Transport Via" widget="radio"
+                                       readonly="state == 'converted'"
+                                       options="{'horizontal': true}" required="1"/>
+                                <field name="ocean_shipment_type" widget="radio" invisible="transport != 'ocean'"
+                                       readonly="state == 'converted'"
+                                       options="{'horizontal': true}" string="Ocean Shipment Type"/><!-- Added string -->
+                                <field name="inland_shipment_type" widget="radio" invisible="transport != 'land'"
+                                       readonly="state == 'converted'"
+                                       options="{'horizontal': true}" string="Land Shipment Type"/><!-- Added string -->
+                            </group>
+                            <group string="Address Type">
+                                <field name="address_to" widget="radio" options="{'horizontal': true}"
+                                       readonly="state == 'converted'" string="Address To"/><!-- Added string -->
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Transporter">
+                                <field name="shipper_id" options="{'no_create':True}" readonly="state == 'converted'" string="Shipper"/><!-- Added string -->
+                                <field name="shipper_phone" widget="phone" readonly="state == 'converted'"
+                                       string="Phone"/>
+                                <field name="shipper_email" widget="email" readonly="state == 'converted'"
+                                       string="Email"/>
+                            </group>
+                            <group string="Customer">
+                                <field name="consignee_id" options="{'no_create':True}"
+                                       readonly="state == 'converted'" string="Consignee"/><!-- Added string -->
+                                <field name="consignee_phone" widget="phone" readonly="state == 'converted'"
+                                       string="Phone"/>
+                                <field name="consignee_email" widget="email" readonly="state == 'converted'"
+                                       string="Email"/>
+                            </group>
+                        </group>
+                        <group string="Location Details" invisible="address_to != 'location_address'">
+                            <group>
+                                <label for="source_location_id" string="From" invisible="transport != 'land'"
+                                       options="{'no_create':True}"/>
+                                <div invisible="transport != 'land'">
+                                    <field name="source_location_id" options="{'no_create':True}"
+                                           readonly="state == 'converted'" required="address_to == 'location_address'" string="Source Location"/><!-- Added string -->
+                                </div>
+                                <label for="source_location_id" string="Loading Port" invisible="transport != 'ocean'"/>
+                                <div invisible="transport != 'ocean'">
+                                    <field name="source_location_id" options="{'no_create':True}"
+                                           readonly="state == 'converted'" required="address_to == 'location_address'" string="Source Location"/><!-- Added string -->
+                                </div>
+                                <label for="source_location_id" string="Gateway" invisible="transport != 'air'"/>
+                                <div invisible="transport != 'air'">
+                                    <field name="source_location_id" options="{'no_create':True}"
+                                           readonly="state == 'converted'" required="address_to == 'location_address'" string="Source Location"/><!-- Added string -->
+                                </div>
+                            </group>
+                            <group>
+                                <label for="destination_location_id" string="To" invisible="transport != 'land'"/>
+                                <div invisible="transport != 'land'">
+                                    <field name="destination_location_id" options="{'no_create':True}"
+                                           readonly="state == 'converted'" required="address_to == 'location_address'" string="Destination Location"/><!-- Added string -->
+                                </div>
+                                <label for="destination_location_id" string="Discharge Port"
+                                       invisible="transport != 'ocean'"/>
+                                <div invisible="transport != 'ocean'">
+                                    <field name="destination_location_id" options="{'no_create':True}"
+                                           readonly="state == 'converted'" required="address_to == 'location_address'" string="Destination Location"/><!-- Added string -->
+                                </div>
+                                <label for="destination_location_id" string="Destination"
+                                       invisible="transport != 'air'"/>
+                                <div invisible="transport != 'air'">
+                                    <field name="destination_location_id" options="{'no_create':True}"
+                                           readonly="state == 'converted'" required="address_to == 'location_address'" string="Destination Location"/><!-- Added string -->
+                                </div>
+                            </group>
+                        </group>
+                        <group string="Address">
+                            <group>
+                                <label for="s_street" string="Source"/>
+                                <div class="o_address_format">
+                                    <field name="s_street" placeholder="Address Line 1....." class="o_address_street"
+                                           required="0" readonly="state == 'converted'" string="Street"/><!-- Added string -->
+                                    <field name="s_street2" placeholder="Address Line 2....." class="o_address_street"
+                                           readonly="state == 'converted'" string="Street 2"/><!-- Added string -->
+                                    <field name="s_city" placeholder="City" class="o_address_city" required="0"
+                                           readonly="state == 'converted'" string="City"/><!-- Added string -->
+                                    <field name="s_state_id" class="o_address_state" placeholder="State" required="0"
+                                           options="{'no_open': True, 'no_create': True}"
+                                           readonly="state == 'converted'" string="State"/><!-- Added string -->
+                                    <field name="s_zip" placeholder="ZIP" class="o_address_zip"
+                                           readonly="state == 'converted'" string="ZIP"/><!-- Added string -->
+                                    <field name="s_country_id" placeholder="Country" class="o_address_country"
+                                           required="0" options="{'no_open': True, 'no_create': True}"
+                                           readonly="state == 'converted'" string="Country"/><!-- Added string -->
+                                </div>
+                            </group>
+                            <group>
+                                <label for="d_street" string="Destination"/>
+                                <div class="o_address_format">
+                                    <field name="d_street" placeholder="Address Line 1....." class="o_address_street"
+                                           required="0" readonly="state == 'converted'" string="Street"/><!-- Added string -->
+                                    <field name="d_street2" placeholder="Address Line 2....." class="o_address_street"
+                                           readonly="state == 'converted'" string="Street 2"/><!-- Added string -->
+                                    <field name="d_city" placeholder="City" class="o_address_city" required="0"
+                                           readonly="state == 'converted'" string="City"/><!-- Added string -->
+                                    <field name="d_state_id" class="o_address_state" placeholder="State" required="0"
+                                           options="{'no_open': True, 'no_create': True}"
+                                           readonly="state == 'converted'" string="State"/><!-- Added string -->
+                                    <field name="d_zip" placeholder="ZIP" class="o_address_zip"
+                                           readonly="state == 'converted'" string="ZIP"/><!-- Added string -->
+                                    <field name="d_country_id" placeholder="Country" class="o_address_country"
+                                           required="0" options="{'no_open': True, 'no_create': True}"
+                                           readonly="state == 'converted'" string="Country"/><!-- Added string -->
+                                </div>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Notify Party">
+                                <field name="first_notify_id" options="{'no_create':True}"
+                                       readonly="state == 'converted'" string="First Notify Party"/><!-- Added string -->
+                                <field name="second_notify_id" options="{'no_create':True}"
+                                       readonly="state == 'converted'" string="Second Notify Party"/><!-- Added string -->
+                            </group>
+                            <group string="Estimate Time">
+                                <field name="pickup_datetime" readonly="state == 'converted'" string="Estimate Pickup"/>
+                                <field name="arrival_datetime" readonly="state == 'converted'"
+                                       string="Estimate Arrival"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Final Destination">
+                                <field name="final_destination_id" options="{'no_create':True}"
+                                       readonly="state == 'converted'" string="Final Destination"/><!-- Added string -->
+                            </group>
+                            <group string="Responsible">
+                                <field name="operator_id" string="Responsible" options="{'no_create': True}"
+                                       widget="many2one_avatar_user" readonly="state == 'converted'"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Vessel/Ship" invisible="transport != 'ocean'">
+                                <group>
+                                    <group>
+                                        <field name="vessel_id" invisible="transport != 'ocean'"
+                                               options="{'no_create':True}" readonly="state == 'converted'" string="Vessel"/><!-- Added string -->
+                                        <field name="ship_owner_id" invisible="transport != 'ocean'"
+                                               options="{'no_create':True}" readonly="1" force_save="1" string="Ship Owner"/><!-- Added string -->
+                                    </group>
+                                    <group>
+                                        <field name="obl" invisible="transport != 'ocean'"
+                                               readonly="state == 'converted'" string="OBL No."/><!-- Added string -->
+                                        <field name="voyage_no" invisible="transport != 'ocean'"
+                                               readonly="state == 'converted'" string="Voyage No."/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Flight/Airline" invisible="transport != 'air'">
+                                <group>
+                                    <group>
+                                        <field name="airline_id" invisible="transport != 'air'"
+                                               options="{'no_create':True}" readonly="state == 'converted'" string="Airline"/><!-- Added string -->
+                                        <field name="airline_owner_id" invisible="transport != 'air'"
+                                               options="{'no_create':True}" readonly="1" force_save="1" string="Airline Owner"/><!-- Added string -->
+                                    </group>
+                                    <group>
+                                        <field name="mawb_no" invisible="transport != 'air'"
+                                               readonly="state == 'converted'" string="MAWB No."/><!-- Added string -->
+                                        <field name="flight_no" invisible="transport != 'air'"
+                                               readonly="state == 'converted'" string="Flight No."/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Vehicle/Truck" invisible="transport != 'land'">
+                                <group>
+                                    <group>
+                                        <field name="truck_ref" invisible="transport != 'land'"
+                                               readonly="state == 'converted'" string="Truck Ref"/><!-- Added string -->
+                                        <field name="truck_owner_id" invisible="transport != 'land'" readonly="1"
+                                               force_save="1" string="Truck Owner"/><!-- Added string -->
+                                    </group>
+                                    <group>
+                                        <field name="trucker" invisible="transport != 'land'"
+                                               options="{'no_create': True}" readonly="state == 'converted'" string="Trucker"/><!-- Added string -->
+                                        <field name="trucker_number" invisible="transport != 'land'"
+                                               readonly="state == 'converted'" string="Trucker Number"/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="General Information">
+                                <group>
+                                    <group string="Tracking Details">
+                                        <field name="tracking_number" readonly="1" force_save="1" string="Tracking Number"/><!-- Added string -->
+                                        <field name="barcode" readonly="state == 'converted'" string="Barcode"/><!-- Added string -->
+                                    </group>
+                                    <group string="Agent Details">
+                                        <field name="agent_id" options="{'no_create': True}"
+                                               readonly="state == 'converted'" string="Agent"/><!-- Added string -->
+                                    </group>
+                                </group>
+                                <group string="Logistics and Compliance">
+                                    <group>
+                                        <field name="move_type" options="{'no_create': True}"
+                                               readonly="state == 'converted'" string="Move Type"/><!-- Added string -->
+                                        <field name="incoterm" options="{'no_create': True}"
+                                               readonly="state == 'converted'" string="Incoterm"/><!-- Added string -->
+                                    </group>
+                                    <group>
+                                        <field name="dangerous_goods" readonly="state == 'converted'" string="Dangerous Goods"/><!-- Added string -->
+                                        <field name="dangerous_goods_notes" invisible="not dangerous_goods"
+                                               readonly="state == 'converted'" string="Dangerous Goods Notes"/><!-- Added string -->
+                                        <field name="notes" readonly="state == 'converted'" string="Notes"/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Booking Lines">
+                                <field name="booking_lines_ids" readonly="state == 'converted'">
+                                    <list>
+                                        <field name="service_id" required="1" string="Service"/><!-- Added string -->
+                                        <field name="name" required="1" string="Description"/><!-- Added string -->
+                                        <field name="qty" required="1" string="Qty"/><!-- Added string -->
+                                        <field name="sale" required="1" string="Unit Price"/><!-- Added string -->
+                                        <field name="currency_id" required="1" string="Currency"/><!-- Added string -->
+                                        <field name="tax_ids" widget="many2many_tags" string="Taxes"/><!-- Added string -->
+                                        <field name="package_type" optional="hide" string="Package Type"/><!-- Added string -->
+                                        <field name="package" optional="hide" string="Package"/><!-- Added string -->
+                                        <field name="height" optional="hide" string="Height"/><!-- Added string -->
+                                        <field name="length" optional="hide" string="Length"/><!-- Added string -->
+                                        <field name="width" optional="hide" string="Width"/><!-- Added string -->
+                                        <field name="gross_weight" optional="hide" sum="gross_weight" string="Gross Weight"/><!-- Added string -->
+                                        <field name="net_weight" optional="hide" string="Net Weight"/><!-- Added string -->
+                                        <field name="volume" optional="hide" sum="volume" string="Volume"/><!-- Added string -->
+                                        <field name="total_cbm" optional="hide" string="Total CBM"/><!-- Added string -->
+                                        <field name="weight_ratio" optional="hide" string="Weight Ratio"/><!-- Added string -->
+                                        <field name="chargeable_weight" optional="hide" sum="chargeable_weight" string="Chargeable Weight"/><!-- Added string -->
+                                        <field name="total_amount" string="Total Amount"/><!-- Added string -->
+                                    </list>
+                                    <form>
+                                        <group string="Service Details">
+                                            <group>
+                                                <field name="service_id" required="1" string="Service"/><!-- Added string -->
+                                                <field name="name" required="1" string="Description"/><!-- Added string -->
+                                                <field name="qty" required="1" string="Qty"/><!-- Added string -->
+                                                <field name="tax_ids" widget="many2many_tags" string="Taxes"/><!-- Added string -->
+                                            </group>
+                                            <group string="Chrages">
+                                                <field name="currency_id" required="1" string="Currency"/><!-- Added string -->
+                                                <field name="sale" required="1" string="Unit Price"/><!-- Added string -->
+                                                <field name="total_amount" string="Total Amount"/><!-- Added string -->
+                                            </group>
+                                        </group>
+                                        <group string="Cargo Details">
+                                            <group>
+                                                <field name="package_type" string="Package Type"/><!-- Added string -->
+                                                <field name="freight_package_ids" invisible="1" string="Freight Packages"/><!-- Added string -->
+                                            </group>
+                                            <group invisible="not package_type">
+                                                <field name="package" string="Package"/><!-- Added string -->
+                                            </group>
+                                        </group>
+                                        <group invisible="not package">
+                                            <group string="Cargo Dimension">
+                                                <field name="length" string="Length"/><!-- Added string -->
+                                                <field name="width" string="Width"/><!-- Added string -->
+                                                <field name="height" string="Height"/><!-- Added string -->
+                                            </group>
+                                            <group string="Weight &amp; Volume">
+                                                <field name="gross_weight" string="Gross Weight"/><!-- Added string -->
+                                                <field name="net_weight" string="Net Weight"/><!-- Added string -->
+                                                <field name="volume" string="Volume"/><!-- Added string -->
+                                                <field name="total_cbm" string="Total CBM"/><!-- Added string -->
+                                            </group>
+                                        </group>
+                                        <group string="Chargeable Weight" invisible="not package">
+                                            <group>
+                                                <field name="weight_ratio" string="Weight Ratio"/><!-- Added string -->
+                                            </group>
+                                            <group>
+                                                <field name="chargeable_weight" string="Chargeable Weight"/><!-- Added string -->
+                                            </group>
+                                        </group>
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Booking Form Report" name="cargo_details">
+                                <span class="text-muted fst-italic oe_inline" colspan="2">
+                                    <strong>Note:</strong>
+                                    These fields are only for generating the Booking Form.
+                                </span>
+                                <hr/>
+                                <group>
+                                    <group>
+                                        <field name="cargo_desc" readonly="state == 'converted'" string="Cargo Desc"/><!-- Added string -->
+                                        <field name="commodity" readonly="state == 'converted'" string="Commodity"/><!-- Added string -->
+                                        <field name="freight_collect_prepaid" readonly="state == 'converted'" string="Freight Collect/Prepaid"/><!-- Added string -->
+                                        <field name="no_of_containers" readonly="state == 'converted'" string="No of Containers"/><!-- Added string -->
+                                        <field name="container_size" string="Container Size"
+                                               options="{'no_create': True}" readonly="state == 'converted'"/>
+                                        <field name="container_type" invisible="0" readonly="state == 'converted'" string="Container Type"/><!-- Added string -->
+                                    </group>
+                                    <group>
+                                        <field name="mask_numbers" readonly="state == 'converted'" string="Mask Numbers"/><!-- Added string -->
+                                        <field name="hs_code" readonly="state == 'converted'" string="HS Code"/><!-- Added string -->
+                                        <field name="bl_document_type" readonly="state == 'converted'" string="BL Document Type"/><!-- Added string -->
+                                        <field name="total_weight" readonly="state == 'converted'" string="Total Weight"/><!-- Added string -->
+                                        <field name="gross_weight" readonly="state == 'converted'" string="Gross Weight"/><!-- Added string -->
+                                        <field name="other_container_type" invisible="container_type != 'other'"
+                                               required="container_type == 'other'" readonly="state == 'converted'" string="Other Container Type"/><!-- Added string -->
+                                        <field name="temperature" readonly="state == 'converted'" string="Temperature"/><!-- Added string -->
+                                        <field name="humidity" readonly="state == 'converted'" string="Humidity"/><!-- Added string -->
+                                        <field name="ventilation" readonly="state == 'converted'" string="Ventilation"/><!-- Added string -->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Cancellation Reason" invisible="state != 'cancel'">
+                                <group>
+                                    <group>
+                                        <field name="cancellation_reason_head" required="state == 'cancel'"
+                                               readonly="state == 'converted'" string="Cancellation Reason Head"/><!-- Added string -->
+                                    </group>
+                                </group>
+                                <group string="Description">
+                                    <field name="cancellation_reason" nolabel="1" required="state == 'cancel'"
+                                           readonly="state == 'converted'"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+        <!-- 列表、日历、搜索视图的field未添加string，因其标题通常由列表定义或不需要额外翻译 -->
+        <record model="ir.ui.view" id="freight_booking_tree_view">
+            <field name="name">freight.booking.list.view</field>
+            <field name="model">shipment.freight.booking</field>
+            <field name="arch" type="xml">
+                <list string="Operations">
+                    <field name="name"/>
+                    <field name="direction"/>
+                    <field name="shipper_id"/>
+                    <field name="consignee_id"/>
+                    <field name="source_location_id"/>
+                    <field name="destination_location_id"/>
+                    <field name="agent_id"/>
+                    <field name="transport"/>
+                    <field name="state"/>
+                </list>
+            </field>
+        </record>
+        <record id="freight_booking_calendar_view" model="ir.ui.view">
+            <field name="name">freight.booking.calendar.view</field>
+            <field name="model">shipment.freight.booking</field>
+            <field name="arch" type="xml">
+                <calendar date_start="create_datetime" mode="month" quick_create="False" hide_time="True"
+                          event_open_popup="True" color="direction">
+                    <field name="name"/>
+                    <field name="source_location_id"/>
+                    <field name="destination_location_id"/>
+                    <field name="shipper_id"/>
+                    <field name="consignee_id"/>
+                    <field name="direction" filters="1"/>
+                    <field name="transport" filters="1"/>
+                    <field name="operation" filters="1"/>
+                </calendar>
+            </field>
+        </record>
+        <record id="freight_booking_search_view" model="ir.ui.view">
+            <field name="name">freight.booking.search.view</field>
+            <field name="model">shipment.freight.booking</field>
+            <field name="arch" type="xml">
+                <search string="Search Bookings">
+                    <field name="shipper_id"/>
+                    <field name="consignee_id"/>
+                    <field name="agent_id"/>
+                    <field name="operation"/>
+                    <filter string="Direct" domain="[('operation', '=', 'direct')]" name="direct"/>
+                    <filter string="House" domain="[('operation', '=', 'house')]" name="house"/>
+                    <filter string="Master" domain="[('operation', '=', 'master')]" name="master"/>
+                    <separator/>
+                    <group>
+                        <filter string="Shipper" name="shipper" domain="[]" context="{'group_by':'shipper_id'}"/>
+                        <filter string="Consignee" name="job" domain="[]" context="{'group_by':'consignee_id'}"/>
+                        <filter string="Agent" name="degree" domain="[]" context="{'group_by':'agent_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="freight_booking_action">
+            <field name="name">Bookings</field>
+            <field name="res_model">shipment.freight.booking</field>
+            <field name="view_mode">list,form,calendar,activity</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Click to create a new bookings.
+                </p>
+            </field>
+        </record>
+    </data>
+</odoo>

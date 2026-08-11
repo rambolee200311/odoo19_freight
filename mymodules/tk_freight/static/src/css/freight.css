@@ -1,0 +1,166 @@
+   .grp-label{
+    font-family: Georgia, "Times New Roman", Times, serif;
+    font-size: 18px;
+    color: #333;
+    text-align: right;
+    margin-right:15px;
+    float:left;
+    }
+    .input-class{
+    border:1px solid #CED4DA;
+    height:calc(1.5em + 0.75rem + 2px);
+    }
+    .cont {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 17px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    }
+    .cont input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    }
+    .checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 17px;
+    width: 17px;
+    background-color: #eee;
+    border-radius: 50%;
+    margin-top:3px;
+    }
+
+    /* On mouse-over, add a grey background color */
+    .cont:hover input ~ .checkmark {
+    background-color: #ccc;
+    }
+
+    /* When the radio button is checked, add a blue background */
+    .cont input:checked ~ .checkmark {
+    background-color: #2196F3;
+    }
+
+  .my-button {
+    border-radius: 24px;
+    background-color: #7C7BAD;
+    border: none;
+    color: #FFFFFF;
+    text-align: center;
+    font-size: 14px;
+    padding: 11px;
+    transition: all 0.5s;
+    cursor: pointer;
+    margin: 5px;
+    width:170px;
+    }
+
+    .my-button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.2s;
+    }
+
+    .my-button span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.2s;
+    }
+
+    .my-button:hover span {
+    padding-right: 25px;
+    color:#FFFFFF;
+    }
+
+    .my-button:hover span:after {
+    opacity: 1;
+    right: 0;
+    }
+
+.timeline-steps {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap
+}
+
+.timeline-steps .timeline-step {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    margin: 1rem
+}
+
+@media (min-width:768px) {
+    .timeline-steps .timeline-step:not(:last-child):after {
+        content: "";
+        display: block;
+        border-top: .25rem dotted #3b82f6;
+        width: 3.46rem;
+        position: absolute;
+        left: 7.5rem;
+        top: .3125rem
+    }
+    .timeline-steps .timeline-step:not(:first-child):before {
+        content: "";
+        display: block;
+        border-top: .25rem dotted #3b82f6;
+        width: 3.8125rem;
+        position: absolute;
+        right: 7.5rem;
+        top: .3125rem
+    }
+}
+
+.timeline-steps .timeline-content {
+    width: 10rem;
+    text-align: center
+}
+
+.timeline-steps .timeline-content .inner-circle {
+    border-radius: 1.5rem;
+    height: 1rem;
+    width: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3b82f6
+}
+
+.timeline-steps .timeline-content .inner-circle:before {
+    content: "";
+    background-color: #3b82f6;
+    display: inline-block;
+    height: 3rem;
+    width: 3rem;
+    min-width: 3rem;
+    border-radius: 6.25rem;
+    opacity: .5
+}
+
+.c-label {
+    font-size: 0.85rem !important;
+    display: block;
+    margin-bottom: -4px;
+}
+
+.c-value{
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    margin-bottom: 30px;
+}
+
+.c-field{
+    margin-bottom: 10px;
+}

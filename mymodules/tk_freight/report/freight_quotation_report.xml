@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="shipment_quotation">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.external_layout">
+                        <h4 style="background-color: #e7e8e9; padding: 10px; border-left: 7px solid #7c7272;">
+                            Quotation
+                            <br/>
+                            <span t-field="o.name" style="font-size:16px;"/>
+                        </h4>
+                        <div class="row">
+                            <div class="col-6">
+                                <ul>
+                                    <li>
+                                        Transport Via :
+                                        <strong>
+                                            <span t-field="o.transport"/>
+                                        </strong>
+                                    </li>
+                                    <t t-if="o.transport in ['land','ocean']">
+                                        <t t-if="o.transport == 'ocean'">
+                                            <li>
+                                                Ocean Shipment :
+                                                <strong>
+                                                    <span t-field="o.ocean_shipment_type"/>
+                                                </strong>
+                                            </li>
+                                        </t>
+                                        <t t-if="o.transport == 'land'">
+                                            <li>
+                                                Land Shipment :
+                                                <strong>
+                                                    <span t-field="o.inland_shipment_type"/>
+                                                </strong>
+                                            </li>
+                                        </t>
+                                    </t>
+                                    <li>
+                                        Address :
+                                        <strong>
+                                            <span t-field="o.address_to"/>
+                                        </strong>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-6">
+                                <ul>
+                                    <li>
+                                        Date :
+                                        <strong>
+                                            <span t-field="o.date"/>
+                                        </strong>
+                                    </li>
+                                    <li>
+                                        Operation :
+                                        <strong>
+                                            <span t-field="o.operation"/>
+                                        </strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <hr/>
+                        <div class="row">
+                            <div class="col-6">
+                                <ul style="margin-bottom:1rem; margin-top:1rem;">
+                                    <li>
+                                        Shipper :
+                                        <strong>
+                                            <span t-field="o.shipper_id"/>
+                                        </strong>
+                                    </li>
+                                    <t t-if="o.address_to == 'location_address'">
+                                        <li>
+                                            From :
+                                            <strong>
+                                                <span t-field="o.source_location_id"/>
+                                            </strong>
+                                        </li>
+                                    </t>
+
+                                </ul>
+                            </div>
+                            <div class="col-6">
+                                <ul>
+                                    <li>
+                                        Consignee :
+                                        <strong>
+                                            <span t-field="o.consignee_id"/>
+                                        </strong>
+                                    </li>
+                                    <t t-if="o.address_to == 'location_address'">
+                                        <li>
+                                            To :
+                                            <strong>
+                                                <span t-field="o.destination_location_id"/>
+                                            </strong>
+                                        </li>
+                                    </t>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <ul>
+                                    <li>
+                                        From Address :
+                                        <br/>
+                                        <strong>
+                                            <span>
+                                                <span t-field="o.s_street"/>
+                                                <br/>
+                                                <t t-if="o.s_street2">
+                                                    <span t-field="o.s_street2"/>
+                                                    <br/>
+                                                </t>
+                                                <span t-field="o.s_city"/>
+                                                <span t-field="o.s_zip"/>
+                                                <br/>
+                                                <span t-field="o.s_state_id"/>
+                                                <span t-field="o.s_country_id"/>
+                                            </span>
+                                        </strong>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-6">
+                                <ul>
+                                    <li>
+                                        To Address :
+                                        <br/>
+                                        <strong>
+                                            <span>
+                                                <span t-field="o.d_street"/>
+                                                <br/>
+                                                <t t-if="o.d_street2">
+                                                    <span t-field="o.d_street2"/>
+                                                    <br/>
+                                                </t>
+                                                <span t-field="o.d_city"/>
+                                                <span t-field="o.d_zip"/>
+                                                <br/>
+                                                <span t-field="o.d_state_id"/>
+                                                <span t-field="o.d_country_id"/>
+                                            </span>
+                                        </strong>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <h5 style="background-color: #e7e8e9; padding: 10px; border-left: 7px solid #7c7272;margin-top: 1rem;">
+                            Quotation Lines
+                        </h5>
+                        <t t-if="o.order_line_ids">
+                            <t t-foreach="o.order_line_ids" t-as="l">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <h6 style="margin-left:15px;">
+                                            <strong>
+                                                Service Details
+                                            </strong>
+                                        </h6>
+                                        <ul>
+                                            <li>
+                                                Service :
+                                                <strong>
+                                                    <span t-field="l.name"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Package Type :
+                                                <strong>
+                                                    <span t-field="l.package_type"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Size / Package :
+                                                <strong>
+                                                    <span t-field="l.package"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Cargo Qty :
+                                                <strong>
+                                                    <span t-field="l.qty"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Currency :
+                                                <strong>
+                                                    <span t-field="l.currency_id.name"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Price :
+                                                <strong>
+                                                    <span t-field="l.sale"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Taxes :
+                                                <strong>
+                                                    <span t-out="', '.join(map(lambda x: (x.description or x.name), l.tax_ids))"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Total Amount :
+                                                <strong>
+                                                    <span t-field="l.total_amount"/>
+                                                </strong>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 style="margin-left:15px;">
+                                            <strong>
+                                                Cargo Details
+                                            </strong>
+                                        </h6>
+                                        <ul>
+                                            <li>
+                                                Length(cm) :
+                                                <strong>
+                                                    <span t-field="l.length"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Width(cm) :
+                                                <strong>
+                                                    <span t-field="l.width"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Height(cm) :
+                                                <strong>
+                                                    <span t-field="l.height"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Volume(CBM) :
+                                                <strong>
+                                                    <span t-field="l.volume"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Gross Weight(KG) :
+                                                <strong>
+                                                    <span t-field="l.gross_weight"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Net Weight(KG) :
+                                                <strong>
+                                                    <span t-field="l.net_weight"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Total CBM(CBM) :
+                                                <strong>
+                                                    <span t-field="l.total_cbm"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Volumetric Weight :
+                                                <strong>
+                                                    <span t-field="l.chargeable_weight"/>
+                                                </strong>
+                                            </li>
+                                            <li>
+                                                Chargeable Weight :
+                                                <strong>
+                                                    <span t-field="l.final_weight"/>
+                                                </strong>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <hr/>
+                            </t>
+                            <div class="row">
+                                <div class="col-12 text-end">
+                                    Total
+                                    <br/>
+                                    <span t-field="o.total_text"/>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+            </t>
+        </template>
+        <record id="freight_quot_report_id" model="ir.actions.report">
+            <field name="name">Freight Quotation</field>
+            <field name="model">shipment.quotation</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">tk_freight.shipment_quotation</field>
+            <field name="report_file">tk_freight.shipment_quotation</field>
+            <field name="binding_model_id" ref="tk_freight.model_shipment_quotation"/>
+            <field name="binding_type">report</field>
+            <field name="print_report_name">'%s' %(object.name)</field>
+        </record>
+    </data>
+</odoo>

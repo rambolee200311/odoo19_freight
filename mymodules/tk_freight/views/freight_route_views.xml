@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="freight_route_view_form" model="ir.ui.view">
+        <field name="name">freight.route.view.form</field>
+        <field name="model">freight.route</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_create_delivery_order" type="object"
+                            class="oe_highlight" string="Create Delivery Order"
+                            invisible="(not pickup_from_warehouse and not delivery_to_warehouse and not internal_transfer) or delivery_order_id"/>
+                </header>
+                <sheet>
+                    <group invisible="not main_carriage">
+                        <group>
+                            <field name="main_carriage" widget="boolean_toggle" readonly="1"
+                                   force_save="1" string="Main Carriage"/>
+                            <field name="shipment_id" invisible="1" string="Shipment"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Transport Type">
+                            <field name="transport" widget="radio"
+                                   options="{'horizontal': true}" string="Transport"/>
+                            <field name="ocean_shipment_type" invisible="transport != 'ocean'"
+                                   required="transport == 'ocean'" string="Ocean Shipment"/>
+                            <field name="inland_shipment_type" invisible="transport != 'land'"
+                                   required="transport == 'land'" string="Inland Shipment"/>
+                        </group>
+                        <group invisible="main_carriage" string="Route Charges">
+                            <field name="type" readonly="delivery_order_id" string="Type"/>
+                            <field name="pickup_from_warehouse" readonly="delivery_order_id"
+                                   invisible="type != 'pickup'" string="Pickup From Warehouse"/>
+                            <field name="delivery_to_warehouse" readonly="delivery_order_id"
+                                   invisible="type != 'delivery'" string="Delivery To Warehouse"/>
+                            <field name="internal_transfer" readonly="delivery_order_id"
+                                   invisible="type != 'oncarriage'" string="Internal Transfer"/>
+
+                            <label for="partner_id" string="Receive From"
+                                   invisible="not pickup_from_warehouse"/>
+                            <label for="partner_id" string="Delivery Address"
+                                   invisible="not delivery_to_warehouse"/>
+                            <label for="partner_id" string="Contact"
+                                   invisible="not internal_transfer"/>
+                            <field name="partner_id" options="{'no_create': True}" nolabel="1"
+                                   required="pickup_from_warehouse or delivery_to_warehouse"
+                                   readonly="delivery_order_id"
+                                   invisible="not pickup_from_warehouse and not delivery_to_warehouse and not internal_transfer" string="Partner"/>
+
+                            <label for="source_warehouse_id" string="Warehouse"
+                                   invisible="not pickup_from_warehouse and not delivery_to_warehouse"/>
+                            <label for="source_warehouse_id" string="Source Warehouse"
+                                   invisible="not internal_transfer"/>
+                            <field name="source_warehouse_id" nolabel="1"
+                                   options="{'no_create': True}"
+                                   readonly="delivery_order_id"
+                                   required="pickup_from_warehouse or delivery_to_warehouse or internal_transfer"
+                                   invisible="not pickup_from_warehouse and not delivery_to_warehouse and not internal_transfer" string="Source Warehouse"/>
+
+                            <label for="destination_warehouse_id" string="Destination Warehouse"
+                                   invisible="not internal_transfer"/>
+                            <field name="destination_warehouse_id" options="{'no_create': True}"
+                                   invisible="not internal_transfer"
+                                   readonly="delivery_order_id"
+                                   required="internal_transfer" nolabel="1" string="Destination Warehouse"/>
+
+                            <field name="delivery_order_id" invisible="not delivery_order_id"
+                                   string="Order"
+                                   readonly="1"/>
+                            <label for="charge_type" string="Charges"/>
+                            <div class="o_row">
+                                <field name="charge_type" required="1" string="Charge Type"/>
+                                <field name="total_charge" invisible="charge_type == 'f'"
+                                       required="charge_type == 'p'" string="Total Charge"/>
+                            </div>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Address Type">
+                            <field name="address_to" widget="radio"
+                                   options="{'horizontal': true}" string="Address To"/>
+                        </group>
+                        <group string="Estimate Time">
+                            <field name="pickup_datetime" string="Estimate Pickup"/>
+                            <field name="arrival_datetime" string="Estimate Arrival"/>
+                        </group>
+                    </group>
+                    <group invisible="address_to != 'sc_address'">
+                        <group string="Transporter">
+                            <field name="shipper_id" required="1" options="{'no_create':True}" string="Shipper"/>
+                        </group>
+                        <group string="Customer">
+                            <field name="consignee_id" required="1"
+                                   options="{'no_create':True}" string="Consignee"/>
+                        </group>
+                    </group>
+                    <group string="Location Details"
+                           invisible="address_to != 'location_address'">
+                        <group>
+                            <label for="source_location_id" string="From"
+                                   invisible="transport != 'land'"/>
+                            <div invisible="transport != 'land'">
+                                <field name="source_location_id" options="{'no_create': True}"
+                                       required="address_to == 'location_address'" string="Source Location"/>
+                            </div>
+                            <label for="source_location_id" string="Loading Port"
+                                   invisible="transport != 'ocean'"/>
+                            <div invisible="transport != 'ocean'">
+                                <field name="source_location_id" options="{'no_create': True}"
+                                       required="address_to == 'location_address'" string="Source Location"/>
+                            </div>
+                            <label for="source_location_id" string="Gateway"
+                                   invisible="transport != 'air'"/>
+                            <div invisible="transport != 'air'">
+                                <field name="source_location_id" options="{'no_create': True}"
+                                       required="address_to == 'location_address'" string="Source Location"/>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="destination_location_id" string="To"
+                                   invisible="transport != 'land'"/>
+                            <div invisible="transport != 'land'">
+                                <field name="destination_location_id"
+                                       options="{'no_create': True}"
+                                       required="address_to == 'location_address'" string="Destination Location"/>
+                            </div>
+                            <label for="destination_location_id" string="Discharge Port"
+                                   invisible="transport != 'ocean'"/>
+                            <div invisible="transport != 'ocean'">
+                                <field name="destination_location_id"
+                                       options="{'no_create': True}"
+                                       required="address_to == 'location_address'" string="Destination Location"/>
+                            </div>
+                            <label for="destination_location_id" string="Destination"
+                                   invisible="transport != 'air'"/>
+                            <div invisible="transport != 'air'">
+                                <field name="destination_location_id"
+                                       options="{'no_create': True}"
+                                       required="address_to == 'location_address'" string="Destination Location"/>
+                            </div>
+                        </group>
+                    </group>
+                    <group string="Address">
+                        <group>
+                            <label for="source_location_id" string="Source"/>
+                            <div class="o_address_format">
+                                <field name="s_street" placeholder="Address Line 1....."
+                                       class="o_address_street" string="Street"/>
+                                <field name="s_street2" placeholder="Address Line 2....."
+                                       class="o_address_street" string="Street 2"/>
+                                <field name="s_city" placeholder="City" class="o_address_city"
+                                       required="1" string="City"/>
+                                <field name="s_state_id" class="o_address_state"
+                                       placeholder="State" required="1"
+                                       options="{'no_open': True, 'no_create': True}" string="State"/>
+                                <field name="s_zip" placeholder="ZIP" class="o_address_zip" string="ZIP"/>
+                                <field name="s_country_id" placeholder="Country"
+                                       class="o_address_country" required="1"
+                                       options="{'no_open': True, 'no_create': True}" string="Country"/>
+                            </div>
+                        </group>
+                        <group>
+                            <label for="destination_location_id" string="Destination"/>
+                            <div class="o_address_format">
+                                <field name="d_street" placeholder="Address Line 1....."
+                                       class="o_address_street" string="Street"/>
+                                <field name="d_street2" placeholder="Address Line 2....."
+                                       class="o_address_street" string="Street 2"/>
+                                <field name="d_city" placeholder="City" class="o_address_city"
+                                       required="1" string="City"/>
+                                <field name="d_state_id" class="o_address_state"
+                                       placeholder="State" required="1"
+                                       options="{'no_open': True, 'no_create': True}" string="State"/>
+                                <field name="d_zip" placeholder="ZIP" class="o_address_zip" string="ZIP"/>
+                                <field name="d_country_id" placeholder="Country"
+                                       class="o_address_country" required="1"
+                                       options="{'no_open': True, 'no_create': True}" string="Country"/>
+                            </div>
+                        </group>
+                    </group>
+                    <field name="company_id" invisible="1" string="Company"/>
+                    <field name="currency_id" invisible="1" string="Currency"/>
+                    <group invisible="transport != 'air'">
+                        <group string="Flight Details">
+                            <field name="airline_id" invisible="transport != 'air'"
+                                   options="{'no_create': True}" string="Airline"/>
+                            <field name="mawb_no" invisible="transport != 'air'" string="MAWB No."/>
+                            <field name="flight_no" invisible="transport != 'air'" string="Flight No."/>
+                        </group>
+                    </group>
+                    <group invisible="transport != 'ocean'">
+                        <group string="Vessel/Ship Details">
+                            <field name="vessel_id" invisible="transport != 'ocean'"
+                                   options="{'no_create': True}" string="Vessel"/>
+                            <field name="obl" invisible="transport != 'ocean'" string="OBL No."/>
+                            <field name="voyage_no" invisible="transport != 'ocean'" string="Voyage No."/>
+                        </group>
+                    </group>
+                    <group invisible="transport != 'land'">
+                        <group string="Vehicle Details">
+                            <field name="truck_ref" invisible="transport != 'land'" string="Truck Ref"/>
+                            <field name="trucker" invisible="transport != 'land'"
+                                   options="{'no_create': True}" string="Trucker"/>
+                            <field name="trucker_number" invisible="transport != 'land'" string="Trucker Number"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <record id="shipment_package_line_view_form" model="ir.ui.view">
+        <field name="name">shipment.package.line.view.form</field>
+        <field name="model">shipment.package.line</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <sheet>
+                    <group>
+                        <label for="package_type"/>
+                        <div>
+                            <field name="package_type" widget="radio"
+                                   options="{'horizontal':True}"/>
+                            <div class="font-italic text-muted" invisible="package_type">
+                                When Package type is Box/Pallet that mean it is small size
+                                package(Box/Pallet /Cargo), it mainly used for Land or Air
+                                Shipment but if Package Type is Container/Box that mean
+                                it is big shipment, and you see a tab that's show what is inside
+                                that Container/Box
+                            </div>
+                        </div>
+                    </group>
+                    <group invisible="package_type != 'container'">
+                        <group string="Container / Box">
+                            <field name="freight_package_ids" invisible="1"/>
+                            <field name="package" required="1" options="{'no_create': True}"/>
+                            <field name="name" required="1"/>
+                            <field name="seal_number" required="1"/>
+                            <field name="container_type" required="1"/>
+                        </group>
+                        <group string="Qty &amp; Type">
+                            <field name="type"/>
+                            <field name="cargo_type"/>
+                            <field name="qty"/>
+                            <field name="charges"/>
+                        </group>
+                    </group>
+                    <group invisible="package_type != 'item'">
+                        <group string="Box / Pallet / Cargo">
+                            <field name="freight_package_ids" invisible="1"/>
+                            <field name="package" required="1" options="{'no_create': True}" string="Container/Package"/>
+                            <field name="name" required="1" string="Description"/>
+                            <field name="seal_number" required="1" string="Seal Number"/>
+                            <field name="container_type" required="1" string="Container Type"/>
+                        </group>
+                        <group string="Qty &amp; Type">
+                            <field name="type" string="Package Type"/>
+                            <field name="cargo_type" string="Cargo Type"/>
+                            <field name="qty" string="Quantity"/>
+                            <field name="charges" string="Charges"/>
+                        </group>
+                    </group>
+                    <group invisible="not package_type">
+                        <group string="Dimension">
+                            <field name="length" string="Length"/>
+                            <field name="width" string="Width"/>
+                            <field name="height" string="Height"/>
+                        </group>
+                        <group string="Weight &amp; Volume">
+                            <field name="gross_weight" string="Gross Weight"/>
+                            <field name="net_weight" string="Net Weight"/>
+                            <field name="volume" string="Volume"/>
+                            <field name="total_cbm" string="Total CBM"/>
+                        </group>
+                    </group>
+                    <group invisible="not package_type" string="Chargeable Weight">
+                        <group>
+                            <field name="weight_ratio" string="Weight Ratio"/>
+                            <field name="chargeable_weight" string="Chargeable Weight"/>
+                        </group>
+                        <group>
+                            <field name="final_weight" string="Final Weight"/>
+                        </group>
+                    </group>
+                    <group invisible="not package_type">
+                        <group string="Environmental Conditions">
+                            <field name="harmonize" string="Harmonized Code"/>
+                            <field name="temperature" string="Temperature"/>
+                            <field name="ventilation" string="Ventilation"/>
+                            <field name="humidity" string="Humidity"/>
+                        </group>
+                        <group string="Shipment Verification">
+                            <field name="vgm" string="Verified Gross Mass (VGM)"/>
+                            <field name="carrier_seal" string="Carrier Seal"/>
+                            <field name="reference" string="Reference"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group invisible="not package_type" string="Dangerous Goods">
+                            <field name="dangerous_goods" string="Dangerous Goods"/>
+                        </group>
+                    </group>
+                    <group invisible="not dangerous_goods or not package_type">
+                        <group string="Regulatory Classification">
+                            <field name="imdg_code" help="International Maritime Dangerous Goods code" string="IMDG Code"/>
+                            <field name="class_number" help="Hazard class" string="Hazard Class"/>
+                            <field name="Package_group" string="Packing Group"/>
+                            <label for="un_number" string="UN Number"/>
+                            <div>
+                                <field name="un_number" string="UN Number"/>
+                                <div class="font-italic text-muted" invisible="un_number">
+                                    UN numbers are four-digit numbers that identify hazardous
+                                    materials and articles in the framework of international
+                                    transport
+                                </div>
+                            </div>
+                        </group>
+                        <group string="Safety and Handling">
+                            <field name="flash_point" string="Flash Point"/>
+                            <field name="material_description" string="Material Description"/>
+                        </group>
+                    </group>
+                    <separator string="Container Items" invisible="package_type != 'container'"/>
+                    <field name="freight_item_lines" nolabel="1" editable="top"
+                           invisible="package_type != 'container'">
+                        <list string="Items">
+                            <field name="package" string="Package"/>
+                            <field name="name" string="Item Name"/>
+                            <field name="qty" sum="qty" string="Quantity"/>
+                            <field name="volume" sum="Total Volume" string="Volume"/>
+                        </list>
+                        <form string="Items">
+                            <group>
+                                <group string="Item Details">
+                                    <field name="freight_package_ids" invisible="1"/>
+                                    <field name="package" required="1"
+                                           options="{'no_create': True}"/>
+                                    <field name="name" required="1"/>
+                                    <field name="type" string="Type"/>
+                                    <field name="qty" required="1" string="Quantity"/>
+                                </group>
+                                <group string="Dimension">
+                                    <field name="length" string="Length"/>
+                                    <field name="width" string="Width"/>
+                                    <field name="height" string="Height"/>
+                                    <field name="volume" string="Volume"/>
+                                    <field name="gross_weight" string="Gross Weight"/>
+                                </group>
+                            </group>
+                        </form>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="shipment_item_view_form" model="ir.ui.view">
+        <field name="name">shipment.item.view.form</field>
+        <field name="model">shipment.item</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <sheet>
+                    <group>
+                        <group string="Item Details">
+                            <field name="freight_package_ids" invisible="1"/>
+                            <field name="package" required="1" options="{'no_create': True}" string="Package"/>
+                            <field name="name" required="1" string="Item Name"/>
+                            <field name="type" string="Item Type"/>
+                            <field name="qty" required="1" string="Quantity"/>
+                        </group>
+                        <group string="Dimension">
+                            <field name="length" string="Length"/>
+                            <field name="width" string="Width"/>
+                            <field name="height" string="Height"/>
+                            <field name="volume" string="Volume"/>
+                            <field name="gross_weight" string="Gross Weight"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>
