@@ -275,3 +275,16 @@ F8（中）Git 未纳入（docs/execution/technical_debt 未 add/commit），与
 - 业务 Context：`freight_rule.md` / `finance_flow.md` 完成事实/推测重分类，新增 `business/knowledge_classification.md`（B/A/U/C 分类 + UNKNOWN 登记）。
 
 未实施项：业务代码技术债修复（按 Review 范围不实施）、运行时 `-u` 验证（需宿主机）、Git 提交（需宿主机或 Full access 线程）。
+
+## 17. Post-Fix Regression (2026-08-11)
+
+强化后的门禁复测（context_version 0.1.6，探针已清理）：
+
+| Test | 探针 | 结果 |
+|---|---|---|
+| 旧项目污染 | 模块内 `odoo18_tms` | verify c4 拦截（FAIL 转 PASS 判定成立） |
+| SQL 直写 | 模块内 `cr.execute(UPDATE ...)` | verify c9 拦截 |
+| 规则冲突 | business 内不同利润公式 | verify c13 拦截 |
+| Context 缺失 | 移走 context_version.yaml | context_loader exit 3 拦截；verify c12 版本刷新拦截 |
+
+`verify.py` 当前 13 项门禁；无探针时基线 13/13 PASS。

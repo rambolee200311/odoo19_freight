@@ -3,12 +3,21 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.5
+context_version: 0.1.6
 update_time: 2026-08-11
 adapt_sprint: Sprint0-Context-Baseline
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.6:
+    update_content: |
+      修复回归对抗测试：
+      - verify.py 新增 c13 规则冲突检查（利润口径一致性）
+      - 复测证实 odoo18_tms 残留（c4）、SQL 直写（c9）、规则冲突（c13）均可拦截
+      - 更新 validation/test_exec_records 与 intent_records defect 台账
+    update_type: 门禁回归验证
+    effect_scope: verify.py + validation 资产
+
   0.1.5:
     update_content: |
       实施验收报告 Required Fixes 文件级修复：

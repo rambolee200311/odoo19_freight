@@ -222,6 +222,31 @@ def c12():
     return True
 check('版本刷新', c12)
 
+
+# c13: 业务规则冲突（利润口径一致性）
+def c13():
+    import re
+    canonical = "已开票收入−已确认成本−税费"
+    bad = []
+    for f in sorted(glob.glob(os.path.join(BASE, 'docs/context/business', '*.md'))):
+        with open(f, encoding='utf-8') as fh:
+            for i, line in enumerate(fh, 1):
+                m = re.search(r'利润\s*=\s*(.+)', line)
+                if not m:
+                    continue
+                expr = m.group(1).strip()
+                expr = re.split(r'[|（(]', expr)[0]
+                expr = expr.rstrip('。！？；., ')
+                norm = re.sub(r'\s+', '', expr)
+                if norm != canonical:
+                    bad.append(f'{os.path.basename(f)}:{i}: {expr}')
+    if bad:
+        for b in bad:
+            print(f'\n  RULE CONFLICT: {b}')
+        return False
+    return True
+check('规则冲突', c13)
+
 print(f'\n========== 结果: {passed} pass, {failed} fail ==========')
 if failed == 0: print('  ALL CHECKS PASSED \U0001f7e2')
 else: print(f'  {failed} checks failed \u274c')

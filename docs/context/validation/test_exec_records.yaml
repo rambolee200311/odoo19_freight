@@ -71,3 +71,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "见 docs/context/cognition/context_readiness_review.md 第16节"
+
+  - contract_id: INT-FREIGHT-AUDIT-002
+    sprint_name: 门禁强化回归对抗测试
+    context_baseline: "0.1.6"
+    execute_time: "2026-08-11"
+    test_category: "对抗测试回归"
+    test_target_models: []
+    total_case_count: 4
+    pass_count: 4
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "c4/c9/c13/loader 全部拦截预期违规"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "探针测试后已删除；verify 13/13 PASS"
