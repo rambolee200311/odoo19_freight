@@ -1,0 +1,62 @@
+# ==============================================================
+# Intent: Sprint0 上下文基线建设
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT0-001"
+sprint_version: "Sprint0-Context-Baseline"
+bind_context_version: "0.1.4"
+asset_snapshot_profile: "infrastructure"
+
+intent_work_type: "Infrastructure"
+intent_change_type: "Architecture Upgrade"
+title: "建立 tk_freight 认知资产基线、技术债登记与门禁引擎"
+target_scope: "docs/context + execution/scripts + mymodules/tk_freight/docs/technical_debt.md"
+accept_criteria:
+  - "docs/context 六大认知资产目录齐全"
+  - "业务口径 9 条登记到 business/freight_rule.md"
+  - "技术债 TD-001 ~ TD-025 登记"
+  - "execution/scripts 五个引擎可执行"
+  - "context_loader.py 输出 READY"
+  - "verify.py 门禁通过"
+
+source:
+  type: "architecture_upgrade"
+  origin_team: "Project Owner"
+
+loop_policy:
+  max_iteration: 3
+  retry_scope:
+    mode: "affected_asset_only"
+  escalation:
+    after_failed_iteration: 2
+    require_human: true
+  stop_condition:
+    - all_validation_pass
+    - human_accept
+    - risk_block
+
+affected_assets:
+  business:
+    - freight_rule
+    - finance_flow
+  architecture:
+    - module_map
+    - dependency
+  governance:
+    - rules
+    - workflow_risk
+
+validation_strategy:
+  layers:
+    - static_check
+    - build_verify
+    - business_review
+  required_pass: all
+
+deliverables:
+  - "docs/context 全量资产"
+  - "execution/scripts 门禁引擎"
+  - "技术债登记"
+
+limit_constraints: "不修改 tk_freight 业务代码；不实施未确认的报表/权限/门户需求"
+risk_precheck: "forbidden_change.yaml 基线扫描"

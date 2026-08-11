@@ -1,0 +1,10 @@
+# 分层校验记录
+static_check:
+  status: PASS
+  note: context_loader.py + verify.py 执行通过
+build_verify:
+  status: PASS
+  note: 门禁脚本 Python 语法与路径适配通过
+business_review:
+  status: PASS
+  note: 9 条业务口径已登记并人工确认

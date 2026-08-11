@@ -1,0 +1,76 @@
+# 模块依赖与调用关系图
+
+version: 1.0.0
+
+external_dependencies:
+  hard_depends:
+    base: "Odoo 核心"
+    mail: "消息/日志/关注"
+    contacts: "伙伴管理"
+    account: "发票/账单/收付款"
+    product: "服务产品数据"
+    sale_management: "销售订单联动"
+    stock: "仓库收发货"
+    fleet: "车辆管理"
+    crm: "线索转报价"
+    website: "官网门户"
+    portal: "客户门户"
+    hr: "员工/负责人"
+  soft_reference: {}
+  explicit_forbidden: {}
+
+model_call_graph:
+  crm.lead:
+    creates: ["shipment.quotation"]
+    reads: ["res.partner"]
+
+  shipment.quotation:
+    creates: ["shipment.freight.booking"]
+    reads: ["res.partner", "freight.port", "product.product", "account.tax"]
+
+  shipment.freight.booking:
+    creates: ["freight.shipment"]
+    reads: ["shipment.quotation", "freight.package"]
+
+  freight.shipment:
+    creates: ["freight.service", "freight.route", "shipment.package.line"]
+    reads: ["account.move", "shipment.freight.booking", "freight.port"]
+
+  freight.service:
+    creates: ["account.move"]
+    reads: ["product.product", "res.partner", "res.currency", "account.tax"]
+
+  account.move:
+    reads: ["freight.shipment"]
+    creates: []
+
+  sale.order:
+    reads: ["freight.shipment"]
+
+  stock.picking:
+    reads: ["freight.shipment", "freight.route"]
+
+direction_constraints:
+  - from: "视图层"
+    to: "数据库"
+    rule: "禁止直写"
+  - from: "JS/Controller"
+    to: "数据库"
+    rule: "必须通过 ORM 模型层写入"
+  - from: "freight.service"
+    to: "account.move"
+    rule: "发票/账单必须经 account 标准模型，禁止绕过 ORM 直写"
+
+development_environment:
+  python_venv: "/Users/lijianqiang/Documents/odoo19_freight/venv"
+  venv_python: "/Users/lijianqiang/Documents/odoo19_freight/venv/bin/python3"
+  odoo_bin: "/Users/lijianqiang/Documents/odoo19_freight/odoo-bin"
+  odoo_conf: "/Users/lijianqiang/Documents/odoo19_freight/odoo.conf"
+  database:
+    host: "127.0.0.1"
+    port: 5555
+    user: "odoo"
+    name: "odoo19_freight"
+  note: |
+    运行时操作必须使用 venv/bin/python3，避免系统 Python 缺少项目依赖。
+    odoo.conf 含敏感配置，不入库。

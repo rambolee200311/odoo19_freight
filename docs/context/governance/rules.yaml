@@ -1,0 +1,35 @@
+# 运行治理 · 静态红线规则
+governance_version: 1.0.0
+enable_static_rule: true
+
+architecture_redline:
+  - 禁止视图层处理核心业务逻辑
+  - 禁止跨层直接读写模型数据
+  - 禁止绕过服务层校验直接生成业务单据
+  - 禁止推翻历史架构决策与分层规范
+
+business_redline:
+  - 所有财务单据必须依托 freight.service 与 account.move
+  - 禁止无单据、无日志修改货运状态或金额
+  - 收入/成本/利润必须符合已确认口径
+  - 所有Bug整改必须依照 bug_fix_workflow.yaml 闭环执行
+  - 禁止无登记、无校验、无记录的临时热修复代码提交
+  - 禁止遗忘历史Bug规避方案
+  - 禁止私自新增未授权模型/字段/接口
+
+security_redline:
+  - 禁止硬编码密钥、端口、账号
+  - 禁止开放超级权限匿名接口
+  - 禁止绕过权限校验执行业务操作
+
+upgrade_redline:
+  - 模块升级一律常驻启动 Odoo + XML-RPC 升级
+  - 升级失败必须检查 log 文件
+  - 禁止仅用 -u --stop-after-init 作为最终验证
+
+knowledge_redline:
+  - 每次迭代启动时必须先执行 context_loader.py
+  - 数据检查必须使用 odoo shell，禁止直连数据库操作（铁律）
+  - 提交前必须更新 decision_note.md 与 context_version.yaml
+  - 跑了测试必须更新 validation/test_exec_records.yaml
+  - 发现 Bug 必须更新 history/bug_record.md

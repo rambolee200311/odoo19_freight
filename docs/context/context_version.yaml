@@ -1,0 +1,62 @@
+# ==============================================
+# 上下文资产版本管理中心
+# 适配：Odoo19 Freight 出口货代项目
+# ==============================================
+
+context_version: 0.1.4
+update_time: 2026-08-11
+adapt_sprint: Sprint0-Context-Baseline
+update_author: AI-Engineering-Team
+
+version_log:
+  0.1.4:
+    update_content: |
+      补齐 TMS 执行侧参考：新增 git_commit.sh 发布门禁
+      （verify → odoo_check → test_runner → commit，--skip-runtime 支持文档变更）。
+      记录本工作区沙箱边界：.git 只读、require_escalated 策略 never，
+      发布门禁需宿主机执行或调整权限。
+    update_type: 工程资产补齐
+    effect_scope: 发布流程
+
+  0.1.3:
+    update_content: |
+      登记模块升级铁律：
+      - 常驻启动 Odoo + XML-RPC button_immediate_upgrade 升级
+      - 升级失败必须检查 debug_logs/odoo_190.log
+      - 禁止仅用 -u --stop-after-init 作为最终验证
+      同步改造 execution/scripts/odoo_check.py 与 docs/skills/odo-validate-loop。
+    update_type: 刚性约束登记 + 工具对齐
+    effect_scope: 模块升级流程
+
+  0.1.2:
+    update_content: |
+      完成 Context Readiness 独立最终验收：
+      - 输出 docs/context/cognition/context_readiness_review.md
+      - 宿主机 odoo shell 验证通过（tk_freight installed 19.0.2.1.0）
+      - 六项对抗测试记录入 validation/test_exec_records.yaml
+    update_type: 验收审计记录
+    effect_scope: cognition/validation 资产
+
+  0.1.1:
+    update_content: |
+      登记数据检查铁律：数据检查一律使用 odoo shell，非万不得已禁止直连数据库。
+      同步更新 constraints/forbidden_change.yaml、business/freight_rule.md、governance/rules.yaml。
+    update_type: 刚性约束登记
+    effect_scope: 数据检查方式
+
+  0.1.0:
+    update_content: |
+      首次上下文基线：
+      - 替换 odoo18_tms 残留资产，适配 odoo19_freight / tk_freight
+      - 登记已确认业务口径 9 条（收入/成本/币种/税费/开票/收付款/利润/状态/兼容）
+      - 登记技术债清单（mymodules/tk_freight/docs/technical_debt.md）
+      - 建立 architecture / business / history / constraints / cognition / governance / intent / profiles 资产
+      - 建立 execution/scripts 门禁引擎（context_loader / verify / commit_guard / odoo_check / test_runner）
+    update_type: 全量新建基线
+    effect_scope: 全局上下文
+
+valid_rule:
+  - 每次迭代必须同步更新本版本文件
+  - 禁止人工擅自删除/修改 forbidden_change.yaml 刚性约束
+  - 意图契约变更必须升级小版本号
+  - 架构/业务规则变更必须升级次版本号

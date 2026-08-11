@@ -1,0 +1,30 @@
+# 流水线动态风控与自动熔断
+workflow_risk_version: 2.0.0
+
+fuse_trigger:
+  - AI代码超出意图Scope范围
+  - 代码违反认知一致性
+  - 触碰静态红线规则
+  - 高危变更无人工审批
+  - 出现历史已规避Bug类型
+  - 无单据业务逻辑
+  - 代码语法校验失败
+  - 文件首行存在前导空格
+  - Odoo19 版本兼容性检查失败
+
+fuse_strategy:
+  default: 拒绝本次迭代、退回重开发
+  high_risk: 冻结模块迭代、强制复盘
+  critical: 暂停所有AI开发、锁定版本基线
+
+pipeline_check_step:
+  1: 意图契约校验
+  2: 认知资产一致性校验
+  3: 静态红线规则扫描
+  4: 产出语法门禁（verify.py）
+  5: 风险等级判定
+  6: 人工卡点校验
+  7: 审计日志留存
+
+emergency_bypass:
+  - 跳过必须经 LEVEL3 审核，并在 bug_record.md 中记录跳过理由

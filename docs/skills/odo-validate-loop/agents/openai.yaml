@@ -1,0 +1,4 @@
+interface:
+  display_name: "Odoo 验证闭环"
+  short_description: "Odoo 模块改动后的升级、日志、端口与收口校验"
+  default_prompt: "Use $odo-validate-loop to verify an Odoo module change end to end, then hand off closure to task-completion-discipline."

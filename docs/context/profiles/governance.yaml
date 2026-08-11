@@ -1,0 +1,30 @@
+# Context Profile: Governance
+name: governance
+
+include:
+  - architecture
+  - business
+  - constraints
+  - governance
+  - history
+
+exclude:
+  - governance/rules
+  - governance/human_loop
+  - governance/workflow_risk
+  - governance/bug_fix_workflow
+  - governance/tool_governance
+  - validation
+
+load_strategy:
+  mode: selective
+  summary:
+    enabled: true
+  full_read:
+    allowed:
+      - business
+      - governance/audit_spec
+      - architecture
+      - constraints
+  forbidden:
+    - validation

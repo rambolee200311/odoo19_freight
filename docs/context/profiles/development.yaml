@@ -1,0 +1,25 @@
+# Context Profile: Development
+name: development
+
+include:
+  - architecture
+  - business
+  - constraints
+  - history
+
+exclude:
+  - governance/human_loop
+  - governance/audit_spec
+  - validation
+
+load_strategy:
+  mode: selective
+  summary:
+    enabled: true
+  full_read:
+    allowed:
+      - architecture
+      - business
+      - constraints
+  forbidden:
+    - validation

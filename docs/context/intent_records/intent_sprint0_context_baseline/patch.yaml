@@ -1,0 +1,8 @@
+# 资产变更摘要
+changes:
+  - path: "docs/context/*"
+    type: "replace/create"
+  - path: "execution/scripts/*"
+    type: "create/adapt"
+  - path: "mymodules/tk_freight/docs/technical_debt.md"
+    type: "create"

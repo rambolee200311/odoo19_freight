@@ -1,0 +1,24 @@
+# 人机在回路治理（三级人工卡点）
+human_loop_version: 1.0.0
+
+human_gate:
+  GATE1_PARSE:
+    name: 需求边界卡点
+    trigger: 每次迭代开始
+    action: 审核意图契约Scope、Goal合法性
+    pass_rule: 无范围溢出、无需求冲突
+  GATE2_ARCH:
+    name: 架构合规卡点
+    trigger: 代码开发完成
+    action: 校验分层、约束、认知一致性
+    pass_rule: 无违规架构代码、无推翻历史设计
+  GATE3_RISK:
+    name: 高危变更审批卡点
+    trigger: LEVEL4/LEVEL5风险
+    action: 技术负责人审批
+    pass_rule: 允许架构变更、有明确决策理由
+
+loop_rule:
+  - 任意卡点不通过 → 禁止合并、禁止提交、禁止迭代完结
+  - 低风险自动放行，高风险100%人工拦截
+  - 所有卡点记录必须留存审计日志

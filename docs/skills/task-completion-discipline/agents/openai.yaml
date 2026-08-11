@@ -1,0 +1,4 @@
+interface:
+  display_name: "任务完成纪律"
+  short_description: "说做必做回合结束前完成改码验证记录提交与报告全流程闭环"
+  default_prompt: "Use $task-completion-discipline before ending any task turn."

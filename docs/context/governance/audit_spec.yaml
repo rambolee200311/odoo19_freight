@@ -1,0 +1,31 @@
+# 全链路审计日志规范
+audit_version: 1.0.0
+
+audit_field:
+  - 迭代ID
+  - 意图契约ID
+  - 认知基线版本
+  - 变更文件清单
+  - 风险等级
+  - 人工卡点审核人
+  - AI生成日志
+  - 违规记录
+  - 熔断记录
+  - 迭代时间戳
+  - bug_id
+  - bug_severity_level
+  - fix_commit_hash
+  - bug_fix_review_record
+
+audit_scope:
+  - 意图解析阶段
+  - 认知加载阶段
+  - 代码生成阶段
+  - 自测阶段
+  - 人工审核阶段
+  - 流水线提交阶段
+
+audit_protect:
+  - 所有审计记录永久留存
+  - 禁止删除、篡改、覆盖审计日志
+  - 每次迭代自动生成审计快照

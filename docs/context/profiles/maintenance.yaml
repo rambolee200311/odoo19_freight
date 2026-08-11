@@ -1,0 +1,24 @@
+# Context Profile: Maintenance
+name: maintenance
+
+include:
+  - architecture
+  - business
+  - constraints
+  - history
+
+exclude:
+  - governance
+  - validation
+
+load_strategy:
+  mode: selective
+  summary:
+    enabled: true
+  full_read:
+    allowed:
+      - architecture
+      - constraints
+      - business/freight_rule
+  forbidden:
+    - business/finance_flow

@@ -1,0 +1,35 @@
+# ==============================================
+# 认知一致性校验规则库
+# ==============================================
+
+check_rule_set:
+  architecture_check:
+    - 所有业务逻辑必须收敛到模型层
+    - 视图层禁止写业务逻辑
+    - 禁止跨层调用、禁止绕过架构分层
+    - 新增模型必须符合 tk_freight 模块边界
+
+  business_check:
+    - 所有财务单据必须依托 freight.service 与 account.move
+    - 禁止直改存量、直改状态、直改金额
+    - 收入/成本/利润必须符合已确认口径
+
+  history_decision_check:
+    - 不得推翻历史决策笔记中已固化架构取舍
+    - 不得重新引入历史已修复Bug机制
+
+  forbidden_check:
+    - 严格匹配 forbidden_change.yaml 禁止清单
+    - 禁止任何绕过、重写、篡改底层逻辑
+
+  intent_check:
+    - intent_work_type 必填
+    - intent_change_type 必须匹配 Work Type
+    - asset_snapshot_profile 必须匹配 work_type
+    - loop_policy 必填
+    - validation_strategy.layers 至少包含 static_check + build_verify + auto_test
+    - accept_criteria 至少包含一条可量化验收标准
+    - affected_assets 必填
+    - 禁止 Development/Infrastructure 任务跳过 human_accept
+
+fail_strategy: intercept_and_rollback

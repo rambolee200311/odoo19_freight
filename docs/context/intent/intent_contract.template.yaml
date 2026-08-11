@@ -1,0 +1,66 @@
+# ==============================================================
+# 【Intent 控制工程 · 标准化执行模板（v3.0）】
+# 适用项目：Odoo19 Freight 中国天津出口代理货代
+# 版本：3.0 — 对齐 5.x Intent Driven AI Engineering 最终规范
+# ==============================================================
+#
+# 使用说明：
+#   1. 新建 Intent 时复制本文件完整填充
+#   2. intent_work_type 和 intent_change_type 决定 Profile 和校验策略
+#   3. asset_snapshot_profile 引用 profiles/*.yaml
+#   4. loop_policy 管控多轮迭代上限和增量重试范围
+#   5. ACCEPTED 后自动生成 Asset Proposal → 人工审核后方可更新基线
+#
+# Work Type 与 Profile 映射：
+#   Development    → profiles/development.yaml
+#   Maintenance    → profiles/maintenance.yaml
+#   Infrastructure → profiles/infrastructure.yaml
+#   Governance     → profiles/governance.yaml
+# ==============================================================
+
+intent_id: ""
+intent_work_type: ""
+intent_change_type: ""
+title: ""
+target_scope: ""
+accept_criteria:
+  - ""
+
+source:
+  type: ""
+  origin_team: ""
+
+asset_snapshot_profile: ""
+asset_snapshot_mode: "human"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  escalation:
+    after_failed_iteration: 3
+    require_human: true
+  stop_condition:
+    - all_validation_pass
+    - human_accept
+    - risk_block
+
+affected_assets:
+  business: []
+  architecture: []
+  governance: []
+
+validation_strategy:
+  layers:
+    - static_check
+    - build_verify
+    - auto_test
+    - runtime_validate
+    - business_review
+  required_pass: all
+
+deliverables:
+  - ""
+
+limit_constraints: ""
+risk_precheck: ""

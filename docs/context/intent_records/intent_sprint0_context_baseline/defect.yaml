@@ -1,0 +1,10 @@
+# 缺陷记录
+defects:
+  - id: "AUDIT-TEST-001"
+    kind: "guard blind spot"
+    finding: "verify.py 无法拦截 odoo18_tms 残留、cr.execute 写库、规则冲突"
+    evidence: "见 docs/context/cognition/context_readiness_review.md 第10节"
+  - id: "AUDIT-TEST-002"
+    kind: "runtime blocked"
+    finding: "odoo shell / odoo_check 在沙箱内无法执行数据库验证"
+    evidence: "psutil sysctl(KERN_PROC_ALL) PermissionError；需宿主机运行"

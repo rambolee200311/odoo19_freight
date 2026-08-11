@@ -1,0 +1,43 @@
+# ==============================================
+# 测试/开发教训（context_loader 风险注入输入）
+# ==============================================
+
+test_lessons_version: "0.1.0"
+source_sprints: ["Sprint0"]
+
+rules:
+
+  - id: "TL-FREIGHT-001"
+    category: "onchange 落库"
+    source: "现状梳理"
+    problem: "create() 后调用 _onchange_address() 但不 write()，起运/目的地址字段不保存"
+    rule: "create 后如需地址字段，必须显式 write 或使用计算字段"
+    severity: "LEVEL2"
+
+  - id: "TL-FREIGHT-002"
+    category: "多币种核算"
+    source: "现状梳理"
+    problem: "货单账务把不同币种 amount_total_signed 直接相加，未折算公司本位币"
+    rule: "所有货单级汇总必须先经 res.currency._convert 折算人民币"
+    severity: "LEVEL2"
+
+  - id: "TL-FREIGHT-003"
+    category: "成本口径"
+    source: "现状梳理"
+    problem: "供应商账单与成本汇总使用 sale 而非 cost"
+    rule: "vendor 行必须用成本价参与应付与利润计算"
+    severity: "LEVEL2"
+
+  - id: "TL-FREIGHT-004"
+    category: "发票状态回写"
+    source: "现状梳理"
+    problem: "发票/账单状态变化不回写服务行，作废/红冲后 invoiced 标志滞留"
+    rule: "account.move 状态变化必须同步 freight.service 与货单账务"
+    severity: "LEVEL2"
+
+  - id: "TL-FREIGHT-005"
+    category: "配置参数类型"
+    source: "现状梳理"
+    problem: "ir.config_parameter 返回字符串，weight_ratio 参与比较/除法报错"
+    rule: "读取配置参数后必须 float() 转换再参与运算"
+    severity: "LEVEL2"

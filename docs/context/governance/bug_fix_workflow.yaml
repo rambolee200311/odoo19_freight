@@ -1,0 +1,51 @@
+# Bug 修复标准工作流
+bug_workflow_version: 2.1.0
+
+severity_level:
+  LEVEL1:
+    name: 语法/格式错误
+    auto_fix: true
+  LEVEL2:
+    name: 业务逻辑 Bug（不影响数据完整性）
+    auto_fix: false
+    human_review: 简单复核
+  LEVEL3:
+    name: 业务逻辑 Bug（影响数据完整性）
+    auto_fix: false
+    human_review: 必须审核
+  LEVEL4:
+    name: 架构级缺陷
+    auto_fix: false
+    forbid_execute: true
+
+fix_workflow:
+  step_1:
+    name: 错误登记
+    action: 创建/更新 history/bug_record.md
+  step_2:
+    name: 风险定级
+    action: 按 severity_level 判定等级
+  step_3:
+    name: 修复设计
+    action: 描述修复方案
+  step_4:
+    name: 执行修复
+    action: 修改代码并验证 Python/XML 语法
+  step_5:
+    name: 回归验证
+    action: odoo_check.py / test_runner.py
+  step_6:
+    name: 状态闭环
+    action: 更新 bug_record.md 状态与 commit hash
+  step_7:
+    name: 提交固化
+    action: commit_guard.py --commit
+  step_8:
+    name: 预防复发
+    action: 追加检查规则到 verify.py / test_lessons.yaml
+
+audit_rule:
+  - 所有修复必须更新 bug_record.md
+  - 修复必须真实修改代码文件，禁止仅更新文档就标记已修复
+  - 修复后必须验证语法无误
+  - LEVEL3+ 的修复必须留有人工审核记录

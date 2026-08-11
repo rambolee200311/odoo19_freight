@@ -1,0 +1,35 @@
+# 五级风险分级治理
+risk_version: 1.0.0
+
+risk_levels:
+  LEVEL1:
+    name: 低风险UI调整
+    desc: 视图文字、布局、按钮显隐、非业务字段调整
+    auto_pass: true
+    human_review: false
+  LEVEL2:
+    name: 普通业务迭代
+    desc: 新增非核心字段、辅助视图、扩展校验规则
+    auto_pass: true
+    human_review: 简单复核
+  LEVEL3:
+    name: 核心业务变更
+    desc: 单据流程、费用计算、开票/账单联动
+    auto_pass: false
+    human_review: 必须审核
+  LEVEL4:
+    name: 架构级变更（高危）
+    desc: 模型结构、分层逻辑、依赖关系改动
+    auto_pass: false
+    human_review: 技术负责人审批
+  LEVEL5:
+    name: 底层致命变更（禁止）
+    desc: 推翻历史决策、修改核心底层逻辑、绕过铁律
+    auto_pass: false
+    forbid_execute: true
+
+module_risk_map:
+  freight.service: LEVEL3
+  account.move 联动: LEVEL3
+  架构分层: LEVEL4
+  底层单据流转: LEVEL5

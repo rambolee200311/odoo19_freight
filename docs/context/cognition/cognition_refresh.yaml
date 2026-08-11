@@ -1,0 +1,67 @@
+# ==============================================
+# 认知沉淀与上下文更新规则
+# ==============================================
+
+cognition_refresh_version: 1.1.0
+
+must_update:
+  - trigger: "新架构决策"
+    update: "architecture/ + history/decision_note.md"
+  - trigger: "新业务规则"
+    update: "business/"
+  - trigger: "新永久约束"
+    update: "constraints/"
+  - trigger: "新工程能力"
+    update: "governance/ + cognition/cognition_asset_map.md"
+  - trigger: "版本基线变更"
+    update: "architecture/odoo_version.md + context_version.yaml"
+
+no_update:
+  - trigger: "语法错误"
+    action: "只进 bug_record.md + verify.py"
+  - trigger: "模块名遗留引用"
+    action: "只进 bug_record.md + verify.py"
+  - trigger: "测试未覆盖"
+    action: "只进 bug_record.md + verify.py"
+
+sprint_mandatory:
+  - history/sprint_log.md
+  - history/decision_note.md
+  - context_version.yaml
+  - history/bug_record.md
+
+precipitation_elements:
+  1: "本次迭代新增业务认知"
+  2: "本次迭代架构认知加固"
+  3: "本次迭代规避的风险认知"
+  4: "本次迭代新增工程决策认知"
+
+intent_based_precipitation:
+  development:
+    precipitate:
+      - "代码归档至对应 Domain 资产"
+      - "缺陷根因/规避规则写入风险教训资产"
+  maintenance:
+    precipitate:
+      - "配置变更/迁移规则归档"
+      - "摘要入快照库"
+  infrastructure:
+    precipitate:
+      - "工具/脚本/配置文件归档至基建资产"
+  governance:
+    precipitate:
+      - "合规校验项/核查标准存入合规资产"
+
+precipitation_lightweight:
+  - "仅归档摘要、规则、配置元数据、差异补丁"
+  - "完整代码由 Git 源码管理，执行记录不重复存储"
+
+execution_record:
+  base_dir: "docs/context/intent_records/"
+  structure:
+    - "intent_xxx/intent.yaml"
+    - "intent_xxx/decision.md"
+    - "intent_xxx/validation.yaml"
+    - "intent_xxx/defect.yaml"
+    - "intent_xxx/asset_diff.patch"
+    - "intent_xxx/summary.md"

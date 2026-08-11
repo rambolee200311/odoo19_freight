@@ -1,0 +1,48 @@
+# ==============================================
+# 认知控制工程 · 强制加载规则
+# 适配：odoo19_freight / tk_freight
+# 优先级：高于业务需求、仅次于意图契约
+# ==============================================
+
+cognition_version: 1.0.0
+enable_cognition_control: true
+
+pre_dev_load_order:
+  1: "读取 context_version.yaml 锁定当前项目基线版本"
+  2: "执行 execution/scripts/context_loader.py 加载认知快照"
+  3: "读取 architecture/module_map.md 架构分层认知"
+  4: "读取 architecture/dependency.yaml 模块依赖认知"
+  5: "读取 profiles/{work_type}.yaml 匹配当前 Work Type"
+  6: "读取 business/freight_rule.md 业务铁律"
+  7: "读取 history/decision_note.md 历史架构决策"
+  8: "读取 history/bug_record.md 历史缺陷规避"
+  9: "读取 constraints/forbidden_change.yaml 刚性约束"
+  10: "读取本次意图契约，核对 work_type/change_type/accept_criteria"
+
+profile_isolation:
+  - Development/Maintenance: 加载业务域资产，按需引入基础配置
+  - Infrastructure: 仅加载底层工具/脚本资产，屏蔽业务单据
+  - Governance: 加载业务基线 + 合规规范，完全屏蔽基建源码
+  - load_strategy.forbidden 文件禁止加载
+
+consistency_law:
+  - 禁止推翻历史架构决策
+  - 禁止绕过已定义业务铁律
+  - 禁止破坏模块分层架构
+  - 禁止违规修改禁止修改字段/模型
+  - 禁止遗忘历史Bug规避方案
+  - 禁止脱离项目基线随意开发
+
+missing_cognition_intercept:
+  - 架构认知缺失 → 禁止开发
+  - 业务规则认知缺失 → 禁止开发
+  - 历史决策冲突 → 禁止开发
+  - 违规修改风险 → 禁止开发
+
+cognition_priority:
+  1: 刚性约束 forbidden_change
+  2: 历史决策 decision_note
+  3: 架构分层 module_map
+  4: 业务规则 freight_rule
+  5: 当前意图契约 task_intent
+  6: 临时用户需求

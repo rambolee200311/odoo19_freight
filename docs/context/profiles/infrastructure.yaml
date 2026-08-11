@@ -1,0 +1,22 @@
+# Context Profile: Infrastructure
+name: infrastructure
+
+include:
+  - architecture
+  - constraints
+  - governance
+
+exclude:
+  - business
+  - validation
+
+load_strategy:
+  mode: selective
+  summary:
+    enabled: true
+  full_read:
+    allowed:
+      - architecture
+      - governance
+  forbidden:
+    - business

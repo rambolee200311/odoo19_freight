@@ -1,0 +1,56 @@
+# ==============================================
+# 迭代测试执行台账
+# ==============================================
+
+test_exec_records:
+
+  - contract_id: INT-FREIGHT-SPRINT0-001
+    sprint_name: 上下文基线建设
+    context_baseline: "0.1.0"
+    execute_time: "2026-08-11"
+    test_category: "门禁引擎"
+    test_target_models: []
+    total_case_count: 2
+    pass_count: 2
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "context_loader + verify 门禁通过"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    attachment: "execution/scripts/context_loader.py + verify.py"
+
+  - contract_id: INT-FREIGHT-AUDIT-001
+    sprint_name: Context Readiness 独立最终验收
+    context_baseline: "0.1.2"
+    execute_time: "2026-08-11"
+    test_category: "独立验收 + 对抗测试"
+    test_target_models: []
+    total_case_count: 10
+    pass_count: 6
+    fail_count: 4
+    skip_count: 0
+    coverage_rate: "引擎 4/5 沙箱可运行；odoo shell 宿主机 PASS"
+    fail_detail:
+      - test_name: "odoo_check.py"
+        fail_reason: "沙箱内无法完成 DB 连接验证"
+        severity: LEVEL2
+      - test_name: "Test 1a"
+        fail_reason: "odoo18_tms 残留无法被 verify 拦截"
+        severity: LEVEL3
+      - test_name: "Test 3"
+        fail_reason: "cr.execute 写库探针无法被 verify 拦截"
+        severity: LEVEL3
+      - test_name: "Test 5"
+        fail_reason: "规则冲突无法被 loader/verify 发现"
+        severity: LEVEL3
+    pass_detail:
+      - test_name: "odoo shell（宿主机）"
+        pass_evidence: "TK_STATE=installed / TK_VERSION=19.0.2.1.0 / HAS_SHIPMENT=True / SHIPMENT_COUNT=1"
+      - test_name: "Test 1b / Test 4"
+        pass_evidence: "wd_tlms 残留被 verify 拦截；缺失 context_version 被 loader 以 exit 3 拦截"
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: false
+    note: "完整结论见 docs/context/cognition/context_readiness_review.md；最终判定 NOT READY"
