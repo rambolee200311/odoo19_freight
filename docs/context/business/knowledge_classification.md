@@ -51,6 +51,8 @@
 | B-43 | 对账单/发票两个 Page 位于 Accountancy 页之后，先对账单后发票 | 2026-08-12 用户确认（U-33） |
 | B-44 | 对账单 Page 不放置操作按钮，仅提供查看/打开 | 2026-08-12 用户确认（U-34） |
 | B-45 | 发票 Page 不拆分应收/应付子页，合并一页并按 move_type 区分 | 2026-08-12 用户确认（U-35） |
+| B-46 | 客户结算单费用范围 = customer-side revenue charges（shipper/consignee）；vendor cost 不进入客户结算单；Vendor Bill 为供应商自有账单，我方不创建（对齐 B-35/BR-35） | 2026-08-12 用户确认 |
+| B-47 | 结算单生成入口沿用现有 wizard 模式（Services 页 Generate Statement → 勾选费用行），不新建独立入口 | 2026-08-12 用户确认（U-37） |
 
 ## 引用规范
 

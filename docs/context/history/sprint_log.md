@@ -64,3 +64,16 @@
 - 未改结算单状态机、开票/追溯逻辑、Vendor Bill 创建、菜单、权限、报表、`__manifest__.py`
 
 **验收**: context_loader 0.1.46 基线 PASS；verify.py 全部强制门禁 PASS；常驻升级 + 27/27 视图断言 + log clean PASS。
+
+## Sprint4-2-Statement-Generation (2026-08-12)
+
+**目标**: 固化 Shipment → 费用行 → Generate Statement → Statement Draft，明确客户结算单费用范围。
+
+**成果**:
+- 契约写入费用范围 B-46：仅 shipper/consignee 客户应收费用，vendor cost 排除
+- 明确 Vendor Bill 为供应商自有账单，我方不创建，不作为技术债/流程对象
+- 生成入口沿用现有 wizard 模式（B-47/B-39）
+- 运行时验收：可选费用仅 shipper/consignee、vendor 排除、draft 生成、金额正确、重复/空选择拦截
+- 本 Sprint 无业务代码变更（沿用 Sprint4 已实现 wizard）
+
+**验收**: context_loader 0.1.48 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 10/10 断言 + log clean PASS。

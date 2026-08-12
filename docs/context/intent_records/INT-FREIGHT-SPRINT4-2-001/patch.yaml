@@ -1,0 +1,17 @@
+intent_id: INT-FREIGHT-SPRINT4-2-001
+status: EXECUTED
+
+changed_files:
+  - docs/context/intent/intent_sprint4_2_statement_generation.yaml
+  - docs/context/business/knowledge_classification.md
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT4-2-001/
+  - docs/context/validation/test_exec_records.yaml
+
+scope_notes:
+  - "Sprint4-2 契约固化为：Shipment → 费用行（shipper/consignee）→ Generate Statement → wizard → Statement Draft"
+  - "费用范围 B-46：仅 shipper/consignee，vendor 排除；Vendor Bill 为供应商自有账单，我方不创建"
+  - "生成入口沿用现有 wizard 模式（B-47，B-39）"
+  - "业务代码沿用 Sprint4 已实现 wizard，本 Sprint 无 mymodules 代码变更，完成运行时验收断言"

@@ -1,0 +1,242 @@
+# ==============================================================
+# Intent: Sprint4-2 结算单生成（Shipment → 费用行 → Statement Draft）
+# 状态：已确认（B-46 费用范围 + U-37 → B-47 沿用现有 wizard，可进入编码）
+# 门禁引擎支持 sprint4_2 / sprint4-2 子编号契约选择（决策38）。
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-2-001"
+sprint_version: "Sprint4-2-Statement-Generation"
+intent_work_type: "Development"
+intent_change_type: "New Feature"
+title: "Shipment → 费用行 → 生成客户结算单草稿（Customer Statement Draft）"
+target_scope: "从 freight.shipment 费用行生成客户结算单草稿（freight.statement draft）。明确结算单费用范围：仅取 customer-side revenue charges（service_type = shipper / consignee）；vendor cost 不进入客户结算单。Vendor Bill 为供应商自有账单，我方不创建，不作为本 Sprint 技术债或流程对象。本 Sprint 只生成 draft，不实施确认、作废、开票、版本生成或审批"
+
+context_binding:
+  bind_context_version: "0.1.48"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint4-2 起草 + 用户确认费用范围"
+  related_sprint:
+    - "INT-FREIGHT-SPRINT4-001"
+    - "INT-FREIGHT-SPRINT4-1-001"
+  confirmed_decisions:
+    - id: "B-46"
+      decision_ref: "用户 2026-08-12"
+      status: "CONFIRMED"
+      statement: "客户结算单费用范围 = customer-side revenue charges（service_type = shipper / consignee）；vendor cost 不进入客户结算单；Vendor Bill 为供应商自有账单，我方不创建（对齐 B-35 / BR-35）"
+    - id: "B-47"
+      decision_ref: "U-37"
+      status: "CONFIRMED"
+      statement: "结算单生成入口沿用现有 wizard 模式（Services 页 Generate Statement → 勾选费用行），不新建独立入口"
+  draft_scope:
+    - "Shipment 表单/费用行 → 生成结算单入口 → wizard 勾选费用行 → 生成 Statement Draft"
+    - "结算单费用范围：仅 shipper / consignee 客户应收费用行"
+    - "vendor 费用行不在客户结算单可选范围内"
+  unresolved_unknowns: []
+  confirmed_open_questions:
+    - id: "U-37"
+      status: "CONFIRMED"
+      decision_ref: "B-47"
+      statement: "生成入口交互：沿用现有 Services 页 wizard 勾选费用行（B-39），不调整入口"
+
+statement_fee_scope:
+  included:
+    - "service_type in ('shipper', 'consignee')"
+    - "有明确开票对象（shipper_id / consignee_id）"
+    - "invoiced = False 且未进入非 voided 结算单"
+  excluded:
+    - "service_type = 'vendor'"
+  rule: >
+    Customer Statement 仅取 customer-side revenue charges（shipper / consignee）；
+    vendor cost 不进入客户结算单。Vendor Bill 是供应商自己的账单，我们不创建，
+    不作为本 Sprint 的技术债或流程对象（对齐 B-35 / BR-35，B-46）。
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "record_and_continue"
+  coding_gate: "开放项已确认（B-46/B-47，决策42），无未决 UNKNOWN"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+  mapping:
+    - "U-37 -> B-47"
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/wizard/__init__.py"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-2-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "结算单生成入口与 wizard 费用行选择逻辑（费用范围按 B-46 强制）"
+    - "freight.statement draft 生成相关最小校验"
+    - "freight_shipment_view.xml / freight_statement_wizard_view.xml 生成入口与费用行列表展示"
+    - "zh_CN.po 新增生成入口/费用范围文案"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改 freight.statement 状态机（draft → voided / confirmed → draft_invoice 之外的状态）"
+    - "生成/修改 Vendor Bill 或供应商结算单"
+    - "修改确认、作废、草稿发票生成、红冲、幂等、追溯逻辑"
+    - "修改既有 security group / record rule"
+    - "修改菜单（menus.xml）"
+    - "修改 __manifest__.py"
+    - "新建 data XML"
+    - "修改报表、Controller、前端静态资源"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-2-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "Shipment → 费用行（shipper / consignee 客户应收费用）"
+  - "生成结算单（Generate Statement 入口）"
+  - "wizard 勾选可结算费用行（vendor 费用行不可选）"
+  - "生成 Statement Draft（freight.statement state = draft）"
+
+technical_constraints:
+  - "结算单费用范围强制：service_type in ('shipper', 'consignee')，vendor 排除"
+  - "费用行必须有明确开票对象（shipper_id / consignee_id）"
+  - "已开票（invoiced=True）或已进入非 voided 结算单的费用行不可选"
+  - "Vendor Bill 为供应商自有账单，不进入客户结算单，不作为技术债或流程对象"
+  - "一次 wizard 仅允许同一 shipment + 同一 customer"
+  - "生成结果必须为 freight.statement draft，禁止直接生成 invoice"
+  - "空选择禁止生成结算单"
+
+acceptance_criteria:
+  functional:
+    - "Shipment 表单可进入生成结算单流程（Generate Statement）"
+    - "wizard 只列出 shipper/consignee 客户应收费用行，vendor 费用行不出现"
+    - "勾选费用行可生成 Statement Draft，编号 STM/年月/流水"
+    - "draft 结算单金额 = 所选费用行合计（含税/不含税/税额按 Sprint4 口径）"
+    - "同一 shipment + customer 已存在非 voided 结算单时阻止重复生成"
+  excluded:
+    - "Vendor Bill 生成"
+    - "供应商结算单"
+    - "确认/作废/草稿发票生成/红冲/版本生成/审批"
+    - "菜单、权限、报表、PDF"
+  non_regression:
+    - "BR-01 ~ BR-14 业务规则不变"
+    - "B-23 ~ B-45 / BR-23 ~ BR-45 口径不变"
+    - "Sprint4 既有结算单状态机与发票幂等不受破坏"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.47）"
+    - "verify.py 全部强制门禁 PASS"
+    - "XML-RPC 模块升级验证通过"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + 模块升级验证通过（button_immediate_upgrade / odoo_check.py）"
+    - "wizard 可选费用范围（仅 shipper/consignee）与 draft 生成断言 PASS"
+  business_review:
+    - "业务负责人人工验收通过"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - knowledge_classification
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-2-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "Shipment 费用行可经 Generate Statement 生成 Customer Statement Draft"
+  - "费用范围符合 B-46：仅 shipper / consignee，vendor 排除"
+  - "重复生成与空选择被阻止"
+  - "decision_gate 已满足：U-37 → B-47（决策42）"
+  - "所有强制验证通过"
+
+deliverables:
+  - "结算单生成入口（沿用/微调 B-39 wizard）"
+  - "费用范围强制校验（B-46）"
+  - "Statement Draft 生成与幂等校验"
+  - "zh_CN.po 文案与决策/执行记录"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-2-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "确认未生成 Vendor Bill / 供应商结算单"
+  - "确认未改确认/作废/开票状态机"
+  - "确认费用范围仅 shipper / consignee（B-46）"

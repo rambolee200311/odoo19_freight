@@ -3,12 +3,30 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.46
+context_version: 0.1.48
 update_time: 2026-08-12
-adapt_sprint: Sprint4-1-Shipment-Form-Pages
+adapt_sprint: Sprint4-2-Statement-Generation
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.48:
+    update_content: |
+      Sprint4-2 开放项确认（决策42）：
+      - U-37 → B-47：生成入口沿用现有 wizard 模式
+      - decision_gate satisfied，可进入编码
+    update_type: Sprint4-2 开放项确认
+    effect_scope: intent_sprint4_2 + history + business
+
+  0.1.47:
+    update_content: |
+      Sprint4-2 契约起草（决策41）：
+      - Shipment → 费用行 → 生成 Customer Statement Draft
+      - 费用范围 B-46：仅 shipper/consignee 客户应收费用，vendor 排除
+      - Vendor Bill 为供应商自有账单，我方不创建，不作为技术债/流程对象
+      - 开放项 U-37（生成入口交互），确认后登记 B-47
+    update_type: Sprint4-2 Intent 起草
+    effect_scope: intent_sprint4_2 + business + history
+
   0.1.46:
     update_content: |
       Sprint4-1 开放项确认（决策40）：

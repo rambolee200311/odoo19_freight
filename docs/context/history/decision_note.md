@@ -209,3 +209,16 @@
 - U-35 → B-45：发票 Page 不拆分应收/应付子页，合并一页并按 move_type 区分。
 
 契约 `unresolved_unknowns` 清空，`decision_gate.status = satisfied`，可以进入编码。
+
+### 决策41：Sprint4-2 契约起草（结算单生成 + 费用范围确认）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-2-001`：Shipment → 费用行 → 生成客户结算单草稿（Customer Statement Draft）。
+
+- 结算单费用范围直接写入契约（B-46）：仅取 customer-side revenue charges（service_type = shipper / consignee）；vendor cost 不进入客户结算单。
+- Vendor Bill 为供应商自有账单，我方不创建，不作为本 Sprint 技术债或流程对象（对齐 B-35 / BR-35）。
+- 流程：Shipment → 费用行（shipper / consignee）→ Generate Statement → wizard 勾选费用行 → Statement Draft。
+- 开放项 U-37（生成入口交互，默认沿用 B-39 wizard），确认后登记 B-47。
+
+### 决策42：Sprint4-2 开放项确认
+
+**决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-2-001` 开放项 U-37：结算单生成入口沿用现有 wizard 模式（Services 页 Generate Statement → 勾选费用行），登记为 B-47。契约 `decision_gate.status = satisfied`，可以进入编码。
