@@ -1,0 +1,334 @@
+# ==============================================================
+# Intent: Sprint4-3 客户拒绝 → 作废 → 修改费用 → 重新生成新结算单
+# 状态：已确认（U-39 → B-50，可进入编码）
+# 核心定位（决策43/44/45）：
+#   - 实现“客户拒绝后的结算单作废 + 回费用事实层修正 + 基于当前
+#     费用重新生成不可变结算快照”的闭环
+#   - 不做结算单版本编辑；Void 不修改 freight.service
+#   - Statement.line 是不可变 snapshot，不是 freight.service 的实时视图
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-3-001"
+sprint_version: "Sprint4-3-Statement-Void-Revision"
+intent_work_type: "Development"
+intent_change_type: "Process Flow"
+title: "客户拒绝 → 作废结算单 → 修改费用 → 重新生成新结算单（不可变版本重建）"
+target_scope: "客户拒绝后，当前 draft 结算单进入 voided 终态；费用修改回到 freight.shipment / freight.service 费用事实层；重新生成新结算单 draft 并创建全新 statement.line 快照，通过版本链承接。本 Sprint 不实现客户接受确认（Sprint4-4）、开票、Vendor Bill"
+
+context_binding:
+  bind_context_version: "0.1.52"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint4-3 起草 + 两轮评审修订"
+  related_sprint:
+    - "INT-FREIGHT-SPRINT4-001"
+    - "INT-FREIGHT-SPRINT4-2-001"
+  related_decisions:
+    - "B-48"
+    - "B-49"
+    - "B-46"
+    - "B-36"
+    - "B-37"
+    - "B-40"
+  confirmed_decisions:
+    - id: "B-48"
+      decision_ref: "用户 2026-08-12"
+      status: "CONFIRMED"
+      statement: "客户拒绝 = 当前 draft 结算单进入 voided 终态，不作废原单修改；费用修改回到 freight.shipment / freight.service；重新生成新结算单并创建全新 statement.line 快照；版本链 statement_root_id + version_no + previous_statement_id，旧结算单永久不可变"
+    - id: "B-49"
+      decision_ref: "U-38"
+      status: "CONFIRMED"
+      statement: "voided_reason 为可选字段，不强制录入，不作为 Sprint4-3 编码阻塞项"
+    - id: "B-50"
+      decision_ref: "U-39"
+      status: "CONFIRMED"
+      statement: "Draft 结算单在费用再次修改后重新生成：旧 Draft 作废（voided）并永久留存，新结算单生成新 version_no；不允许原地刷新/重建同版本"
+  draft_scope:
+    - "客户拒绝仅允许对 draft 结算单执行作废；禁止对 voided / confirmed / draft_invoice 作废"
+    - "作废结算单不回写或重置 freight.service 费用事实"
+    - "重新生成结算单时，由现有费用选择规则重新计算当前可纳入的 freight.service"
+    - "Statement-002 必须创建新的 statement.line 记录，不得复用旧 line"
+    - "审计链：Shipment → Fees；Statement-001 [Void] → Statement-002 [Draft]"
+  unresolved_unknowns: []
+  confirmed_open_questions:
+    - id: "U-38"
+      status: "CONFIRMED"
+      decision_ref: "B-49"
+      statement: "客户拒绝原因（voided_reason）可选录入，不强制"
+    - id: "U-39"
+      status: "CONFIRMED"
+      decision_ref: "B-50"
+      statement: "Draft 结算单在费用再次修改后：旧 Draft 作废并永久留存，生成新 version_no"
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "record_and_continue"
+  coding_gate: "开放项已确认（决策46），无未决 UNKNOWN"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+  mapping:
+    - "U-39 -> B-50"
+
+version_policy:
+  mode: "regenerate_as_new_version"
+  rules:
+    - "客户拒绝后，当前 draft 结算单进入 voided 终态"
+    - "voided 结算单 header 与 statement.line 快照永久不可修改"
+    - "客户拒绝动作不修改 freight.service 费用事实"
+    - "费用修改必须发生在 freight.shipment / freight.service 费用层"
+    - "重新生成结算单时，从当前有效 freight.service 费用重新生成全新 Statement Snapshot"
+    - "新版本不得复用旧 statement.line，必须创建新的 line 记录"
+    - "新版本通过版本链字段承接（statement_root_id + version_no + previous_statement_id）"
+    - "旧版本只作为历史事实保留"
+    - "新版本默认进入 draft"
+    - "本 Sprint 不实现 confirmed / invoice"
+    - "Draft 在费用再次修改后重新生成：旧 Draft 作废并永久留存，新结算单生成新 version_no，不允许原地刷新/重建同版本"
+  invariants:
+    - "voided 是终态，不允许重新激活、恢复、确认或直接转入下一状态"
+    - "历史 statement.line 不得因 freight.service 后续修改而变化"
+    - "同一业务键 + 版本根下，只允许 version_no 最大且非 voided 的版本作为当前有效版本"
+    - "重复生成不得产生重复当前版本"
+    - "Statement v2 的金额必须来自生成时的 freight.service 快照"
+  version_chain:
+    - "版本根及业务唯一键沿用 Sprint4-2 已确认规则"
+    - "本 Sprint 仅实现 Void → 新版本重建，不重新定义 Statement Root 的业务键"
+
+snapshot_invariants:
+  - "Statement.line 是生成时的不可变快照"
+  - "Statement.line 后续不得重新从 freight.service 计算覆盖"
+  - "freight.service 后续修改不得回写任何历史 statement.line"
+  - "重新生成 Statement 时必须创建新的 statement.line 记录"
+
+version_chain_fields:
+  - "statement_root_id：版本根引用；具体字段是否复用既有 statement_id，沿用 Sprint4-2 已确认定义（本 Sprint 不做字段重命名）"
+  - "version_no"
+  - "previous_statement_id"
+  - "voided_uid / voided_date / voided_reason（可选）"
+
+architecture_principle:
+  - "freight.service = 费用事实来源"
+  - "freight.statement = 不可变业务快照"
+  - "account.move = 财务凭证"
+  - "三层职责不得混用"
+
+void_policy:
+  allowed_source_states:
+    - "draft"
+  forbidden_source_states:
+    - "voided"
+    - "confirmed"
+    - "draft_invoice"
+  action:
+    - "Void 操作必须通过 action_void() 统一业务方法执行，不允许直接写 state='voided'"
+    - "action_void() 步骤：状态合法性检查 → 写 voided_uid → 写 voided_date → 写 voided_reason（可选）→ 保持 statement.line 不变 → 形成历史版本"
+    - "客户拒绝动作仅负责作废当前结算单，不自动修改 freight.service 费用"
+
+fee_source_policy:
+  - "作废结算单不回写或重置 freight.service 的费用事实"
+  - "重新生成结算单时，由现有费用选择规则重新计算当前可纳入的 freight.service"
+  - "不得通过修改或删除 Statement-001 的 statement.line 实现费用重新归属"
+  - "Statement-002 必须重新从当前 freight.service 费用层生成新快照"
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/wizard/__init__.py"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-3-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "结算单作废（draft → voided）与审计字段（voided_uid / voided_date / voided_reason 可选）"
+    - "重新生成结算单时从当前 freight.service 重新计算可纳入费用并创建新 statement.line"
+    - "Statement Void 操作入口与 action_void() 统一方法"
+    - "仅当现有 Generate Statement 入口位于 freight.shipment 且需要接入新版本选择逻辑时，才允许修改 freight_shipment.py；不得因“可能需要”而修改"
+    - "zh_CN.po 新增作废/版本链文案"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "在已作废/已确认/已开票结算单上直接修改费用行或 header"
+    - "将 voided 状态改为可编辑、可恢复、可确认或可转入其他状态"
+    - "新增或重构 freight.service 状态机"
+    - "改变 freight.service 原有费用业务口径"
+    - "通过删除/修改历史 statement.line 改变历史快照"
+    - "客户拒绝动作自动修改 freight.service 费用"
+    - "statement_id → statement_root_id 字段重命名（本 Sprint 不做 schema rename）"
+    - "修改确认（客户接受）流程（Sprint4-4）"
+    - "生成/修改 Vendor Bill 或供应商结算单"
+    - "修改草稿发票生成、幂等、红冲、追溯逻辑"
+    - "修改既有 security group / record rule"
+    - "修改菜单（menus.xml）"
+    - "修改 __manifest__.py"
+    - "新建 data XML"
+    - "修改报表、Controller、前端静态资源"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-3-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "费用录入（freight.shipment / freight.service 费用事实来源）"
+  - "生成结算单（Sprint4-2）→ Statement-001 Draft"
+  - "客户审核 → 客户拒绝"
+  - "Statement-001 作废（voided 终态），原单与快照不可修改"
+  - "业务人员在费用层显式修改 freight.service"
+  - "重新生成新结算单 → Statement-002 Draft（全新 statement.line 快照）"
+  - "Sprint4-4：客户接受 → Confirmed"
+
+acceptance_criteria:
+  functional:
+    - "客户拒绝后，draft 结算单进入 voided 终态，并记录 voided_uid / voided_date"
+    - "voided 结算单 header 与费用快照不可修改（模型级拦截）"
+    - "作废后费用可在 freight.shipment / freight.service 层修改"
+    - "重新生成新结算单 draft，version_no 递增，previous_statement_id 指向旧结算单，版本根沿用既有规则"
+    - "Void 操作仅通过 action_void() 执行，禁止对 voided / confirmed / draft_invoice 作废"
+  snapshot_isolation:
+    - "Statement-001 金额 1000 → Void；修改 freight.service 为 1200 → 生成 Statement-002；断言 Statement-001=1000、Statement-002=1200"
+    - "修改 Statement-002 后，Statement-001 不受影响"
+    - "删除/修改 freight.service 后，Statement-001 历史快照不发生变化"
+  reverse_pollution:
+    - "V1=1000 → V1 Void → 修改 freight.service=1200 → V2=1200"
+    - "再次修改 freight.service=1500 → 断言 V1=1000、V2=1200（历史结算单是快照，不是费用表实时视图）"
+  duplicate_generation:
+    - "Statement-001 Void → 修改费用 → 生成 Statement-002"
+    - "再次点击 Generate：不得产生 Statement-003（当前有效 Draft 已存在）"
+  draft_regeneration:
+    - "Statement-002 Draft 存在时修改 freight.service"
+    - "Statement-002 作废（action_void，永久留存）后重新生成 Statement-003"
+    - "断言 Statement-002 保持 voided、Statement-003 version_no 递增且金额来自最新费用快照"
+    - "不允许原地刷新/重建 Statement-002 同版本"
+  excluded:
+    - "客户接受确认（confirmed，Sprint4-4）"
+    - "草稿发票生成"
+    - "Vendor Bill 生成"
+    - "作废状态恢复/编辑/确认"
+    - "statement_id → statement_root_id 字段重命名"
+    - "菜单、权限、报表、PDF"
+  non_regression:
+    - "不改变与本 Sprint 相关的已确认业务规则（B-48 / B-49 / B-50 / B-46 / B-36 / B-37 / B-40）"
+    - "Sprint4 既有生成、幂等、发票逻辑不受破坏"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.52）"
+    - "verify.py 全部强制门禁 PASS"
+    - "XML-RPC 模块升级验证通过"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + 模块升级验证通过（button_immediate_upgrade / odoo_check.py）"
+    - "作废 → 费用修改 → 重新生成版本链断言 PASS"
+    - "历史快照隔离与反向污染断言 PASS"
+    - "重复生成幂等断言 PASS"
+  business_review:
+    - "业务负责人人工验收通过"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - "B-48 decision registration"
+    - "B-49 decision registration"
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-3-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "客户拒绝后 Statement-001 进入 voided 终态且不可修改"
+  - "费用修改回 Shipment 费用层，Statement-002 从当前 freight.service 生成全新 statement.line 快照"
+  - "版本链字段正确承接（statement_root_id / version_no / previous_statement_id）"
+  - "历史快照隔离、反向污染与重复生成幂等断言通过"
+  - "B-48 / B-49 / B-50 已存在于已确认业务决策资产"
+  - "所有强制验证通过"
+
+deliverables:
+  - "结算单作废与不可变约束（voided 终态 + voided_uid/voided_date/voided_reason 可选）"
+  - "作废后费用重新成为下一版结算单来源（fee_source_policy）"
+  - "新结算单全新 statement.line 快照与版本链承接"
+  - "zh_CN.po 文案与决策/执行记录"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-3-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "确认未在旧结算单上直接修改费用/删除历史 line"
+  - "确认未回写或重置 freight.service 费用事实"
+  - "确认未实现客户接受确认/开票/Vendor Bill"
+  - "确认未做 statement_id → statement_root_id schema rename"

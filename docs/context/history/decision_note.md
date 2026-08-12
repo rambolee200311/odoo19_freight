@@ -222,3 +222,41 @@
 ### 决策42：Sprint4-2 开放项确认
 
 **决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-2-001` 开放项 U-37：结算单生成入口沿用现有 wizard 模式（Services 页 Generate Statement → 勾选费用行），登记为 B-47。契约 `decision_gate.status = satisfied`，可以进入编码。
+
+### 决策43：Sprint4-3 契约起草（客户拒绝 → 作废 → 修改费用 → 新结算单）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-3-001`，按业务负责人确认的设计方向登记 B-48：
+
+- 客户拒绝 = 当前结算单作废（voided），不作废原单修改；旧结算单及其费用快照不可变。
+- 费用修改必须回到 `freight.shipment / freight.service` 费用层。
+- 重新生成新结算单，版本链 `statement_id（根）+ version_no + previous_statement_id`（等价 revision_of 语义）。
+- 审计链：Shipment → Fees；Statement-001 [Void] → Statement-002 [Draft/Confirmed]。
+- 客户接受确认（confirmed）与开票不在本 Sprint 范围。
+
+### 决策44：Sprint4-3 契约按评审修订
+
+**决策**: 按评审意见修订 `INT-FREIGHT-SPRINT4-3-001`：
+
+- 作废边界不绑定 `draft`：客户拒绝仅允许对尚未确认、尚未开票的当前结算单执行作废，来源状态由现有状态机确定。
+- “费用释放”改为“费用重新成为下一版结算单来源”：作废后原结算单快照不可变，对应 `freight.service` 恢复为可参与下一结算单生成的业务来源；不得通过修改/删除旧 `statement.line` 实现费用重新归属。
+- 版本根字段重命名为 `statement_root_id`（既有 `statement_id` 同步重命名），版本链为 `statement_root_id + version_no + previous_statement_id`。
+- `voided` 为终态：不允许重新激活、恢复、确认或直接转入下一状态；Void 必须通过 `action_void()` 统一方法执行。
+- 客户拒绝动作不自动修改 `freight.service` 费用；费用修改必须由业务人员在费用层显式完成。
+- 增加历史快照隔离测试与重复生成幂等测试。
+- 开放项 U-38：`voided_reason` 是否强制录入（默认可选字段），确认后登记 B-49。
+
+### 决策45：Sprint4-3 契约按第二轮评审修订
+
+**决策**: 按第二轮评审修订 `INT-FREIGHT-SPRINT4-3-001`：
+
+- 删除 `statement_id → statement_root_id` 字段重命名任务；版本根引用沿用 Sprint4-2 已确认定义，本 Sprint 不做 schema rename。
+- `void_policy.allowed_source_states = [draft]`，禁止对 voided / confirmed / draft_invoice 作废；Void 必须经 `action_void()` 统一方法。
+- 明确作废结算单不回写或重置 `freight.service` 费用事实；重新生成时由现有费用选择规则重新计算可纳入费用。
+- 新增 `snapshot_invariants`：Statement.line 是不可变快照，不重新从 freight.service 计算覆盖，历史 line 不受费用后续修改影响，新版本必须创建新 line。
+- U-38 确认：`voided_reason` 可选、不强制（B-49），不再阻塞编码。
+- 新增开放项 U-39：Draft 结算单在费用再次修改后是原 Draft 重建/刷新，还是生成新的 version_no（确认后登记 B-50）。
+- 新增历史快照反向污染测试与重复生成幂等测试。
+
+### 决策46：Sprint4-3 开放项确认（U-39 → B-50）
+
+**决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-3-001` 开放项 U-39：Draft 结算单在费用再次修改后重新生成时，旧 Draft 作废（voided）并永久留存，新结算单生成新 version_no，不允许原地刷新/重建同版本，登记为 B-50。契约 `decision_gate.status = satisfied`，可以进入编码。

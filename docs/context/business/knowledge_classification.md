@@ -53,6 +53,9 @@
 | B-45 | 发票 Page 不拆分应收/应付子页，合并一页并按 move_type 区分 | 2026-08-12 用户确认（U-35） |
 | B-46 | 客户结算单费用范围 = customer-side revenue charges（shipper/consignee）；vendor cost 不进入客户结算单；Vendor Bill 为供应商自有账单，我方不创建（对齐 B-35/BR-35） | 2026-08-12 用户确认 |
 | B-47 | 结算单生成入口沿用现有 wizard 模式（Services 页 Generate Statement → 勾选费用行），不新建独立入口 | 2026-08-12 用户确认（U-37） |
+| B-48 | 客户拒绝 = 当前 draft 结算单进入 voided 终态，不作废原单修改；费用修改回到 freight.shipment / freight.service；重新生成新结算单并创建全新 statement.line 快照；版本链 statement_root_id + version_no + previous_statement_id（版本根引用沿用 Sprint4-2 定义，不做字段重命名），旧结算单永久不可变 | 2026-08-12 用户确认 |
+| B-49 | voided_reason 为可选字段，不强制录入，不作为 Sprint4-3 编码阻塞项 | 2026-08-12 用户确认（U-38） |
+| B-50 | Draft 结算单在费用再次修改后重新生成：旧 Draft 作废（voided）并永久留存，新结算单生成新 version_no；不允许原地刷新/重建同版本 | 2026-08-12 用户确认（U-39） |
 
 ## 引用规范
 

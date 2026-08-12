@@ -3,12 +3,56 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.48
+context_version: 0.1.52
 update_time: 2026-08-12
-adapt_sprint: Sprint4-2-Statement-Generation
+adapt_sprint: Sprint4-3-Statement-Void-Revision
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.52:
+    update_content: |
+      Sprint4-3 开放项确认（决策46）：
+      - U-39 → B-50：旧 Draft 作废并永久留存，新结算单生成新 version_no
+      - 不允许原地刷新/重建同版本
+      - decision_gate satisfied，可进入编码
+    update_type: Sprint4-3 开放项确认
+    effect_scope: intent_sprint4_3 + history + business
+
+  0.1.51:
+    update_content: |
+      Sprint4-3 契约按第二轮评审修订（决策45）：
+      - 删除 statement_id → statement_root_id schema rename
+      - void 来源状态写死 draft；禁止 voided/confirmed/draft_invoice
+      - 作废不回写 freight.service；重新生成时重新计算可纳入费用
+      - snapshot_invariants：Statement.line 不可变快照，新版本创建新 line
+      - U-38 确认（voided_reason 可选，B-49）
+      - 新增 U-39（Draft 再次生成版本行为，确认后 B-50）
+      - 新增历史快照反向污染测试与重复生成幂等测试
+    update_type: Sprint4-3 契约第二轮评审修订
+    effect_scope: intent_sprint4_3 + business + history
+
+  0.1.50:
+    update_content: |
+      Sprint4-3 契约按评审修订（决策44）：
+      - 作废边界不绑定 draft；仅未确认/未开票当前结算单可作废
+      - 费用“重新成为下一版结算单来源”，非“释放”；不得改删旧 statement.line
+      - 版本根字段重命名 statement_root_id
+      - voided 终态，Void 仅经 action_void()；拒绝不自动改费用
+      - 新增快照隔离测试与重复生成幂等测试
+      - 开放项 U-38（voided_reason 是否强制），确认后登记 B-49
+    update_type: Sprint4-3 契约评审修订
+    effect_scope: intent_sprint4_3 + business + history
+
+  0.1.49:
+    update_content: |
+      Sprint4-3 契约起草（决策43，B-48）：
+      - 客户拒绝 = 作废，原结算单不可修改
+      - 费用修改回 freight.shipment / freight.service 费用层
+      - 重新生成新结算单，版本链 statement_id + version_no + previous_statement_id
+      - 审计链 Shipment → Fees；Statement-001 [Void] → Statement-002 [Draft]
+    update_type: Sprint4-3 Intent 起草
+    effect_scope: intent_sprint4_3 + business + history
+
   0.1.48:
     update_content: |
       Sprint4-2 开放项确认（决策42）：

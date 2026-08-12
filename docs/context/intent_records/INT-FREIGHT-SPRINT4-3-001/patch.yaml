@@ -1,0 +1,22 @@
+intent_id: INT-FREIGHT-SPRINT4-3-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/models/freight_statement.py
+  - mymodules/tk_freight/views/freight_statement_view.xml
+  - mymodules/tk_freight/i18n/zh_CN.po
+  - docs/context/intent/intent_sprint4_3_statement_void_revision.yaml
+  - docs/context/business/knowledge_classification.md
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT4-3-001/
+  - docs/context/validation/test_exec_records.yaml
+
+scope_notes:
+  - "新增 voided_reason 可选字段与 action_void(reason) 审计"
+  - "作废为 voided 终态；draft 可作废，voided/confirmed/draft_invoice 禁止作废"
+  - "作废不回写 freight.service；重新生成时从当前费用重新创建全新 statement.line 快照"
+  - "版本链 statement_id（根）/ previous_statement_id / version_no；不做 schema rename"
+  - "B-50：旧 Draft 作废永久留存，新结算单生成新 version_no"
+  - "未实现 confirmed 客户接受（Sprint4-4）、开票、Vendor Bill"

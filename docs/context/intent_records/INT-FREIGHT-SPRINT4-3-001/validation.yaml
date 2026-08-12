@@ -1,0 +1,16 @@
+intent_id: INT-FREIGHT-SPRINT4-3-001
+context_baseline: "0.1.51"
+execution_time: "2026-08-12"
+
+static_gates:
+  context_loader: "0.1.52 baseline PASS（Development profile，选中 intent_sprint4_3_statement_void_revision.yaml）"
+  verify: "18/18 PASS（提交后 c15 通过）"
+  py_compile: "PASS"
+  xml_parse: "PASS"
+
+runtime:
+  code_change: "mymodules/tk_freight（freight_statement.py / freight_statement_view.xml / zh_CN.po）"
+  database: "odoo19_freight"
+  module_upgrade: "button_immediate_upgrade PASS（tk_freight 19.0.2.2.0，act_url 成功；odoo_check.py 因无 XML-RPC 凭据沿用服务端等价方法）"
+  log_check: "debug_logs/odoo_190.log clean"
+  odoo_shell: "12/12 断言 PASS（voided 审计字段、作废终态、header/line 不可变、版本链、快照隔离、反向污染、Draft 重新生成 B-50、重复生成拦截、confirmed 禁止作废）"

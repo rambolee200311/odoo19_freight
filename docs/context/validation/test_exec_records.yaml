@@ -265,3 +265,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "覆盖：费用范围仅 shipper/consignee（B-46）、vendor 排除、Shipment Generate Statement 入口沿用 wizard（B-47）、draft 生成与 STM 编号、金额正确、同业务键重复生成阻止、空选择阻止、结算单行无 vendor；本 Sprint 无 mymodules 代码变更"
+
+  - contract_id: INT-FREIGHT-SPRINT4-3-001
+    sprint_name: Sprint4-3 客户拒绝 → 作废 → 修改费用 → 新结算单
+    context_baseline: "0.1.51"
+    execute_time: "2026-08-12"
+    test_category: "不可变版本重建 + 快照隔离"
+    test_target_models: ["freight.statement", "freight.statement.line", "freight.service"]
+    total_case_count: 12
+    pass_count: 12
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "context_loader 0.1.52 基线 PASS；verify.py 18/18；button_immediate_upgrade PASS；odoo shell 12/12 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "覆盖：voided 审计字段、作废终态、header/line 不可变、版本链、快照隔离（V1=1000/V2=1200）、反向污染（费用改 1500 后 V1/V2 不变）、Draft 重新生成（B-50，V3 version_no=3）、重复生成拦截、confirmed 禁止作废；新增 voided_reason 可选字段"

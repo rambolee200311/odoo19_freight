@@ -9405,3 +9405,18 @@ msgstr "生成结算单"
 msgid "Statements"
 msgstr "结算单"
 
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__voided_reason
+msgid "Void Reason"
+msgstr "作废原因"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__voided_uid
+msgid "Voided By"
+msgstr "作废人"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__voided_date
+msgid "Voided On"
+msgstr "作废时间"
+

@@ -87,6 +87,12 @@
                                        string="Root Statement"/>
                                 <field name="previous_statement_id" readonly="1"
                                        string="Previous Statement"/>
+                                <field name="voided_uid" readonly="1"
+                                       invisible="not voided_uid" string="Voided By"/>
+                                <field name="voided_date" readonly="1"
+                                       invisible="not voided_date" string="Voided On"/>
+                                <field name="voided_reason" readonly="1"
+                                       invisible="not voided_reason" string="Void Reason"/>
                             </group>
                         </group>
                         <notebook>

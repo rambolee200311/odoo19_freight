@@ -77,3 +77,17 @@
 - 本 Sprint 无业务代码变更（沿用 Sprint4 已实现 wizard）
 
 **验收**: context_loader 0.1.48 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 10/10 断言 + log clean PASS。
+
+## Sprint4-3-Statement-Void-Revision (2026-08-12)
+
+**目标**: 客户拒绝 → 作废 → 修改费用 → 重新生成新结算单（不可变版本重建）。
+
+**成果**:
+- 新增 `voided_reason` 可选字段与 `action_void(reason)` 审计（voided_uid / voided_date / voided_reason）
+- 作废为 voided 终态：draft 可作废，voided/confirmed/draft_invoice 禁止作废；header 与 statement.line 不可变
+- 作废不回写 freight.service；重新生成时从当前费用创建全新 statement.line 快照
+- 版本链沿用 `statement_id（根）/ previous_statement_id / version_no`，未做 schema rename
+- B-50：旧 Draft 作废永久留存，新结算单生成新 version_no，不允许原地刷新
+- 未实现客户接受确认（Sprint4-4）、开票、Vendor Bill
+
+**验收**: context_loader 0.1.52 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 12/12 断言（快照隔离/反向污染/重复生成拦截）+ log clean PASS。
