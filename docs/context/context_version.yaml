@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.45
+context_version: 0.1.46
 update_time: 2026-08-12
 adapt_sprint: Sprint4-1-Shipment-Form-Pages
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.46:
+    update_content: |
+      Sprint4-1 开放项确认（决策40）：
+      - U-33 → B-43：Page 位于 Accountancy 后，先对账单后发票
+      - U-34 → B-44：对账单 Page 不放操作按钮，仅查看/打开
+      - U-35 → B-45：发票 Page 合并一页，按 move_type 区分
+      - unresolved_unknowns 清空，decision_gate satisfied，可进入编码
+    update_type: Sprint4-1 开放项确认
+    effect_scope: intent_sprint4_1 + history + business
+
   0.1.45:
     update_content: |
       Sprint4-1 契约按评审修订（决策39）：

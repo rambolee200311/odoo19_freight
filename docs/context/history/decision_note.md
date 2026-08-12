@@ -199,3 +199,13 @@
 - 明确 Vendor Bill 只展示、不创建；Invoices Page 仅展示 `freight_operation_id` 关联的 `account.move`（客户发票/供应商账单按类型列区分）。
 - 删除 U-36，全状态展示直接定义为 `display_rule`；开放项收敛为 U-33 / U-34 / U-35，`decision_gate` 映射为 U-33→B-43、U-34→B-44、U-35→B-45。
 - `business_rules.yaml` 与 `__manifest__.py` 移出契约范围；`context_audit` 仅保留 decision_note / sprint_log / context_version / intent_records / test_exec_records。
+
+### 决策40：Sprint4-1 开放项确认
+
+**决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-1-001` 三个开放项：
+
+- U-33 → B-43：对账单/发票两个 Page 位于 Accountancy 页之后，先对账单后发票。
+- U-34 → B-44：对账单 Page 不放置操作按钮，仅提供查看/打开。
+- U-35 → B-45：发票 Page 不拆分应收/应付子页，合并一页并按 move_type 区分。
+
+契约 `unresolved_unknowns` 清空，`decision_gate.status = satisfied`，可以进入编码。

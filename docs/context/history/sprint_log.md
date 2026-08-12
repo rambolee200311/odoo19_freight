@@ -51,3 +51,16 @@
 - 未开发开票申请（B-42）、Vendor Bill 生成、dispute/adjusted、分批开票、行级追溯
 
 **验收**: context_loader PASS；verify.py 全部强制门禁 PASS；XML-RPC 模块升级 + 结算单状态流转与发票幂等断言 PASS。
+
+## Sprint4-1-Shipment-Form-Pages (2026-08-12)
+
+**目标**: `freight.shipment` 表单新增对账单与发票两个只读 Page，建立 Shipment 财务观察窗口。
+
+**成果**:
+- Statements Page：展示该货运单全部结算单版本（含 voided），无操作按钮，仅行跳转打开
+- Invoices Page：展示 `freight_operation_id` 关联的 `account.move`（客户发票/供应商账单按类型区分），无操作按钮
+- `freight.shipment.invoice_ids` 只读 One2many（inverse `freight_operation_id`），仅用于展示
+- 页面位于 Accountancy 之后，先对账单后发票（B-43/B-44/B-45）
+- 未改结算单状态机、开票/追溯逻辑、Vendor Bill 创建、菜单、权限、报表、`__manifest__.py`
+
+**验收**: context_loader 0.1.46 基线 PASS；verify.py 全部强制门禁 PASS；常驻升级 + 27/27 视图断言 + log clean PASS。

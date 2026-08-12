@@ -1004,6 +1004,39 @@
                                     </table>
                                 </div>
                             </page>
+                            <page string="Statements">
+                                <field name="statement_ids" nolabel="1"
+                                       create="False" delete="False">
+                                    <list>
+                                        <field name="name" string="Statement Number"/>
+                                        <field name="customer_id" string="Customer"/>
+                                        <field name="state" string="Status"
+                                               widget="badge"/>
+                                        <field name="version_no" string="Version"/>
+                                        <field name="settlement_date"
+                                               string="Settlement Date"/>
+                                        <field name="amount_total"
+                                               string="Total Amount"/>
+                                        <field name="invoice_count"
+                                               string="Invoice Count"/>
+                                    </list>
+                                </field>
+                            </page>
+                            <page string="Invoices">
+                                <field name="invoice_ids" nolabel="1"
+                                       create="False" delete="False">
+                                    <list>
+                                        <field name="name" string="Invoice Number"/>
+                                        <field name="move_type" string="Type"/>
+                                        <field name="partner_id" string="Partner"/>
+                                        <field name="invoice_date"
+                                               string="Invoice Date"/>
+                                        <field name="state" string="Status"/>
+                                        <field name="amount_total"
+                                               string="Total Amount"/>
+                                    </list>
+                                </field>
+                            </page>
                             <page string="Terms &amp; Conditions">
                                 <field name="term_condition" nolabel="1" placeholder="Terms &amp; Conditions....."
                                        readonly="is_last_stage"/>

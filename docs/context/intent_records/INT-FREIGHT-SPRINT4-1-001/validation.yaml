@@ -1,0 +1,16 @@
+intent_id: INT-FREIGHT-SPRINT4-1-001
+context_baseline: "0.1.45"
+execution_time: "2026-08-12"
+
+static_gates:
+  context_loader: "0.1.46 baseline PASS（Development profile，选中 intent_sprint4_1_shipment_form_pages.yaml）"
+  verify: "18/18 PASS（提交后 c15 通过）"
+  py_compile: "PASS"
+  xml_parse: "PASS"
+
+runtime:
+  code_change: "mymodules/tk_freight（Sprint4-1 范围内：freight_shipment.py / freight_shipment_view.xml）"
+  database: "odoo19_freight"
+  module_upgrade: "button_immediate_upgrade PASS（tk_freight 19.0.2.2.0，act_url 成功；odoo_check.py 因无 XML-RPC 凭据改用服务端等价方法）"
+  log_check: "debug_logs/odoo_190.log clean"
+  odoo_shell: "27/27 断言 PASS（invoice_ids 字段、Statements/Invoices 两个 Page、字段完整、无按钮、顺序 Accountancy→Statements→Invoices、既有页面/统计按钮不变）"

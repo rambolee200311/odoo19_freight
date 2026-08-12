@@ -147,6 +147,8 @@ class FreightShipment(models.Model):
     statement_ids = fields.One2many('freight.statement', 'freight_operation_id',
                                     string='Settlement Statements')
     statement_count = fields.Integer(compute='_compute_statement_count')
+    invoice_ids = fields.One2many('account.move', 'freight_operation_id',
+                                  string='Freight Invoices')
 
     # Custom Department
     custom_ids = fields.One2many('custom.department', 'freight_id')

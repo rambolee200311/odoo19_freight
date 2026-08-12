@@ -1,6 +1,6 @@
 # ==============================================================
 # Intent: Sprint4-1 货运单表单新增对账单与发票两个 Page
-# 状态：起草（未确认，禁止进入编码）
+# 状态：已确认（U-33/U-34/U-35 → B-43/B-44/B-45，可进入编码）
 # 门禁引擎支持 sprint4_1 / sprint4-1 / sprint4.1 子编号契约选择（决策38）。
 # 按评审修订（决策39）：本 Sprint 只建立 Shipment → 财务对象观察窗口，
 # 不建立 Shipment → 财务流程操作入口。
@@ -14,7 +14,7 @@ title: "freight.shipment 表单新增对账单与发票两个 Page"
 target_scope: "仅在 freight.shipment 表单 notebook 内新增两个只读展示页：Statements 与 Invoices。Statements 展示当前货运单已有的全部结算单记录及历史版本；Invoices 展示当前货运单已有的 account.move 财务单据（客户发票及供应商账单）。本 Intent 不创建或修改结算单、发票、供应商账单，不实施状态机、确认、作废、开票、红冲、版本生成或审批逻辑"
 
 context_binding:
-  bind_context_version: "0.1.45"
+  bind_context_version: "0.1.46"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -29,7 +29,19 @@ business_intent:
     confirmation_ref: "Sprint4-1 起草 + 评审修订"
   related_sprint:
     - "INT-FREIGHT-SPRINT4-001"
-  confirmed_decisions: []
+  confirmed_decisions:
+    - id: "B-43"
+      decision_ref: "U-33"
+      status: "CONFIRMED"
+      statement: "对账单/发票两个 Page 位于 Accountancy 页之后，先对账单后发票"
+    - id: "B-44"
+      decision_ref: "U-34"
+      status: "CONFIRMED"
+      statement: "对账单 Page 不放置操作按钮，仅提供查看/打开"
+    - id: "B-45"
+      decision_ref: "U-35"
+      status: "CONFIRMED"
+      statement: "发票 Page 不拆分应收/应付子页，合并一页并按 move_type 区分"
   draft_scope:
     - "Statements Page：展示 freight.shipment 已存在的全部结算单记录与版本（含 voided）"
     - "Invoices Page：展示 freight_operation_id 关联的 account.move（客户发票 / 供应商账单，按 move_type 区分）"
@@ -37,25 +49,29 @@ business_intent:
   draft_recommendations:
     - "U-34 推荐结论：Statements Page 不放任何操作按钮，仅提供打开"
     - "来源结算单列不在本 Sprint 要求；account.move.freight_statement_id 为 Sprint4 已存在字段，本 Sprint 不新增、不回填"
-  unresolved_unknowns: ["U-33", "U-34", "U-35"]
-  draft_open_questions:
+  unresolved_unknowns: []
+  confirmed_open_questions:
     - id: "U-33"
-      statement: "两个 Page 在表单 notebook 中的位置与顺序（默认建议：Accountancy 页之后，先对账单后发票）"
+      status: "CONFIRMED"
+      decision_ref: "B-43"
+      statement: "两个 Page 在表单 notebook 中的位置与顺序：Accountancy 页之后，先对账单后发票"
     - id: "U-34"
-      statement: "对账单 Page 是否直接放置操作按钮（评审推荐：不放，仅查看跳转）"
+      status: "CONFIRMED"
+      decision_ref: "B-44"
+      statement: "对账单 Page 不放置操作按钮，仅查看跳转"
     - id: "U-35"
-      statement: "发票 Page 是否拆分应收/应付两个子页（默认合并一页并按 move_type 列区分）"
+      status: "CONFIRMED"
+      decision_ref: "B-45"
+      statement: "发票 Page 不拆分应收/应付两个子页，合并一页并按 move_type 列区分"
 
 unknown_policy:
   unresolved_unknowns_allowed: true
   newly_discovered_unknown_action: "record_and_continue"
-  coding_gate: "U-33 ~ U-35 确认前禁止修改业务代码（verify c18）"
+  coding_gate: "开放项已确认（决策40），无未决 UNKNOWN"
 
 decision_gate:
-  required_before_coding:
-    - "U-33"
-    - "U-34"
-    - "U-35"
+  status: "satisfied"
+  required_before_coding: []
   mapping:
     - "U-33 -> B-43"
     - "U-34 -> B-44"
@@ -66,6 +82,7 @@ scope:
     - "mymodules/tk_freight/models/freight_shipment.py"
     - "mymodules/tk_freight/views/freight_shipment_view.xml"
     - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/knowledge_classification.md"
     - "docs/context/history/decision_note.md"
     - "docs/context/history/sprint_log.md"
     - "docs/context/context_version.yaml"
@@ -80,7 +97,7 @@ scope:
     - "mymodules/tk_freight/security/"
     - "mymodules/tk_freight/views/menus.xml"
     - "mymodules/tk_freight/__manifest__.py"
-    - "docs/context/business/"
+    - "docs/context/business/business_rules.yaml"
     - "mymodules/tk_freight/data/"
     - "mymodules/tk_freight/report/"
     - "mymodules/tk_freight/controllers/"
@@ -170,7 +187,7 @@ acceptance_criteria:
     - "不产生重复发票"
   validation:
     - "context_loader.py 基线 PASS（bind 0.1.45）"
-    - "verify.py 全部强制门禁 PASS（U-33 ~ U-35 确认后）"
+    - "verify.py 全部强制门禁 PASS"
     - "XML-RPC 模块升级验证通过"
     - "业务负责人人工验收通过"
 
@@ -223,7 +240,7 @@ execution_artifacts:
 success_definition:
   - "货运单表单新增对账单与发票两个 Page，展示内容与行跳转正确"
   - "既有页面、统计按钮与结算单/发票业务逻辑不受影响"
-  - "decision_gate 已确认：U-33 → B-43、U-34 → B-44、U-35 → B-45"
+  - "decision_gate 已满足：U-33 → B-43、U-34 → B-44、U-35 → B-45（决策40）"
   - "所有强制验证通过"
 
 deliverables:
