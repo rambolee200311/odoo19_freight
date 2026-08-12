@@ -213,3 +213,21 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: false
     note: "freight_port.xml state_id required 已移除；模型层未变更；c15 待提交后复核"
+
+  - contract_id: INT-FREIGHT-SPRINT4-001
+    sprint_name: Sprint4 结算单与草稿应收发票流程
+    context_baseline: "0.1.41"
+    execute_time: "2026-08-12"
+    test_category: "结算单状态机 + 幂等草稿开票"
+    test_target_models: ["freight.statement", "freight.statement.line",
+                         "freight.statement.wizard", "freight.statement.wizard.line"]
+    total_case_count: 28
+    pass_count: 28
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "context_loader 基线 PASS；verify.py 18/18；button_immediate_upgrade 升级 PASS；odoo shell 28/28 断言 PASS"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "覆盖：模型/字段、旧开票拦截、server action 取消绑定、向导生成、版本链、作废释放、确认冻结、税目字段、tax_amount 调整、草稿发票幂等与 header 追溯。odoo_check.py 因 odoo.conf 未配置 xmlrpc_user/xmlrpc_password 且库内无 admin 登录账号，改用常驻服务 + 服务端 button_immediate_upgrade（shell 调用，返回 act_url 成功）+ 重启 + log clean 验证；测试数据使用独立测试客户/产品/费用行"

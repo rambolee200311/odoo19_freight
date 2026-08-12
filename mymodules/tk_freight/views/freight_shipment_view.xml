@@ -784,8 +784,10 @@
                                     <div class="col-12">
                                         <button name="action_create_vendor_bill" class="btn btn-outline-primary me-1"
                                                 type="object" string="Create Vendor Bill" invisible="not id"/>
-                                        <button name="action_create_invoice" class="btn btn-outline-primary"
-                                                type="object" string="Create Invoice" invisible="not id"/>
+                                        <button name="action_generate_statement" class="btn btn-outline-primary me-1"
+                                                type="object" string="Generate Statement" invisible="not id"/>
+                                        <button name="button_open_statements" class="btn btn-outline-primary"
+                                                type="object" string="Statements" invisible="not id"/>
                                     </div>
                                 </div>
                                 <field name="freight_services" nolabel="1"
@@ -1271,7 +1273,7 @@
                 if records:
                 action = records.action_create_shipper_invoice()
             </field>
-            <field name="binding_model_id" ref="tk_freight.model_freight_shipment"/>
+            <field name="binding_model_id" eval="False"/>
             <field name="binding_view_types">list</field>
         </record>
         <record id="ir_actions_server_freight_create_consignee_invoice" model="ir.actions.server">
@@ -1283,7 +1285,7 @@
                 if records:
                 action = records.action_create_consignee_invoice()
             </field>
-            <field name="binding_model_id" ref="tk_freight.model_freight_shipment"/>
+            <field name="binding_model_id" eval="False"/>
             <field name="binding_view_types">list</field>
         </record>
     </data>

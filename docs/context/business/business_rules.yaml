@@ -1,7 +1,7 @@
 # 机器可读业务规则表（供 verify 对比器使用）
 # BR-* 引用语义见 knowledge_classification.md
 version: 0.1.0
-updated: 2026-08-11
+updated: 2026-08-12
 
 rules:
   - id: BR-01
@@ -77,20 +77,122 @@ rules:
     status: DECISION_CONFIRMED
     source: B-14
     statement: "应收/应付发票菜单仅显示 freight_operation_id 有值单据"
+  - id: BR-23
+    category: finance
+    status: CONFIRMED
+    source: B-23
+    statement: "对账单折算默认取当前汇率，允许用户录入结算汇率覆盖"
+  - id: BR-24
+    category: finance
+    status: CONFIRMED
+    source: B-24
+    statement: "费用行整行进一张发票，禁止行内分批/部分开票"
+  - id: BR-25
+    category: finance
+    status: CONFIRMED
+    source: B-25
+    statement: "利润公式中税费净额 = 销项税 − 进项税"
+  - id: BR-26
+    category: tax
+    status: CONFIRMED
+    source: B-26
+    statement: "服务/产品档案维护税目编码和税目名称；手工调整税额按 tax_amount 权威落账"
+  - id: BR-27
+    category: report
+    status: CONFIRMED
+    source: B-27
+    statement: "PDF 对账单需求以 docs/reports/应收对账单原始单据.md 为输入"
+  - id: BR-28
+    category: scope
+    status: DECISION_CONFIRMED
+    source: B-28
+    statement: "当前不建设角色权限与 portal 收敛，保持现状"
+  - id: BR-29
+    category: scope
+    status: DECISION_CONFIRMED
+    source: B-29
+    statement: "标准 Accounting 创建入口当前不纳入收敛，Sprint4 只收敛 tk_freight 业务开票入口"
+  - id: BR-30
+    category: process
+    status: CONFIRMED
+    source: B-30
+    statement: "旧开票入口采用隐藏策略，保留方法与兼容调用能力"
+  - id: BR-31
+    category: process
+    status: CONFIRMED
+    source: B-31
+    statement: "Statement 编号规则：STM/年月/4位流水码"
+  - id: BR-32
+    category: process
+    status: DECISION_CONFIRMED
+    source: B-32
+    statement: "历史数据不迁移，对账单从新数据开始"
+  - id: BR-33
+    category: process
+    status: CONFIRMED
+    source: B-33
+    statement: "自动生成费用行通过对账单状态管理，客户确认后生成发票"
+  - id: BR-34
+    category: process
+    status: DECISION_CONFIRMED
+    source: B-34
+    statement: "不需要调整申请/审批角色流程"
+  - id: BR-35
+    category: finance
+    status: CONFIRMED
+    source: B-35
+    statement: "供应商成本行排除在客户对账单外"
+  - id: BR-36
+    category: process
+    status: CONFIRMED
+    source: B-36
+    statement: "客户 reject 的对账单作废，释放费用为可修改状态"
+  - id: BR-37
+    category: process
+    status: CONFIRMED
+    source: B-37
+    statement: "confirmed 后强制版本化，已确认版本不可原地修改"
+  - id: BR-38
+    category: finance
+    status: CONFIRMED
+    source: B-38
+    statement: "不建立 Statement Line ↔ Invoice Line 行级关联，仅 header 级 statement ↔ invoice 关联"
+  - id: BR-39
+    category: process
+    status: CONFIRMED
+    source: B-39
+    statement: "生成结算单使用向导，在列表行勾选费用行生成结算单"
+  - id: BR-40
+    category: process
+    status: CONFIRMED
+    source: B-40
+    statement: "客户拒绝后费用修改必须回到 freight.shipment / freight.service，结算单本身不可编辑费用"
+  - id: BR-41
+    category: finance
+    status: CONFIRMED
+    source: B-41
+    statement: "客户接受后生成草稿应收发票（account.move draft），草稿不代表已过账"
+  - id: BR-42
+    category: scope
+    status: DECISION_CONFIRMED
+    source: B-42
+    statement: "开票申请为预留业务节点，本 Sprint 不开发模型/按钮/审批流/状态机/权限"
 
 assumptions:
   - id: A-1
-    status: ASSUMPTION
-    statement: "费用行整行进一张发票，不做行级分批"
+    status: CONFIRMED
+    source: B-24
+    statement: "费用行整行进一张发票，禁止行内分批/部分开票"
   - id: A-2
     status: ASSUMPTION
     statement: "收入/成本按单据日汇率，收付款按登记日汇率"
   - id: A-3
-    status: ASSUMPTION
+    status: CONFIRMED
+    source: B-25
     statement: "税费净额 = 销项税 − 进项税"
   - id: A-4
     status: ASSUMPTION
-    statement: "手工税额开票用定额税码"
+    statement: "手工税额开票用定额税码（未确认；当前系统无税目编码/名称字段，产品档案仅可维护标准税率）"
   - id: A-5
     status: ASSUMPTION
     statement: "开票生成 Odoo 草稿单据"
@@ -105,24 +207,9 @@ assumptions:
     statement: "财务字段按本位币展示、发票不改口径"
 
 unknowns:
-  - id: U-01
+  - id: U-08
     status: UNKNOWN
-    statement: "费用行分批开票是否允许"
-  - id: U-02
+    statement: "货单序列 transport→operation 映射是否保留"
+  - id: U-09
     status: UNKNOWN
-    statement: "汇率折算日期口径"
-  - id: U-03
-    status: UNKNOWN
-    statement: "利润公式中税费的净税解释"
-  - id: U-04
-    status: UNKNOWN
-    statement: "手工税额开票机制"
-  - id: U-05
-    status: UNKNOWN
-    statement: "收付款登记货单入口、报价转订舱价格锁定"
-  - id: U-06
-    status: UNKNOWN
-    statement: "报表需求、角色权限、门户写权限"
-  - id: U-07
-    status: UNKNOWN
-    statement: "U8C/外部财务接口是否恢复"
+    statement: "路由生成拣货单 pickup/delivery 类型映射语义"

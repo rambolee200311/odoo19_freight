@@ -9280,3 +9280,128 @@ msgstr "运输类型"
 msgid "陆运"
 msgstr "陆运"
 
+#. module: tk_freight
+#: model:ir.model,name:tk_freight.model_freight_statement
+msgid "Customer Settlement Statement"
+msgstr "客户结算单"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__name
+msgid "Statement Number"
+msgstr "结算单号"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__state
+msgid "Voided"
+msgstr "已作废"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__state
+msgid "Confirmed"
+msgstr "已确认"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__state
+msgid "Draft Invoice"
+msgstr "草稿发票"
+
+#. module: tk_freight
+#: model:ir.actions.act_window,name:tk_freight.action_freight_statement
+msgid "Settlement Statement"
+msgstr "结算单"
+
+#. module: tk_freight
+#: model:ir.actions.act_window,name:tk_freight.freight_statement_wizard_action
+msgid "Generate Settlement Statement"
+msgstr "生成结算单"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__statement_line_ids
+msgid "Statement Lines"
+msgstr "结算单明细"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__currency_summary
+msgid "Currency Summary"
+msgstr "币种汇总"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__settlement_date
+msgid "Settlement Date"
+msgstr "结算日期"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__version_no
+msgid "Version"
+msgstr "版本"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__statement_id
+msgid "Root Statement"
+msgstr "根结算单"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__previous_statement_id
+msgid "Previous Statement"
+msgstr "上一版本结算单"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement_line__settlement_rate
+msgid "Settlement Rate"
+msgstr "结算汇率"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement_line__tax_code
+msgid "Tax Code"
+msgstr "税目编码"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement_line__tax_name
+msgid "Tax Name"
+msgstr "税目名称"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement_line__tax_amount
+msgid "Tax Amount"
+msgstr "税额"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement_line__amount_untaxed
+msgid "Untaxed Amount"
+msgstr "不含税金额"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_account_move__freight_statement_id
+msgid "Freight Statement"
+msgstr "货运结算单"
+
+#. module: tk_freight
+#: model:ir.ui.view,string:tk_freight.freight_statement_wizard_form_view
+msgid "Selectable Services"
+msgstr "可选费用"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_statement.py:0
+msgid "Confirm"
+msgstr "确认"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_statement.py:0
+msgid "Void"
+msgstr "作废"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_statement.py:0
+msgid "Generate Draft Invoice"
+msgstr "生成草稿发票"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_statement.py:0
+msgid "Generate Statement"
+msgstr "生成结算单"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_statement.py:0
+msgid "Statements"
+msgstr "结算单"
+

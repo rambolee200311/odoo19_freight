@@ -3,12 +3,226 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.20
-update_time: 2026-08-11
-adapt_sprint: Sprint0-Context-Baseline
+context_version: 0.1.42
+update_time: 2026-08-12
+adapt_sprint: Sprint4-Statement-Invoice-Flow
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.42:
+    update_content: |
+      Sprint4 实施完成（决策36）：
+      - 新增 freight.statement / freight.statement.line 状态机与版本链
+      - 结算单生成 wizard（B-39）；同一业务键仅一个非 voided 当前活动结算单
+      - 仅 confirmed 生成草稿应收发票，幂等且 header 级关联 freight_statement_id（B-38/B-41）
+      - product.template 税目编码/税目名称（B-26）；tax_amount 权威落账
+      - 旧 action_create_invoice 隐藏并拦截直调（B-30），server action 取消列表绑定
+      - 未开发开票申请（B-42）、Vendor Bill 生成、dispute/adjusted、分批开票、行级追溯
+    update_type: Sprint4 实施执行
+    effect_scope: intent_sprint4 + business + architecture + history + validation
+
+  0.1.41:
+    update_content: |
+      Sprint4 契约按第二轮评审修订（决策35）：
+      - draft 明确 metadata_only；confirmed 增加 generate_draft_invoice 动作
+      - 唯一性改为“非 voided 当前活动结算单”，补充幂等规则
+      - 新增 wizard_constraints / statement_line_eligibility / tax_master_scope / invoice_idempotency / audit_events / non_inference_rules / file_scope_constraints
+      - action_create_invoice 直接调用拦截；来源追溯明确为 header 级
+    update_type: Sprint4 契约第二轮评审修订
+    effect_scope: intent_sprint4
+
+  0.1.40:
+    update_content: |
+      Sprint4 契约按评审重写（决策34）：
+      - 状态机：draft → voided / confirmed → draft_invoice，删除 dispute/partially_invoiced/invoiced/adjusted
+      - 客户拒绝=作废，费用修改回 freight.shipment/freight.service，重新生成新结算单版本
+      - 仅 confirmed 生成草稿应收发票；开票申请预留不开发（B-42）
+      - Vendor Bill 降级为背景，TD-001 标记延期
+      - 登记 B-40/B-41/B-42（BR-40/BR-41/BR-42）
+    update_type: Sprint4 契约评审重写
+    effect_scope: intent_sprint4 + business + analysis_report + technical_debt
+
+  0.1.39:
+    update_content: |
+      目标工作流与结算单向导确认（决策33，B-39/BR-39）：
+      - 录入费用 → 向导勾选费用行生成结算单 → 客户核对 → 拒绝/作废/释放费用 → 修改 → 新结算单 → 接受 → 草稿发票
+      - 生成结算单使用 wizard（列表勾选费用行）
+      - 开票申请暂不设置开发任务
+    update_type: Sprint3-002 目标工作流确认
+    effect_scope: analysis_report + business + intent_records
+
+  0.1.38:
+    update_content: |
+      技术债登记与规则表补齐：
+      - TD-026：每日汇率自动更新缺失（cron 首选 Frankfurter/ECB，备选 ExchangeRate-API）
+      - business_rules.yaml 补登 U-08 / U-09，恢复 UNKNOWN 结构校验
+      - 分析报告同步 B-29（标准 Accounting 入口不收敛）与 TD-026 说明
+    update_type: TD-026 登记 + 规则表补齐
+    effect_scope: technical_debt + business + analysis_report
+
+  0.1.37:
+    update_content: |
+      Sprint3-002 剩余开放项确认（决策32，B-26 ~ B-38 / BR-26 ~ BR-38）：
+      - U-04 ~ U-32 全部关闭，开放项清空
+      - 关键口径：税目编码/名称入档案、PDF 以应收对账单原始单据.md 为输入、旧入口隐藏、编号 STM/年月/流水、历史不迁移、客户确认后开票、供应商成本不入对账单、reject 作废释放费用、confirmed 强制版本化、不做行级关联
+      - Sprint4 实施契约按 B-23 ~ B-38 修订
+    update_type: Sprint3-002 开放项确认
+    effect_scope: business + analysis_report + intent_records
+
+  0.1.36:
+    update_content: |
+      Sprint3-002 开放项确认（决策30/31）：
+      - U-01 → B-24/BR-24：费用行整行进一张发票，禁止行内分批/部分开票
+      - U-03 → B-25/BR-25：利润税费净额 = 销项税 − 进项税
+      - knowledge_classification / business_rules / 分析报告已同步
+    update_type: Sprint3-002 开放项确认
+    effect_scope: business + analysis_report + intent_records
+
+  0.1.35:
+    update_content: |
+      U-04 税目字段范围澄清（决策29）：
+      - 运行时确认 account.tax / product.product / product.template 无税目编码/税目名称字段
+      - 产品档案仅可维护标准销售/采购税率（taxes_id / supplier_taxes_id）
+      - 税目字段设计与手工调整税额落账机制待 Sprint4 确认
+    update_type: U-04 税目字段澄清
+    effect_scope: business + analysis_report + intent_records
+
+  0.1.34:
+    update_content: |
+      U-02 汇率口径确认（决策28，B-23/BR-23）：
+      - 对账单折算默认取当前汇率，允许用户录入结算汇率覆盖
+      - knowledge_classification / business_rules / Sprint3-002 报告已同步
+      - 现系统曾用 2026-08-10 汇率折算 2026-03-19 发票，Sprint4 按 B-23 实现
+    update_type: U-02 汇率口径确认
+    effect_scope: business + analysis_report + intent_records
+
+  0.1.33:
+    update_content: |
+      移除 U8C 历史残留（决策27）：
+      - 本项目为纯 Odoo 项目，无 U8C/外部财务接口
+      - U-07 已从知识资产与分析报告中移除
+    update_type: U8C 残留清理
+    effect_scope: business + constraints + technical_debt + analysis_report
+
+  0.1.32:
+    update_content: |
+      供应商账单口径澄清（Sprint3-002 分析报告）：
+      - 供应商账单由供应商开具原件、业务侧登记，不视为我方技术债
+      - 移除“vendor bill 未折算本位币”的技术债表述
+      - total_bills=-970 为供应商账单按原币登记的 signed 金额，符号口径正确
+    update_type: Sprint3-002 供应商账单口径澄清
+    effect_scope: analysis_report + intent_records
+
+  0.1.31:
+    update_content: |
+      汇率口径核验修正（Sprint3-002 分析报告 FACT-B）：
+      - total_invoiced=32500 为公司本位币 signed 口径（USD 4500 × 7 + CNY 1000），非口径失真
+      - total_bills=-970 为供应商账单按原币登记的 signed 金额，符号口径正确
+      - 修正 0.1.30 中“货单汇总字段与已过账发票口径不一致”的错误表述
+    update_type: Sprint3-002 汇率口径核验修正
+    effect_scope: analysis_report + intent_records
+
+  0.1.30:
+    update_content: |
+      Sprint3-002 分析报告补充运行时核验（FACT-B，odoo shell）：
+      - freight.service 与 account.move 双向追溯字段实际为空
+      - total_invoiced=32500 为本位币 signed 口径；供应商账单按原币登记（供应商原件）
+      - account.move/line 的 statement_id/statement_line_id 为标准银行流水字段，对账单字段需避免命名冲突
+      - freight.statement 系列与 shipment.fee 模型不存在；freight.multiple.invoice 为空表
+    update_type: Sprint3-002 运行时核验
+    effect_scope: analysis_report + intent_records
+
+  0.1.29:
+    update_content: |
+      Sprint3-002 分析报告按评审修订：
+      - 候选规则 B-15 ~ B-22 不再作为设计前提，推荐改为条件式表述
+      - 术语统一为 CODE_FACT freight.service，禁止另建 shipment.fee
+      - 明确 Statement Version ≠ Audit Log
+      - 追溯链扩展为五层，关联基数登记 U-32
+      - 新增 CODE_FACT 证据等级章节，报告扩展为 14 章
+      - U-23 提升为 LEVEL4 / BLOCKING UNKNOWN
+    update_type: Sprint3-002 分析报告评审修订
+    effect_scope: analysis_report + intent_sprint3_analysis
+
+  0.1.28:
+    update_content: |
+      Sprint3-002 分析执行完成（INT-FREIGHT-SPRINT3-002）：
+      - 交付 docs/reports/sprint3_finance_flow_analysis.md（14 个必需章节）
+      - 执行记录归档至 docs/context/intent_records/INT-FREIGHT-SPRINT3-002/
+      - 未修改业务代码/模型/视图/权限/数据库
+      - UNKNOWN（U-02 ~ U-07 + U-23 ~ U-29）待业务负责人确认后进入 Sprint4
+    update_type: Sprint3-002 分析执行完成
+    effect_scope: intent_sprint3_analysis + analysis_report + intent_records
+
+  0.1.27:
+    update_content: |
+      Sprint3-002 分析契约按评审修订（INT-FREIGHT-SPRINT3-002）：
+      - 移除 invariants 对 Sprint4 候选规则 B-15 ~ B-22 的引用
+      - unknown_policy 允许记录 UNKNOWN（record_and_continue），禁止自行解决/转 CONFIRMED
+      - 新增 analysis_constraints / design_advisory_policy / analysis_report.required_sections
+      - context_policy 增加 update_policy；change_boundary 增加 security/database 空边界
+      - 分析报告重构为 13 个必需章节，设计建议标注 PROPOSAL/INFERENCE/UNKNOWN
+    update_type: Sprint3-002 分析契约评审修订
+    effect_scope: intent_sprint3_analysis + analysis_report
+
+  0.1.26:
+    update_content: |
+      Sprint3 分析阶段意图契约登记（INT-FREIGHT-SPRINT3-002）：
+      - 交付现状分析报告 docs/reports/sprint3_finance_flow_analysis.md
+      - 实施契约已暂存为 Sprint4（INT-FREIGHT-SPRINT4-001）
+      - 分析阶段 UNKNOWN 清单（含新增 U-23 ~ U-29）待业务负责人确认后再进入 Sprint4
+    update_type: Sprint3 分析阶段契约登记
+    effect_scope: intent_sprint3_analysis
+
+  0.1.25:
+    update_content: |
+      Sprint3 重新规划：
+      - 原实施契约 INT-FREIGHT-SPRINT3-001 暂存为 Sprint4（INT-FREIGHT-SPRINT4-001）
+      - 新 Sprint3 为财务流程现状分析阶段，只输出分析报告，不修改代码/Context
+      - B-15 ~ B-22 / BR-15 ~ BR-22 决策引用不变
+    update_type: Sprint3 重新规划
+    effect_scope: intent_sprint3 + intent_sprint4
+
+  0.1.24:
+    update_content: |
+      Sprint3 契约开放项确认（INT-FREIGHT-SPRINT3-001）：
+      - U-17 → B-20：对账单仅限客户（AR），供应商账单沿用既有链路
+      - U-18 → B-21：明细行允许本币/原币，按币种分别汇总本币与原币金额，禁止跨币种合并汇总
+      - U-19 → B-22：开票后全部调整完成才进入 adjusted，adjusted 为终态
+      契约 unresolved_unknowns 已清空，可进入执行。
+    update_type: Sprint3 契约开放项确认
+    effect_scope: intent_sprint3
+
+  0.1.23:
+    update_content: |
+      Sprint3 契约按 L3 评审修订（INT-FREIGHT-SPRINT3-001）：
+      - 状态机补齐 partially_invoiced，补充可执行状态转移矩阵
+      - 明确修订为不可变版本链（revision_of / version_no）与唯一业务键（freight_operation_id + customer_id）
+      - 补充 tax_policy / billing_traceability / legacy_invoice_entry / permission_policy / 并发与币种规则
+      - 删除 menu_assertions，收窄 unchanged_business_behavior 与文件语义范围
+      - 明确不新建 data XML
+      - 登记开放项 U-17（客户/供应商对账单范围）、U-18（多币种 Statement）、U-19（adjusted 语义），确认前不进入执行
+    update_type: Sprint3 契约评审修订
+    effect_scope: intent_sprint3
+
+  0.1.22:
+    update_content: |
+      Sprint3 契约开放项确认：
+      - B-15：对账单按“货运单 + 客户”一单一账
+      - B-16：修订保留完整快照
+      - B-17：已确认对账单允许分批/按费用行开票
+      - B-18：开票后调整仅允许红冲/贷项通知单
+      - B-19：费用无税率默认不含税，对账单记录税率/税额/含税/不含税并可手工调整
+    update_type: Sprint3 契约开放项确认
+    effect_scope: intent_sprint3
+
+  0.1.21:
+    update_content: |
+      Sprint3 契约起草：费用录入 → 对账单草稿/异议/确认 → 发票生成 → 开票后调整（INT-FREIGHT-SPRINT3-001）。
+      待业务负责人确认后进入编码执行。
+    update_type: Sprint3 契约起草
+    effect_scope: intent_sprint3
+
   0.1.20:
     update_content: |
       Sprint2 执行完成：

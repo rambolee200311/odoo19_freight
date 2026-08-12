@@ -28,17 +28,19 @@ mymodules/tk_freight/
 | 中游 | `shipment.freight.booking` | 订舱 |
 | 下游 | `freight.shipment`、`freight.route`、`shipment.package.line`、`shipment.item` | 货单及承运明细 |
 | 计费 | `freight.service` | 收入/成本费用行 |
-| 结算 | `account.move`（out/in）、`account.payment`、`freight.multiple.invoice` | 发票/账单/收付款登记 |
+| 结算 | `freight.statement`、`freight.statement.line` | 客户结算单（draft → voided / confirmed → draft_invoice，版本链） |
+| 开票 | `account.move`（out/in）、`account.payment`、`freight.multiple.invoice` | 发票/账单/收付款登记（发票 header 关联 `freight_statement_id`，B-38） |
 | 基础资料 | `freight.port`、`freight.vessel`、`freight.airline`、`freight.package`、`freight.incoterms`、`freight.move.type`、`certificate.type`、`shipment.location`、`tracking.template` 等 | 主数据 |
 
 ## 3. 主流程
 
 ```text
-CRM/门户 → 报价 → 订舱 → 货单 → 服务费 → 客户发票/供应商账单 → 收付款登记 → 货单账务汇总与利润
+CRM/门户 → 报价 → 订舱 → 货单 → 服务费 → 结算单（wizard 勾选费用行）→ 客户确认/作废 → 草稿应收发票/供应商账单 → 收付款登记 → 货单账务汇总与利润
 ```
 
 ## 4. 分层约束
 
 - 业务字段只加在 tk_freight 模型；官方模型只做最小继承（`account.move`、`sale.order`、`stock.picking`、`res.partner`）。
 - 财务联动必须走 `account` 标准模型与 API，禁止绕过 ORM。
+- 结算单为不可变快照：draft 仅允许税额/结算汇率元数据调整；voided/confirmed/draft_invoice 不可原地修改，变更走版本链重新生成。
 - 门户只承担查询/询价能力；写权限收敛待角色权限方案确定后实施。

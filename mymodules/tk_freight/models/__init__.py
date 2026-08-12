@@ -10,3 +10,4 @@ from . import freight_quot
 from . import res_config
 from . import freight_crm
 from . import stock_picking
+from . import freight_statement

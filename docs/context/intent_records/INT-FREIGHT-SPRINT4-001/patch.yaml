@@ -1,0 +1,31 @@
+intent_id: INT-FREIGHT-SPRINT4-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/models/freight_statement.py
+  - mymodules/tk_freight/models/freight_shipment.py
+  - mymodules/tk_freight/models/freight_configuration.py
+  - mymodules/tk_freight/models/__init__.py
+  - mymodules/tk_freight/wizard/freight_statement_wizard.py
+  - mymodules/tk_freight/wizard/__init__.py
+  - mymodules/tk_freight/views/freight_statement_view.xml
+  - mymodules/tk_freight/views/freight_statement_wizard_view.xml
+  - mymodules/tk_freight/views/freight_shipment_view.xml
+  - mymodules/tk_freight/views/freight_configuration.xml
+  - mymodules/tk_freight/security/ir.model.access.csv
+  - mymodules/tk_freight/i18n/zh_CN.po
+  - mymodules/tk_freight/__manifest__.py
+  - docs/context/business/business_rules.yaml
+  - docs/context/business/knowledge_classification.md
+  - docs/context/architecture/module_map.md
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT4-001/
+  - docs/context/validation/test_exec_records.yaml
+
+scope_notes:
+  - "仅实现 INT-FREIGHT-SPRINT4-001 确认闭环：draft → voided / confirmed → draft_invoice"
+  - "未开发开票申请（B-42）、Vendor Bill 生成、dispute/adjusted、分批开票、行级追溯"
+  - "旧 action_create_invoice 保留方法，UI 隐藏且直调拦截（B-30）"
+  - "发票按币种生成且幂等，header 级关联 freight_statement_id（B-38/B-41）"

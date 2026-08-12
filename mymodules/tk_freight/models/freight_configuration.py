@@ -19,11 +19,20 @@ class ResPartner(models.Model):
     multiple_invoice_ids = fields.One2many('freight.multiple.invoice', 'partner_id')
 
 
+class ProductTemplate(models.Model):
+    """Product tax master data used by settlement statements."""
+    _inherit = 'product.template'
+
+    tax_code = fields.Char(string='Tax Code')
+    tax_name = fields.Char(string='Tax Name')
+
+
 class CustomerInvoice(models.Model):
     """customer invoice"""
     _inherit = 'account.move'
 
     freight_operation_id = fields.Many2one('freight.shipment', string='Freight Shipment')
+    freight_statement_id = fields.Many2one('freight.statement', string='Freight Statement')
     direction = fields.Selection(related="freight_operation_id.direction", string='Direction')
     transport = fields.Selection(related="freight_operation_id.transport", string='Transport Via')
     operation = fields.Selection(related="freight_operation_id.operation", string='Operation')

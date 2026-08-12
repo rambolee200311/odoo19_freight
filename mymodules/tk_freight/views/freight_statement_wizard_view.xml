@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="freight_statement_wizard_form_view" model="ir.ui.view">
+            <field name="name">freight.statement.wizard.form.view</field>
+            <field name="model">freight.statement.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Generate Settlement Statement">
+                    <group>
+                        <group>
+                            <field name="shipment_id" string="Freight Operation"
+                                   required="1"/>
+                        </group>
+                        <group>
+                            <field name="customer_id" string="Customer" required="1"/>
+                        </group>
+                    </group>
+                    <field name="line_ids" nolabel="1">
+                        <list string="Selectable Services">
+                            <field name="select" string="Select" widget="checkbox"/>
+                            <field name="sequence" string="Sequence"/>
+                            <field name="service_type" string="Service To"/>
+                            <field name="partner_id" string="Invoice To"/>
+                            <field name="name" string="Description"/>
+                            <field name="qty" string="Quantity"/>
+                            <field name="price_unit" string="Unit Price"/>
+                            <field name="currency_id" string="Currency"/>
+                            <field name="tax_code" string="Tax Code"/>
+                            <field name="tax_name" string="Tax Name"/>
+                            <field name="tax_rate" string="Tax Rate (%)"/>
+                            <field name="tax_amount" string="Tax Amount"/>
+                            <field name="settlement_rate" string="Settlement Rate"/>
+                        </list>
+                    </field>
+                    <footer>
+                        <button name="action_generate_statement" type="object"
+                                string="Generate Statement" class="btn-primary"/>
+                        <button string="Cancel" special="cancel" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="freight_statement_wizard_action" model="ir.actions.act_window">
+            <field name="name">Generate Settlement Statement</field>
+            <field name="res_model">freight.statement.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+    </data>
+</odoo>

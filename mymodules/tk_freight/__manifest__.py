@@ -12,7 +12,7 @@
     'summary': """
         All types of transportation management
     """,
-    'version': '2.1.0',
+    'version': '2.2.0',
     'author': 'TechKhedut Inc.',
     'category': 'services',
     'company': 'TechKhedut Inc.',
@@ -46,6 +46,8 @@
         # Views
         'views/asset.xml',
         'views/freight_shipment_view.xml',
+        'views/freight_statement_view.xml',
+        'views/freight_statement_wizard_view.xml',
         'views/freight_configuration.xml',
         'views/booking_view.xml',
         'views/freight_templates.xml',

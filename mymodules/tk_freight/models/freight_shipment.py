@@ -143,6 +143,11 @@ class FreightShipment(models.Model):
     total_vendor_service_charge = fields.Monetary(string="Total Vendor Service", store=True,
                                                   compute="_compute_service_charges")
 
+    # Settlement Statements
+    statement_ids = fields.One2many('freight.statement', 'freight_operation_id',
+                                    string='Settlement Statements')
+    statement_count = fields.Integer(compute='_compute_statement_count')
+
     # Custom Department
     custom_ids = fields.One2many('custom.department', 'freight_id')
 
@@ -339,6 +344,12 @@ class FreightShipment(models.Model):
                 [('freight_operation_id', 'in', [order.id]), ('move_type', '=', 'in_invoice')])
             order.service_booking_count = 1 if self.booking_id else 0
 
+    @api.depends('statement_ids')
+    def _compute_statement_count(self):
+        """compute statement count"""
+        for order in self:
+            order.statement_count = len(order.statement_ids)
+
     @api.depends('freight_packages')
     def _compute_total_gross_net_volume(self):
         """compute total gross net volume"""
@@ -493,6 +504,26 @@ class FreightShipment(models.Model):
         else:
             action['domain'] = [('id', 'in', invoices.ids)]
         return action
+
+    def button_open_statements(self):
+        """button open settlement statements"""
+        self.ensure_one()
+        action = self.env['ir.actions.act_window']._for_xml_id(
+            'tk_freight.action_freight_statement')
+        action['domain'] = [('freight_operation_id', '=', self.id)]
+        return action
+
+    def action_generate_statement(self):
+        """open the settlement statement generation wizard"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Generate Settlement Statement'),
+            'res_model': 'freight.statement.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_shipment_id': self.id},
+        }
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -737,6 +768,10 @@ class FreightShipment(models.Model):
 
     def action_create_invoice(self):
         """action create invoice"""
+        raise ValidationError(_(
+            "The direct invoice entry is disabled. Generate a settlement statement "
+            "first, confirm it with the customer, then create the draft customer "
+            "invoice from the confirmed statement."))
         shipper_invoice_line = []
         consignee_invoice_line = []
         shipper_list = self.env['freight.service'].search(

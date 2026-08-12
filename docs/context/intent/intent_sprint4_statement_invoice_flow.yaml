@@ -1,0 +1,549 @@
+# ==============================================================
+# Intent: Sprint4 结算单与草稿应收发票流程
+# 修订：按评审将状态机对齐为“拒绝→作废→修改费用→新结算单→接受→草稿发票”
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-001"
+sprint_version: "Sprint4-Statement-Invoice-Flow"
+intent_work_type: "Development"
+intent_change_type: "New Feature"
+title: "货运单费用 → 结算单草稿/客户核对/作废 → 新结算单 → 客户接受 → 草稿应收发票"
+target_scope: "新增客户结算单状态机（draft → voided / confirmed → draft_invoice），生成入口为 wizard 勾选费用行；供应商账单为供应商原始账单，不纳入本 Sprint 主流程"
+
+context_binding:
+  bind_context_version: "0.1.41"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint3-002 分析确认 + Sprint4 Intent 评审"
+  confirmed_decisions:
+    - id: "B-23"
+      decision_ref: "U-02"
+      decision_status: "CONFIRMED"
+      statement: "对账单折算默认取当前汇率，允许用户录入结算汇率覆盖"
+      rule_refs: ["BR-23"]
+    - id: "B-24"
+      decision_ref: "U-01"
+      decision_status: "CONFIRMED"
+      statement: "费用行整行进一张发票，禁止行内分批/部分开票"
+      rule_refs: ["BR-24"]
+    - id: "B-26"
+      decision_ref: "U-04"
+      decision_status: "CONFIRMED"
+      statement: "服务/产品档案新增税目编码、税目名称；手工调整税额按 tax_amount 权威落账"
+      rule_refs: ["BR-26"]
+    - id: "B-30"
+      decision_ref: "U-24"
+      decision_status: "CONFIRMED"
+      statement: "旧开票入口隐藏，保留方法与兼容调用能力"
+      rule_refs: ["BR-30"]
+    - id: "B-31"
+      decision_ref: "U-25"
+      decision_status: "CONFIRMED"
+      statement: "Statement 编号规则：STM/年月/4位流水码"
+      rule_refs: ["BR-31"]
+    - id: "B-33"
+      decision_ref: "U-27"
+      decision_status: "CONFIRMED"
+      statement: "自动生成费用行通过对账单状态管理，客户确认后生成发票"
+      rule_refs: ["BR-33"]
+    - id: "B-35"
+      decision_ref: "U-29"
+      decision_status: "CONFIRMED"
+      statement: "供应商成本行排除在客户对账单外"
+      rule_refs: ["BR-35"]
+    - id: "B-36"
+      decision_ref: "U-30"
+      decision_status: "CONFIRMED"
+      statement: "客户 reject 的对账单作废，释放费用为可修改状态"
+      rule_refs: ["BR-36"]
+    - id: "B-37"
+      decision_ref: "U-31"
+      decision_status: "CONFIRMED"
+      statement: "confirmed 后强制版本化，已确认版本不可原地修改"
+      rule_refs: ["BR-37"]
+    - id: "B-38"
+      decision_ref: "U-32"
+      decision_status: "CONFIRMED"
+      statement: "不建立 Statement Line ↔ Invoice Line 行级关联，仅 header 级 statement ↔ invoice 关联"
+      rule_refs: ["BR-38"]
+    - id: "B-39"
+      decision_ref: "决策33"
+      decision_status: "CONFIRMED"
+      statement: "生成结算单使用向导，在列表行勾选费用行生成结算单"
+      rule_refs: ["BR-39"]
+    - id: "B-40"
+      decision_ref: "决策34"
+      decision_status: "CONFIRMED"
+      statement: "客户拒绝后费用修改必须回到 freight.shipment / freight.service，结算单本身不可编辑费用"
+      rule_refs: ["BR-40"]
+    - id: "B-41"
+      decision_ref: "决策34"
+      decision_status: "CONFIRMED"
+      statement: "客户接受后生成草稿应收发票（account.move draft），草稿不代表已过账"
+      rule_refs: ["BR-41"]
+    - id: "B-42"
+      decision_ref: "决策34"
+      decision_status: "CONFIRMED"
+      statement: "开票申请为预留业务节点，本 Sprint 不开发模型/按钮/审批流/状态机/权限"
+      rule_refs: ["BR-42"]
+  unresolved_unknowns: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: false
+  newly_discovered_unknown_action: "stop_and_escalate"
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/models/__init__.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_configuration.xml"
+    - "mymodules/tk_freight/security/ir.model.access.csv"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/architecture/module_map.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "新增 freight.statement / freight.statement.line 模型及状态机（代码仅限 freight_statement.py）"
+    - "新增结算单生成 wizard（列表勾选 freight.service 行，B-39）"
+    - "freight_shipment.py 修改范围以 file_scope_constraints.freight_shipment.py 为准"
+    - "freight_configuration.py 修改范围以 file_scope_constraints.freight_configuration.py 为准"
+    - "product.template 新增 tax_code / tax_name（tax_master_scope，B-26）"
+    - "新增结算单相关视图与货运单费用录入/生成入口"
+    - "新模型 ACL：仅新增模型访问记录，不改既有权限"
+    - "zh_CN.po 新增结算单流程文案"
+    - "BR-23 ~ BR-42 相关登记与 Context 审计记录更新"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改既有 security group / record rule"
+    - "修改既有业务口径（BR-01 ~ BR-14）"
+    - "直连 SQL 绕过 ORM"
+    - "删除/重命名遗留兼容字段、方法、向导"
+    - "直接修改已作废/已确认结算单的费用行"
+    - "修改 freight_configuration.py / freight_shipment.py 中与本 Sprint 无关的既有逻辑"
+    - "新建 data XML（mymodules/tk_freight/data/ 保持 forbidden）"
+    - "本 Sprint 不开发开票申请功能（模型/按钮/表单审批流/状态机/角色权限）"
+    - "本 Sprint 不开发供应商账单创建流程 / Vendor Bill 自动生成"
+    - "本 Sprint 不实现 dispute / partially_invoiced / invoiced / adjusted 状态"
+    - "本 Sprint 不实现分批开票、未开票余额跟踪、开票后调整流程"
+    - "不得实现 invoice line ↔ statement line 关联"
+    - "不得实现 confirmed 后原地修改费用"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/models/__init__.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_configuration.xml"
+    - "mymodules/tk_freight/security/ir.model.access.csv"
+    - "mymodules/tk_freight/__manifest__.py"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/business/business_rules.yaml"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/architecture/module_map.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "货运单录入客户应收费用"
+  - "Wizard 勾选可结算费用行"
+  - "生成应收结算单 Draft"
+  - "客户核对"
+  - "客户拒绝 → 当前结算单 Void"
+  - "回 freight.shipment / freight.service 修改费用"
+  - "重新选择费用行生成新的结算单 Version"
+  - "客户接受 → Statement Confirmed"
+  - "开票申请：预留业务节点，本 Sprint 不开发"
+  - "通过已确认结算单生成草稿应收发票"
+
+state_machine:
+  initial_state: "draft"
+  states:
+    draft:
+      editable: false
+      editable_scope: "metadata_only"
+      allowed_next: [voided, confirmed]
+      note: "结算单费用行由 freight.service 快照生成，不允许直接编辑；客户拒绝前如需修改费用，回货运单费用层修改后重新生成结算单"
+    voided:
+      editable: false
+      allowed_next: []
+      note: "客户拒绝后作废；旧结算单不可变，费用修改后重新生成新结算单"
+    confirmed:
+      editable: false
+      allowed_next: [draft_invoice]
+      allowed_actions:
+        - "generate_draft_invoice"
+      note: "客户接受；不可原地修改，变更必须重新生成新结算单"
+    draft_invoice:
+      editable: false
+      allowed_next: []
+      meaning: "已生成草稿应收发票"
+      invoice_state: "account.move.state = draft"
+      note: "表示已由该结算单生成草稿应收发票，不代表发票已过账"
+  reserved_nodes:
+    invoice_application:
+      status: "business_process_reserved"
+      development_scope: "excluded"
+  state_invariants:
+    - "draft：费用行来源于当前有效货运单费用快照，不直接在结算单行编辑"
+    - "voided：旧结算单及其费用快照不可修改"
+    - "confirmed：客户已接受，不可编辑；变更必须重新生成新结算单"
+    - "draft_invoice：仅允许生成草稿应收发票，禁止直接过账"
+
+version_policy:
+  mode: "regenerate_as_new_version"
+  rule:
+    - "客户拒绝后当前结算单作废（voided），不可修改"
+    - "费用修改回到 freight.shipment / freight.service"
+    - "重新生成新结算单，形成新版本"
+    - "新版本通过 statement_id + version_no + previous_statement_id 建立版本链"
+    - "旧结算单及其费用快照保持不可变"
+
+statement_identity:
+  business_key:
+    - "freight_operation_id"
+    - "customer_id"
+  rule:
+    - "同一 freight_operation_id + customer_id 只能存在一个非 voided 的当前活动结算单"
+    - "voided 结算单永久保留，不参与当前活动结算单唯一性判断"
+    - "新结算单生成时，如存在非 voided 结算单，必须阻止重复生成或明确替换规则"
+    - "version_no 仅用于版本链编号，不作为当前活动结算单唯一性判定的依据"
+
+statement_scope:
+  confirmed: "结算单对象仅为客户（AR），不实现 supplier statement"
+  supplier_bills: "供应商账单由供应商提供原始账单，本 Sprint 不开发 Vendor Bill 生成流程"
+
+wizard_constraints:
+  - "一次 wizard 只能选择同一 freight_operation_id"
+  - "一次 wizard 只能选择同一 customer_id"
+  - "供应商成本费用不可选择"
+  - "已进入有效结算单的费用不可重复选择"
+  - "已作废结算单对应费用可以重新选择"
+
+statement_line_eligibility:
+  allowed:
+    - "客户应收费用行"
+    - "service_type 属于 shipper / consignee 的有效费用"
+    - "具有 customer/partner 开票对象"
+  forbidden:
+    - "vendor 成本费用"
+    - "已进入有效结算单且未被作废释放的费用"
+    - "无明确开票对象（shipper_id / consignee_id）的自动生成费用行（TD-015，需先在费用层补齐）"
+
+tax_master_scope:
+  model: "product.template（产品档案）"
+  fields:
+    - "tax_code"
+    - "tax_name"
+  note: "freight.service 通过 service_id 引用产品档案税目信息；不新增独立税率模型"
+
+invoice_idempotency:
+  - "同一 confirmed statement 不得生成两张草稿发票"
+  - "重复执行生成草稿发票动作必须返回已有草稿发票"
+  - "已生成 draft_invoice 的 statement 不得再次生成新的草稿发票"
+
+audit_events:
+  events:
+    - "结算单生成记录操作人和时间"
+    - "结算单作废记录操作人和时间"
+    - "结算单确认记录操作人和时间"
+    - "草稿发票生成记录操作人和时间"
+  note: "复用现有审计机制（mail.thread / audit_spec），不新增复杂审计模型"
+
+non_inference_rules:
+  - "不得因为存在 confirmed 状态而自行实现 dispute 状态"
+  - "不得因为存在版本链而允许在旧 Statement 上修改费用"
+  - "不得因为存在 draft invoice 而实现自动过账"
+  - "不得因为存在 invoice_application 预留节点而开发开票申请"
+  - "不得因为存在 Vendor Bill 兼容方法而开发供应商账单流程"
+  - "不得实现 invoice line ↔ statement line 关联"
+  - "不得实现分批开票或部分开票"
+  - "不得实现 confirmed 后原地修改费用"
+
+file_scope_constraints:
+  freight_shipment.py:
+    allowed:
+      - "新增 statement 关联字段"
+      - "新增结算单生成 wizard 调用入口"
+      - "新增与 Statement 状态联动所必需的最小校验"
+    forbidden:
+      - "重构 freight.service 费用计算"
+      - "修改既有费用自动生成逻辑"
+      - "修改现有收入/成本计算"
+  freight_configuration.py:
+    allowed:
+      - "仅新增本 Sprint 已确认的税率/税目配置字段（product.template 继承）"
+    forbidden:
+      - "修改现有费用自动生成逻辑"
+      - "修改现有费用计算逻辑"
+      - "修改既有配置行为"
+
+tax_policy:
+  calculated:
+    - "费用行无税率默认不含税"
+    - "tax_amount = untaxed_amount × tax_rate（自动计算）"
+  manual_adjustment:
+    allowed: true
+    authority_field: "tax_amount"
+    rule:
+      - "手工调整后 tax_amount 为真实来源"
+      - "tax_rate 仅作参考，不再强制数学一致"
+  total:
+    - "total_amount = untaxed_amount + tax_amount"
+    - "结算单汇总按上述口径逐行汇总"
+
+source_traceability:
+  required_chain:
+    - "freight.shipment"
+    - "freight.service"
+    - "freight.statement"
+    - "account.move"
+  rule:
+    - "草稿发票 header 必须能够追溯至 freight.statement"
+    - "freight.statement.line 必须能够追溯至 freight.service"
+    - "本 Sprint 不要求 account.move.line 与 freight.statement.line 建立直接关联"
+
+legacy_invoice_entry:
+  action_create_invoice:
+    preserve: true
+    primary_entry: false
+    user_entry: "disabled_or_hidden"
+    ui_visible: false
+    direct_call:
+      allowed: false
+      behavior: "拒绝创建发票并提示必须通过 Statement 流程"
+    reason: "保留方法与兼容调用能力；从正常业务 UI 隐藏，且直接调用必须被新流程拦截（B-30）"
+  action_create_vendor_bill:
+    preserve: true
+    primary_entry: false
+    user_entry: "preserved_background"
+    reason: "供应商账单由供应商提供原始账单，Sprint4 不开发 Vendor Bill 生成流程；仅保留兼容"
+
+currency_policy:
+  baseline:
+    - "金额字段使用 Odoo monetary 字段与精度"
+    - "明细行允许本币/原币，保留原币金额与本币折算金额"
+    - "汇总金额按币种分别展示本币与原币口径"
+    - "禁止跨币种合并汇总或直接相加"
+    - "结算单折算默认取当前汇率，允许用户录入结算汇率覆盖（B-23）"
+    - "每日汇率自动同步为独立技术债 TD-026（Deferred），不在本 Sprint 主开发范围"
+
+permission_policy:
+  scope: "仅新增新模型 ACL（ir.model.access.csv 新增记录），不修改既有 security group / record rule"
+  state_level_control: "本 Sprint 不实现状态级业务权限控制"
+
+technical_constraints:
+  - "新增 freight.statement / freight.statement.line，状态机 draft → voided / confirmed → draft_invoice"
+  - "结算单草稿费用行不可编辑（metadata_only），货运单费用可继续修改"
+  - "客户拒绝后只能作废当前结算单，不得进入 dispute 编辑"
+  - "费用修改必须回到 freight.shipment / freight.service"
+  - "已作废结算单不得直接编辑费用行"
+  - "新结算单从当前有效货运单费用重新生成"
+  - "旧结算单及其费用快照保持不可变"
+  - "仅 confirmed 结算单允许生成草稿应收发票"
+  - "草稿发票来源于已接受结算单，不允许跳过结算单直接生成"
+  - "生成草稿发票不等于过账，后续财务处理属于 Odoo Accounting"
+  - "不开发开票申请功能（模型/按钮/审批流/状态机/角色权限）"
+  - "不修改 account 模块"
+  - "发票必须携带 freight_operation_id，header 级关联 freight_statement_id（B-38），不做行级关联"
+  - "旧 action_create_invoice 从正常业务 UI 隐藏，直接调用必须被拦截并提示走 Statement 流程；action_create_vendor_bill 仅保留兼容，不作为主流程"
+  - "草稿发票生成必须满足 invoice_idempotency（同一 confirmed statement 仅一张草稿发票）"
+  - "结算单生成/作废/确认/草稿发票生成必须记录操作人与时间（audit_events，复用现有审计机制）"
+  - "费用行无税率默认不含税；结算单记录税率、税额、含税金额、不含税金额；手工调整后 tax_amount 为权威字段"
+  - "product.template 新增 tax_code / tax_name（B-26，tax_master_scope）"
+  - "分批开票、未开票余额跟踪、开票后调整不在本 Sprint 范围"
+
+menu_relocation:
+  target: ""
+  parent: ""
+  groups: []
+
+translation_constraints:
+  - "仅新增本流程涉及的结算单/状态/按钮文案"
+  - "禁止批量重译或修改非本流程翻译"
+
+invariants:
+  unchanged_menu_roots: []
+  unchanged_menu_semantics: []
+  moved_menu_groups: []
+  unchanged_business_behavior:
+    - "BR-01 ~ BR-14 保持不变"
+    - "本 Sprint 仅实现本契约确认的业务闭环（draft → voided / confirmed → draft_invoice）"
+    - "不得通过修改既有业务规则解决本 Sprint 实现问题"
+  unchanged_permissions:
+    - "不修改既有 security group / record rule"
+  forbidden_menu_changes: []
+  statement_invariants:
+    - "同一 freight_operation_id + customer_id 仅一个非 voided 的当前活动结算单"
+    - "结算单金额按确认快照的税率/税额/含税/不含税口径汇总"
+    - "作废结算单不可修改，旧快照保持不可变"
+    - "费用修改必须回到 freight.shipment / freight.service"
+    - "仅 confirmed 结算单可生成草稿应收发票"
+
+acceptance_criteria:
+  functional:
+    - "货运单费用可通过 wizard 勾选费用行生成结算单草稿"
+    - "客户拒绝后结算单转为 voided 状态"
+    - "作废结算单不可继续编辑"
+    - "费用修改必须在 freight.shipment / freight.service 层完成"
+    - "修改后可重新生成新的结算单"
+    - "新结算单与旧结算单存在版本/来源关系（statement_id + version_no + previous_statement_id）"
+    - "旧结算单快照不可修改"
+    - "客户接受后结算单进入 confirmed 状态"
+    - "仅 confirmed 结算单允许生成草稿应收发票"
+    - "草稿发票 header 必须能够追溯至结算单；结算单行可追溯至货运单费用"
+    - "草稿发票生成后不代表发票已过账"
+    - "同一 confirmed 结算单只生成一张草稿发票，重复动作返回已有草稿发票"
+    - "结算单生成/作废/确认/草稿发票生成记录操作人与时间"
+    - "旧 action_create_invoice 直接调用被拦截并提示走 Statement 流程"
+    - "费用行无税率默认不含税；结算单展示税率、税额、含税金额、不含税金额，税额可手工调整"
+    - "明细行允许本币/原币，按币种分别汇总本币与原币金额"
+  excluded:
+    - "开票申请功能"
+    - "供应商账单创建流程 / Vendor Bill 自动生成"
+    - "dispute / partially_invoiced / invoiced / adjusted 状态"
+    - "分批开票、未开票余额跟踪、开票后调整"
+  non_regression:
+    - "BR-01 ~ BR-14 业务规则不变"
+    - "不产生重复发票"
+    - "既有 account.move 扩展字段与菜单入口不受破坏"
+    - "遗留 freight.multiple.invoice / shipment.invoice 兼容逻辑保留"
+    - "action_create_vendor_bill 保留兼容，不作为主流程"
+  validation:
+    - "context_loader.py 基线 PASS"
+    - "verify.py 当前版本全部强制门禁 PASS"
+    - "XML-RPC 模块升级验证通过（odoo_check.py）"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 当前版本全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "宿主机常驻 + XML-RPC 模块升级验证通过（odoo_check.py）"
+    - "结算单状态流转（draft → voided / confirmed → draft_invoice）与草稿发票生成断言 PASS"
+  business_review:
+    - "业务负责人人工验收通过"
+  snapshot:
+    verify_gate_count: 18
+    note: "历史快照，仅记录执行时门禁数量，不作为验收标准"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  escalation:
+    after_failed_iteration: 3
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - business_rules
+    - knowledge_classification
+  architecture:
+    - module_map
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "货运单费用可通过 wizard 生成结算单草稿且金额汇总正确"
+  - "结算单草稿费用行不可编辑（metadata_only），货运单费用可继续修改"
+  - "客户拒绝后当前结算单作废，费用释放为可修改"
+  - "费用修改回到 freight.shipment / freight.service，不在结算单行直接编辑"
+  - "重新生成新结算单形成新版本，旧结算单不可变"
+  - "客户接受后进入 confirmed，费用锁定"
+  - "仅 confirmed 结算单可生成草稿应收发票；草稿发票 header 可追溯至结算单，结算单行可追溯至货运单费用"
+  - "草稿发票不代表过账，开票申请预留节点不开发"
+  - "同一 confirmed 结算单仅一张草稿发票，重复动作返回已有草稿发票"
+  - "旧 action_create_invoice 直接调用被拦截并提示走 Statement 流程"
+  - "结算单生成/作废/确认/草稿发票生成记录操作人与时间"
+  - "税率/税额/含税/不含税金额完整且手工调整以 tax_amount 为权威"
+  - "明细行本币/原币保留完整，按币种汇总本币与原币金额"
+  - "B-23 ~ B-42 与 Context 审计记录完整"
+  - "所有强制验证通过"
+
+deliverables:
+  - "freight.statement / freight.statement.line 模型与状态机（draft / voided / confirmed / draft_invoice）"
+  - "结算单生成 wizard（列表勾选费用行，B-39）"
+  - "货运单费用录入 + 结算单生成/作废/确认/草稿发票视图"
+  - "新模型 ACL、i18n 文案、__manifest__.py 注册（不新建 data XML，data/ 保持 forbidden）"
+  - "结算单税率/税额/含税/不含税字段与手工调整（tax_amount 权威）；product.template 税目编码/名称字段（B-26）"
+  - "版本链（statement_id + version_no + previous_statement_id）"
+  - "草稿应收发票生成与 header 级来源追溯（B-38）"
+  - "BR-23 ~ BR-42 业务规则登记"
+  - "docs/context/history/decision_note.md 与 docs/context/context_version.yaml 更新"
+  - "完整 Intent 执行记录（docs/context/intent_records/INT-FREIGHT-SPRINT4-001/）"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 当前版本全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "禁止路径变更检查（odoo/addons/report/controllers/data/static）"
+  - "确认未开发开票申请、Vendor Bill 生成、dispute/adjusted 等排除项"
+  - "确认 action_create_invoice 直接调用被拦截并提示走 Statement 流程"
+  - "确认 non_inference_rules 无违规（无 dispute、无 line 级关联、无分批开票、无原地改费用）"

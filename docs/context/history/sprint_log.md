@@ -37,3 +37,17 @@
 - Name/Code/Street/City/Country 必填约束保持不变
 
 **验收**: verify.py 17/18 PASS（c15 仅 flag Sprint2 Intent 契约文件本身）；XML-RPC 模块升级与视图 arch 断言 PASS。
+
+## Sprint4-Statement-Invoice-Flow (2026-08-12)
+
+**目标**: 货运单费用 → 结算单草稿/客户核对/作废 → 新结算单版本 → 客户接受 → 草稿应收发票。
+
+**成果**:
+- 新增 `freight.statement / freight.statement.line` 状态机（draft → voided / confirmed → draft_invoice）与版本链
+- 新增结算单生成 wizard（列表勾选费用行，B-39），同一业务键仅一个非 voided 当前活动结算单
+- 仅 confirmed 生成草稿应收发票，幂等且 header 级关联 `freight_statement_id`（B-38/B-41）
+- `product.template` 新增税目编码/税目名称（B-26），结算单行记录税率/税额/含税/不含税，`tax_amount` 权威
+- 旧 `action_create_invoice` 隐藏并拦截直调（B-30），遗留 server action 取消列表绑定，Vendor Bill 保留兼容
+- 未开发开票申请（B-42）、Vendor Bill 生成、dispute/adjusted、分批开票、行级追溯
+
+**验收**: context_loader PASS；verify.py 全部强制门禁 PASS；XML-RPC 模块升级 + 结算单状态流转与发票幂等断言 PASS。

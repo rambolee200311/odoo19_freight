@@ -136,6 +136,8 @@
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="freight_operation_id" force_save="1" readonly="1"
                            invisible="not freight_operation_id" string="Freight Shipment"/>
+                    <field name="freight_statement_id" force_save="1" readonly="1"
+                           invisible="not freight_statement_id" string="Freight Statement"/>
                 </xpath>
                 <xpath expr="//page[@name='other_info']" position="after">
                     <page string="Shipment Details" invisible="not freight_operation_id">
@@ -166,6 +168,25 @@
                             </group>
                         </group>
                     </page>
+                </xpath>
+            </field>
+        </record>
+
+        <!--Product Tax Master Fields-->
+        <record id="product_template_tax_fields_view_inherit" model="ir.ui.view">
+            <field name="name">product.template.tax.fields.inherit</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet" position="inside">
+                    <group string="Tax Code">
+                        <group>
+                            <field name="tax_code" string="Tax Code"/>
+                        </group>
+                        <group>
+                            <field name="tax_name" string="Tax Name"/>
+                        </group>
+                    </group>
                 </xpath>
             </field>
         </record>
