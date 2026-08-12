@@ -3,12 +3,24 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.44
+context_version: 0.1.45
 update_time: 2026-08-12
 adapt_sprint: Sprint4-1-Shipment-Form-Pages
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.45:
+    update_content: |
+      Sprint4-1 契约按评审修订（决策39）：
+      - 只建 Shipment → 财务对象观察窗口，不建流程操作入口
+      - invoice_ids 不强制；优先复用现有关联，必要时才新增只读 One2many
+      - 移除来源结算单列要求，不新增/回填 Statement → Invoice 关联
+      - Vendor Bill 只展示不创建；U-36 删除并改为 display_rule
+      - 开放项收敛 U-33/U-34/U-35；decision_gate 映射 B-43/B-44/B-45
+      - business_rules.yaml 与 __manifest__.py 移出契约范围
+    update_type: Sprint4-1 契约评审修订
+    effect_scope: intent_sprint4_1 + history
+
   0.1.44:
     update_content: |
       门禁引擎支持 sprint 子编号契约选择（决策38）：

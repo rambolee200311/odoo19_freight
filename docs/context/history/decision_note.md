@@ -182,9 +182,20 @@
 
 - 范围：`freight_shipment.py` 仅新增 `invoice_ids` One2many（inverse `freight_operation_id`）；`freight_shipment_view.xml` 仅新增两个 Page；i18n 与 manifest 版本递增。
 - 禁止：修改结算单状态机、开票/幂等/追溯逻辑、菜单、权限、报表、Controller、前端静态资源；禁止页面内直接建删对账单/发票。
-- 开放项：U-33（页面位置顺序，默认 Accountancy 后先对账单后发票）、U-34（对账单页是否放操作按钮，默认仅查看跳转）、U-35（发票页是否拆分应收/应付，默认合并按类型列区分）、U-36（发票页是否全状态展示，默认全部展示）。
+- 开放项：U-33（页面位置顺序，默认 Accountancy 后先对账单后发票）、U-34（对账单页是否放操作按钮，评审推荐不放）、U-35（发票页是否拆分应收/应付，默认合并按类型列区分）。
 - 未确认前禁止进入编码（verify c18 / unknown_policy.coding_gate）。
 
 ### 决策38：门禁引擎支持 sprint 子编号契约选择
 
 **决策**: 升级 `execution/scripts/context_loader.py` 与 `execution/scripts/verify.py` 的契约选择逻辑：`sprint(\d+)` 解析扩展为支持 `sprint4_1` / `sprint4-1` / `sprint4.1` 子编号，按 `(主编号, 子编号)` 元组取最新契约；Sprint4-1 契约文件名由 `intent_sprint5_shipment_form_pages.yaml` 改回 `intent_sprint4_1_shipment_form_pages.yaml`。该改动仅影响门禁引擎选契约，不改变业务口径。
+
+### 决策39：Sprint4-1 契约按评审修订
+
+**决策**: 按评审意见修订 `INT-FREIGHT-SPRINT4-1-001`，核心原则为“只建立 Shipment → 财务对象观察窗口，不建立流程操作入口”：
+
+- `invoice_ids` 不作为强制新增字段：允许提供发票关联展示字段/关联关系，但优先复用现有关联，仅在现有模型无法满足视图展示时才允许新增只读 One2many。
+- 移除“来源结算单”列要求：本 Sprint 不新增、不回填 `account.move → freight.statement` 关联。
+- 明确 Statements Page 仅展示现有 `freight.statement` 数据及版本关系，不改变状态/版本/快照语义，voided 历史必须可见。
+- 明确 Vendor Bill 只展示、不创建；Invoices Page 仅展示 `freight_operation_id` 关联的 `account.move`（客户发票/供应商账单按类型列区分）。
+- 删除 U-36，全状态展示直接定义为 `display_rule`；开放项收敛为 U-33 / U-34 / U-35，`decision_gate` 映射为 U-33→B-43、U-34→B-44、U-35→B-45。
+- `business_rules.yaml` 与 `__manifest__.py` 移出契约范围；`context_audit` 仅保留 decision_note / sprint_log / context_version / intent_records / test_exec_records。

@@ -2,17 +2,19 @@
 # Intent: Sprint4-1 货运单表单新增对账单与发票两个 Page
 # 状态：起草（未确认，禁止进入编码）
 # 门禁引擎支持 sprint4_1 / sprint4-1 / sprint4.1 子编号契约选择（决策38）。
+# 按评审修订（决策39）：本 Sprint 只建立 Shipment → 财务对象观察窗口，
+# 不建立 Shipment → 财务流程操作入口。
 # ==============================================================
 
 intent_id: "INT-FREIGHT-SPRINT4-1-001"
 sprint_version: "Sprint4-1-Shipment-Form-Pages"
 intent_work_type: "Development"
 intent_change_type: "View Enhancement"
-title: "freight.shipment 表单新增对账单（Statement）与发票（Invoice）两个 Page"
-target_scope: "仅在 freight.shipment 表单 notebook 内新增两个展示页：对账单页展示该货运单的全部结算单版本；发票页展示该货运单关联的应收/应付发票。不做状态机、开票逻辑、菜单或权限改动"
+title: "freight.shipment 表单新增对账单与发票两个 Page"
+target_scope: "仅在 freight.shipment 表单 notebook 内新增两个只读展示页：Statements 与 Invoices。Statements 展示当前货运单已有的全部结算单记录及历史版本；Invoices 展示当前货运单已有的 account.move 财务单据（客户发票及供应商账单）。本 Intent 不创建或修改结算单、发票、供应商账单，不实施状态机、确认、作废、开票、红冲、版本生成或审批逻辑"
 
 context_binding:
-  bind_context_version: "0.1.44"
+  bind_context_version: "0.1.45"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -24,38 +26,46 @@ business_intent:
   source:
     type: "customer_demand"
     origin_team: "业务负责人（用户）"
-    confirmation_ref: "Sprint4-1 起草"
+    confirmation_ref: "Sprint4-1 起草 + 评审修订"
   related_sprint:
     - "INT-FREIGHT-SPRINT4-001"
   confirmed_decisions: []
   draft_scope:
-    - "对账单 Page：展示 freight.shipment.statement_ids（含 voided / confirmed / draft_invoice 全版本）"
-    - "发票 Page：展示 freight.shipment 关联 account.move（out_invoice / in_invoice，freight_operation_id 有值）"
-    - "两页均为只读展示 + 行跳转打开明细，不直接在页面内新增/修改业务数据"
-  unresolved_unknowns: ["U-33", "U-34", "U-35", "U-36"]
+    - "Statements Page：展示 freight.shipment 已存在的全部结算单记录与版本（含 voided）"
+    - "Invoices Page：展示 freight_operation_id 关联的 account.move（客户发票 / 供应商账单，按 move_type 区分）"
+    - "两页均为只读展示 + 行跳转打开明细，不在页面内新增/修改/删除业务单据"
+  draft_recommendations:
+    - "U-34 推荐结论：Statements Page 不放任何操作按钮，仅提供打开"
+    - "来源结算单列不在本 Sprint 要求；account.move.freight_statement_id 为 Sprint4 已存在字段，本 Sprint 不新增、不回填"
+  unresolved_unknowns: ["U-33", "U-34", "U-35"]
   draft_open_questions:
     - id: "U-33"
       statement: "两个 Page 在表单 notebook 中的位置与顺序（默认建议：Accountancy 页之后，先对账单后发票）"
     - id: "U-34"
-      statement: "对账单 Page 是否需要直接放置操作按钮（生成/作废/确认/生成草稿发票），默认仅查看跳转"
+      statement: "对账单 Page 是否直接放置操作按钮（评审推荐：不放，仅查看跳转）"
     - id: "U-35"
-      statement: "发票 Page 是否拆分应收/应付两个子页，默认合并一页并按 move_type 列区分"
-    - id: "U-36"
-      statement: "发票 Page 是否展示全部状态（草稿/已过账/红字），默认全部展示并按状态列区分"
+      statement: "发票 Page 是否拆分应收/应付两个子页（默认合并一页并按 move_type 列区分）"
 
 unknown_policy:
   unresolved_unknowns_allowed: true
   newly_discovered_unknown_action: "record_and_continue"
-  coding_gate: "U-33 ~ U-36 确认前禁止修改业务代码（verify c18）"
+  coding_gate: "U-33 ~ U-35 确认前禁止修改业务代码（verify c18）"
+
+decision_gate:
+  required_before_coding:
+    - "U-33"
+    - "U-34"
+    - "U-35"
+  mapping:
+    - "U-33 -> B-43"
+    - "U-34 -> B-44"
+    - "U-35 -> B-45"
 
 scope:
   allowed_files:
     - "mymodules/tk_freight/models/freight_shipment.py"
     - "mymodules/tk_freight/views/freight_shipment_view.xml"
     - "mymodules/tk_freight/i18n/zh_CN.po"
-    - "mymodules/tk_freight/__manifest__.py"
-    - "docs/context/business/knowledge_classification.md"
-    - "docs/context/business/business_rules.yaml"
     - "docs/context/history/decision_note.md"
     - "docs/context/history/sprint_log.md"
     - "docs/context/context_version.yaml"
@@ -69,24 +79,30 @@ scope:
     - "mymodules/tk_freight/wizard/"
     - "mymodules/tk_freight/security/"
     - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/"
     - "mymodules/tk_freight/data/"
     - "mymodules/tk_freight/report/"
     - "mymodules/tk_freight/controllers/"
     - "mymodules/tk_freight/static/"
   allowed_changes:
-    - "freight.shipment 新增 invoice_ids One2many（inverse freight_operation_id），仅用于发票 Page 展示"
+    - "允许为 freight.shipment 提供发票关联展示字段/关联关系，但不得修改 account.move 业务逻辑"
+    - "若现有 freight.shipment 已存在可复用的发票关联字段，则必须优先复用，不得重复创建关联字段"
+    - "仅在现有模型无法满足视图展示时，才允许新增只读 One2many 关联字段"
     - "freight_shipment_view.xml 新增 对账单/发票 两个 notebook page（仅视图）"
     - "zh_CN.po 新增 对账单/发票 Page 及列文案"
-    - "__manifest__.py 版本号递增"
   forbidden_changes:
     - "修改 account 模块或官方 addons"
-    - "修改 freight.statement / freight.statement.line 状态机与快照逻辑"
-    - "修改发票创建、幂等、过账或追溯逻辑"
+    - "修改 freight.statement / freight.statement.line 状态机、版本与快照语义"
+    - "新增或回填 account.move → freight.statement 业务关联"
+    - "修改发票创建、幂等、过账、红冲或追溯逻辑"
+    - "新增 Vendor Bill 创建/修改/触发逻辑"
     - "修改既有 security group / record rule"
     - "修改菜单（menus.xml）"
+    - "修改 __manifest__.py（版本递增遵循项目级 Coding Standard，不在本契约规定）"
     - "新建 data XML"
     - "修改报表、Controller、前端静态资源"
-    - "在页面内直接创建/删除对账单或发票"
+    - "在页面内直接创建/删除/修改对账单或发票"
 
 change_boundary:
   functional_code:
@@ -95,8 +111,6 @@ change_boundary:
   translation:
     - "mymodules/tk_freight/i18n/zh_CN.po"
   context_audit:
-    - "docs/context/business/knowledge_classification.md"
-    - "docs/context/business/business_rules.yaml"
     - "docs/context/history/decision_note.md"
     - "docs/context/history/sprint_log.md"
     - "docs/context/context_version.yaml"
@@ -105,29 +119,58 @@ change_boundary:
 
 business_flow:
   - "货运单表单打开 → 原有 notebook 页保持不变"
-  - "新增 对账单 Page：查看该货运单全部结算单版本（含作废）"
-  - "新增 发票 Page：查看该货运单关联应收/应付发票"
+  - "Statements Page：展示该货运单已经存在且 freight_operation_id 关联的全部结算单记录与历史版本"
+  - "Invoices Page：展示该货运单已经存在且 freight_operation_id 关联的客户发票及供应商账单"
+  - "本 Sprint 不创建、修改或触发 Vendor Bill；Vendor Bill 仅作为已有财务单据展示对象"
   - "行点击跳转对应结算单/发票表单，页面本身不写数据"
+
+technical_constraints:
+  - "Statements Page 仅展示现有 freight.statement 数据"
+  - "不得改变 freight.statement 状态、版本及快照语义"
+  - "不得通过 related/computed 字段改变 statement 的状态或版本语义"
+  - "voided statement 必须继续可见，不得通过默认 domain 隐藏历史版本"
+  - "不得重新定义状态语义（draft_invoice 保持 Sprint4 现状，不在本 Sprint 调整）"
+  - "Invoices Page 仅展示已有 freight_operation_id 关联的 account.move"
+  - "不得新增 account.move 创建逻辑"
+  - "不得新增 Vendor Bill 创建逻辑"
+  - "不得新增 Statement → Invoice 业务关系"
+  - "如已有模型关系可直接复用则不得重复创建"
+  - "页面仅允许打开已有记录，不允许在 Page 内直接创建、删除或修改业务单据"
+
+display_rule:
+  - "展示所有 freight_operation_id = 当前货运单的 account.move"
+  - "不按 state 排除历史发票"
+  - "通过 move_type / state 列展示单据类型与状态（类型列：客户发票 / 供应商账单）"
 
 acceptance_criteria:
   functional:
     - "freight.shipment 表单 notebook 内存在 对账单 与 发票 两个 Page"
-    - "对账单 Page 展示 freight.statement 全版本（draft/voided/confirmed/draft_invoice），含编号、客户、状态、版本、结算日期、合计金额"
-    - "发票 Page 展示 freight_operation_id 关联的 out_invoice/in_invoice，含发票号、类型、客户、日期、状态、金额、来源结算单"
-    - "行可跳转打开对应记录表单；页面无新建/删除按钮"
+    - "对账单 Page 展示现有 freight.statement 全版本（draft/voided/confirmed/draft_invoice），含编号、客户、状态、版本、结算日期、合计金额"
+    - "发票 Page 展示 freight_operation_id 关联的 account.move，含发票号、类型（客户发票/供应商账单）、客户、日期、状态、金额"
+    - "不按状态过滤发票；草稿、已过账、作废、红字均按现有数据展示"
+    - "行可跳转打开对应记录表单；页面无新建/删除/修改入口"
     - "既有 Pages/按钮/统计按钮行为不变"
   excluded:
-    - "结算单状态机、生成向导、作废/确认/开票逻辑改动"
-    - "发票创建/过账/幂等/追溯逻辑改动"
-    - "菜单、权限、报表、Controller、前端静态资源改动"
+    - "生成结算单"
+    - "结算单确认"
+    - "结算单作废"
+    - "结算单版本生成"
+    - "开票申请"
+    - "生成草稿发票"
+    - "红字发票 / Credit Note"
+    - "Vendor Bill 创建"
+    - "新增或回填 Statement → Invoice 关联"
+    - "PDF"
+    - "权限"
+    - "菜单"
   non_regression:
     - "BR-01 ~ BR-14 业务规则不变"
-    - "freight.statement 既有视图与按钮不变"
+    - "freight.statement 状态机、版本链与既有视图不变"
     - "account.move 标准字段与菜单入口不受破坏"
     - "不产生重复发票"
   validation:
-    - "context_loader.py 基线 PASS（bind 0.1.43）"
-    - "verify.py 全部强制门禁 PASS（U-33 ~ U-36 确认后）"
+    - "context_loader.py 基线 PASS（bind 0.1.45）"
+    - "verify.py 全部强制门禁 PASS（U-33 ~ U-35 确认后）"
     - "XML-RPC 模块升级验证通过"
     - "业务负责人人工验收通过"
 
@@ -162,9 +205,7 @@ loop_policy:
       - new_unknown
 
 affected_assets:
-  business:
-    - knowledge_classification
-    - business_rules
+  business: []
   architecture: []
   governance: []
   history:
@@ -182,12 +223,12 @@ execution_artifacts:
 success_definition:
   - "货运单表单新增对账单与发票两个 Page，展示内容与行跳转正确"
   - "既有页面、统计按钮与结算单/发票业务逻辑不受影响"
-  - "U-33 ~ U-36 已确认并登记为 B-43 ~ B-46（或等价编号）"
+  - "decision_gate 已确认：U-33 → B-43、U-34 → B-44、U-35 → B-45"
   - "所有强制验证通过"
 
 deliverables:
   - "freight.shipment 表单 notebook 新增 对账单/发票 两个 Page"
-  - "freight.shipment.invoice_ids One2many（仅展示用）"
+  - "发票关联展示字段仅在现有模型无法满足时新增（只读 One2many，优先复用现有关联）"
   - "zh_CN.po 页面与列文案"
   - "决策笔记、Context 版本与执行记录更新"
 
@@ -198,5 +239,6 @@ risk_precheck:
   - "forbidden_change.yaml 基线扫描"
   - "verify.py 全部强制门禁"
   - "Git diff scope check（scope.allowed_files / forbidden_paths）"
-  - "确认未改结算单状态机、开票逻辑、菜单、权限、报表"
+  - "确认未新增/回填 Statement → Invoice 关联"
+  - "确认未改结算单状态机、开票逻辑、Vendor Bill 创建、菜单、权限、报表"
   - "确认页面仅展示与跳转，无数据写入"
