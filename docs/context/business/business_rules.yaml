@@ -213,3 +213,15 @@ unknowns:
   - id: U-09
     status: UNKNOWN
     statement: "路由生成拣货单 pickup/delivery 类型映射语义"
+  - id: U-33
+    status: UNKNOWN
+    statement: "对账单/发票两个 Page 在货运单表单中的位置与顺序"
+  - id: U-34
+    status: UNKNOWN
+    statement: "对账单 Page 是否直接放置操作按钮"
+  - id: U-35
+    status: UNKNOWN
+    statement: "发票 Page 是否拆分应收/应付子页"
+  - id: U-36
+    status: UNKNOWN
+    statement: "发票 Page 是否展示全部状态"

@@ -175,3 +175,16 @@
 - 旧 `action_create_invoice` 从业务 UI 隐藏，直接调用被拦截并提示走 Statement 流程（B-30）；两个遗留 server action 取消列表绑定；`action_create_vendor_bill` 保留兼容（B-35/TD-001 延期）。
 - 未开发开票申请（B-42）、Vendor Bill 生成、dispute/partially_invoiced/invoiced/adjusted、分批开票、行级追溯、confirmed 后原地改费用。
 - 验证：context_loader PASS；verify.py 全部强制门禁 PASS（c15 在 Sprint3-002 存量归档提交后通过）；XML-RPC 常驻升级 + odoo shell 状态流转断言 PASS。
+
+### 决策37：Sprint4-1 契约起草（货运单表单新增对账单/发票 Page）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-1-001`（Sprint4-1-Shipment-Form-Pages）：在 `freight.shipment` 表单 notebook 内新增两个只读展示 Page：对账单页展示该货运单全部结算单版本（含作废），发票页展示该货运单关联的应收/应付发票；页面仅展示与行跳转，不写业务数据。
+
+- 范围：`freight_shipment.py` 仅新增 `invoice_ids` One2many（inverse `freight_operation_id`）；`freight_shipment_view.xml` 仅新增两个 Page；i18n 与 manifest 版本递增。
+- 禁止：修改结算单状态机、开票/幂等/追溯逻辑、菜单、权限、报表、Controller、前端静态资源；禁止页面内直接建删对账单/发票。
+- 开放项：U-33（页面位置顺序，默认 Accountancy 后先对账单后发票）、U-34（对账单页是否放操作按钮，默认仅查看跳转）、U-35（发票页是否拆分应收/应付，默认合并按类型列区分）、U-36（发票页是否全状态展示，默认全部展示）。
+- 未确认前禁止进入编码（verify c18 / unknown_policy.coding_gate）。
+
+### 决策38：门禁引擎支持 sprint 子编号契约选择
+
+**决策**: 升级 `execution/scripts/context_loader.py` 与 `execution/scripts/verify.py` 的契约选择逻辑：`sprint(\d+)` 解析扩展为支持 `sprint4_1` / `sprint4-1` / `sprint4.1` 子编号，按 `(主编号, 子编号)` 元组取最新契约；Sprint4-1 契约文件名由 `intent_sprint5_shipment_form_pages.yaml` 改回 `intent_sprint4_1_shipment_form_pages.yaml`。该改动仅影响门禁引擎选契约，不改变业务口径。

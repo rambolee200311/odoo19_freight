@@ -3,12 +3,31 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.42
+context_version: 0.1.44
 update_time: 2026-08-12
-adapt_sprint: Sprint4-Statement-Invoice-Flow
+adapt_sprint: Sprint4-1-Shipment-Form-Pages
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.44:
+    update_content: |
+      门禁引擎支持 sprint 子编号契约选择（决策38）：
+      - context_loader.py / verify.py 按 (主编号, 子编号) 元组取最新 intent
+      - 支持 sprint4_1 / sprint4-1 / sprint4.1 文件名
+      - Sprint4-1 契约文件恢复为 intent_sprint4_1_shipment_form_pages.yaml
+    update_type: 门禁引擎升级
+    effect_scope: execution/scripts + intent_sprint4_1
+
+  0.1.43:
+    update_content: |
+      Sprint4-1 契约起草（决策37）：
+      - freight.shipment 表单新增 对账单/发票 两个只读 Page（展示 + 行跳转）
+      - freight_shipment.py 仅新增 invoice_ids One2many（展示用）
+      - 禁止改动结算单状态机、开票逻辑、菜单、权限、报表
+      - 开放项 U-33 ~ U-36 确认前禁止编码
+    update_type: Sprint4-1 Intent 起草
+    effect_scope: intent_sprint4_1 + business + history
+
   0.1.42:
     update_content: |
       Sprint4 实施完成（决策36）：
