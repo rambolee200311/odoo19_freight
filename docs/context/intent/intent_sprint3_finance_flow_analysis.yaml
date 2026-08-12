@@ -1,0 +1,228 @@
+# ==============================================================
+# Intent: Sprint3-002 财务流程逆向分析与实施前设计输入
+# 阶段性质：Analysis Only，禁止修改业务代码
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT3-002"
+sprint_version: "Sprint3-Finance-Flow-Reverse-Analysis"
+intent_work_type: "Analysis"
+intent_change_type: "Analysis"
+title: "财务流程逆向分析与实施前设计输入（Analysis Only）"
+target_scope: "逆向分析 tk_freight 现有费用/开票链路与认知资产差距，建立 Sprint4 实施前的事实基线，不实施代码变更"
+
+context_binding:
+  bind_context_version: "0.1.27"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+  update_policy:
+    - "仅允许登记本次分析任务及分析报告索引"
+    - "禁止新增或修改 business rule"
+    - "禁止将 UNKNOWN 转为 CONFIRMED"
+    - "禁止将设计建议写入业务铁律"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint3 财务流程重构任务说明 + 分析 Intent 评审"
+  confirmed_decisions: []
+  unresolved_unknowns: []
+  unknown_reference: "分析过程中发现的 UNKNOWN 记录到 docs/reports/sprint3_finance_flow_analysis.md 第 12 节；Sprint4 执行前必须由业务负责人逐项确认"
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "record_and_continue"
+  resolution_policy:
+    - "记录到 UNKNOWN 清单"
+    - "不得自行猜测"
+    - "不得转为 CONFIRMED"
+    - "Sprint4 执行前必须由业务负责人确认"
+
+analysis_constraints:
+  - "代码事实、认知资产规则、设计建议、业务决策必须严格分层"
+  - "分析报告中的设计建议不得写入 business_rules.yaml"
+  - "未经业务负责人确认的设计建议不得标记为 BR/B/U/CONFIRMED"
+  - "UNKNOWN 不得通过技术推断自动消除"
+
+design_advisory_policy:
+  - "设计建议仅作为候选方案"
+  - "不得视为已确认架构"
+  - "不得直接写入 architecture/module_map.md / business/business_rules.yaml"
+  - "每项设计建议必须标注：FACT / INFERENCE / PROPOSAL / UNKNOWN"
+
+scope:
+  allowed_files:
+    - "docs/reports/sprint3_finance_flow_analysis.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT3-002/"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "仅新增/更新现状分析报告 docs/reports/sprint3_finance_flow_analysis.md"
+    - "仅登记本契约的决策笔记与 context_version"
+  forbidden_changes:
+    - "任何 mymodules/ 文件修改"
+    - "任何 odoo/ 文件修改"
+    - "任何 addons/ 文件修改"
+    - "任何数据库写入"
+    - "任何模块升级"
+    - "任何数据迁移"
+    - "创建新模型/新报表"
+    - "删除旧代码"
+    - "修改业务规则（BR-01 ~ BR-14）"
+    - "自行补充未确认业务规则"
+    - "将设计建议写入 business_rules.yaml / module_map.md"
+
+change_boundary:
+  functional_code: []
+  translation: []
+  security: []
+  database: []
+  context_audit:
+    - "docs/context/history/decision_note.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT3-002/"
+  analysis_report:
+    - "docs/reports/sprint3_finance_flow_analysis.md"
+
+analysis_report:
+  required_sections:
+    - "1. 现状业务流程"
+    - "2. 现状代码调用链"
+    - "3. account.move 创建链"
+    - "4. 现有开票入口清单"
+    - "5. CODE_FACT 证据等级"
+    - "6. 认知资产规则"
+    - "7. 代码与认知资产冲突"
+    - "8. Gap Matrix"
+    - "9. 旧开票逻辑依赖"
+    - "10. 对账单设计候选方案"
+    - "11. 版本快照/确认/调整/追溯设计候选方案"
+    - "12. 风险清单"
+    - "13. UNKNOWN 清单"
+    - "14. 推荐 Sprint 实施方案"
+
+technical_constraints:
+  - "本阶段只读分析，禁止修改 mymodules/tk_freight 任何文件"
+  - "禁止修改 account 模块或官方 addons"
+  - "禁止直连数据库或执行数据迁移/模块升级"
+  - "发现未确认业务规则时记录 UNKNOWN 并继续分析，不得自行猜测或转为 CONFIRMED"
+  - "分析报告章节必须与 analysis_report.required_sections 一一对应"
+  - "设计建议必须标注 FACT / INFERENCE / PROPOSAL / UNKNOWN"
+
+menu_relocation:
+  target: ""
+  parent: ""
+  groups: []
+
+translation_constraints: []
+
+invariants:
+  unchanged_menu_roots: []
+  unchanged_menu_semantics: []
+  moved_menu_groups: []
+  unchanged_business_behavior:
+    - "BR-01 ~ BR-14 保持不变"
+    - "本阶段不新增、不确认、不修改任何新的业务规则"
+    - "Sprint4 候选业务规则仅作为待验证输入，不构成本阶段约束"
+  unchanged_permissions:
+    - "不修改 security group / record rule"
+  forbidden_menu_changes: []
+
+acceptance_criteria:
+  functional:
+    - "分析报告包含 analysis_report.required_sections 全部 14 个章节"
+    - "完成现有代码调用链与 account.move 创建链清单"
+    - "完成认知资产规则与冲突清单"
+    - "完成 Gap Matrix 与旧开票逻辑依赖分类"
+    - "完成对账单/版本快照/确认后调整/发票追溯设计候选方案（标注 PROPOSAL）"
+    - "完成风险清单与 UNKNOWN 清单"
+    - "完成推荐实施分 Sprint 方案"
+    - "确认本次未修改任何业务代码/模型/视图/权限/数据库"
+  non_regression:
+    - "BR-01 ~ BR-14 业务规则不变"
+    - "不触发 forbidden_change.yaml 红线"
+  validation:
+    - "context_loader.py 基线 PASS"
+    - "verify.py c18 UNKNOWN 拦截 PASS"
+    - "业务负责人确认分析报告"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 当前版本全部强制门禁 PASS"
+  build: []
+  runtime: []
+  business_review:
+    - "业务负责人确认 UNKNOWN 清单与分 Sprint 方案"
+  snapshot:
+    verify_gate_count: 18
+    note: "历史快照，仅记录执行时门禁数量，不作为验收标准"
+
+loop_policy:
+  max_iteration: 3
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  escalation:
+    after_failed_iteration: 2
+    require_human: true
+  stop_condition:
+    success:
+      - analysis_report_delivered
+      - human_accept
+    hard_stop:
+      - scope_violation
+      - forbidden_change
+
+affected_assets:
+  business: []
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - context_version
+  analysis:
+    - docs/reports/sprint3_finance_flow_analysis.md
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT3-002/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "现状分析报告交付且 analysis_report.required_sections 14 个章节全部齐全"
+  - "UNKNOWN 清单完整登记，无自行猜测、无自动转为 CONFIRMED"
+  - "未修改业务代码/模型/视图/权限/数据库"
+  - "设计建议均标注 PROPOSAL / INFERENCE / UNKNOWN，未写入业务铁律"
+  - "业务负责人确认分析结果后，方可进入 Sprint4 实施契约"
+
+deliverables:
+  - "docs/reports/sprint3_finance_flow_analysis.md（现状分析报告）"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT3-002/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 当前版本全部强制门禁"
+  - "Git diff 确认无 mymodules/ 业务代码变更"
+  - "确认设计建议未写入 business_rules.yaml / module_map.md"

@@ -1,0 +1,14 @@
+intent_id: INT-FREIGHT-SPRINT3-002
+context_baseline: "0.1.27"
+execution_time: "2026-08-12"
+
+static_gates:
+  context_loader: "0.1.27 baseline PASS（Development profile）"
+  verify: "17/18 PASS（c15 仅 flag Intent 契约文件自身与未跟踪 docs/reports/，c18 UNKNOWN 拦截 PASS）"
+  report_sections: "analysis_report.required_sections 14 章全部存在"
+
+runtime:
+  code_change: "无（未修改 mymodules/ / odoo/ / addons/）"
+  database: "无"
+  module_upgrade: "无"
+  odoo_shell: "PASS（2026-08-12，freight.shipment(1) / freight.service(1) / account.move(1) 核验，结果写入分析报告 5 节 FACT-B）"

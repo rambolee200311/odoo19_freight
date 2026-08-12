@@ -107,7 +107,6 @@ Not authoritative for business requirements
 - U-04 手工税额开票机制
 - U-05 收付款登记货单入口、报价转订舱价格锁定
 - U-06 报表需求、角色权限、门户写权限
-- U-07 U8C/外部财务接口
 
 ## 6. 缺口总表（严格分类）
 

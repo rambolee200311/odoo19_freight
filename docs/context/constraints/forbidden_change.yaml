@@ -48,7 +48,7 @@ feature:
     risk: "破坏兼容性"
 
   - target: "未定需求"
-    rule: "报表需求、角色权限、门户写权限、U8C 接口未确认前禁止实施"
+    rule: "报表需求、角色权限、门户写权限未确认前禁止实施"
     risk: "返工与范围溢出"
 
 # ========== 安全层约束 ==========
@@ -137,7 +137,7 @@ require_user_confirmation:
   - "修改已确认业务口径（见 business/knowledge_classification.md）"
   - "删除/重命名遗留兼容字段、方法、向导"
   - "调整 security group / portal 权限"
-  - "实施未定需求（报表、角色权限、U8C）"
+  - "实施未定需求（报表、角色权限）"
 
 # ========== 无法程序化验证的约束（DOCUMENT_ONLY） ==========
 document_only:

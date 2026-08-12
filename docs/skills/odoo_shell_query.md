@@ -9,20 +9,32 @@ metadata:
 
 ## Method 1: Odoo Shell (Preferred — First Choice)
 
+### 标准命令（Odoo19 Freight 项目）
+
+在项目根目录 `odoo19_freight` 下，先激活虚拟环境，再运行：
+
+```bash
+source venv/bin/activate
+python3 odoo-bin shell -c odoo.conf
+```
+
+数据库名已写在 `odoo.conf`（`db_name = odoo19_freight`），因此不需要显式 `-d`。如需显式指定，可加：
+
+```bash
+python3 odoo-bin shell -c odoo.conf -d odoo19_freight
+```
+
 Use `echo` pipe to run non-interactive one-liners. This is the preferred method for all data queries.
 
 ### Syntax
 ```bash
-echo "PYTHON_CODE" | /path/to/python /path/to/odoo-bin shell -c /path/to/odoo.conf -d DB_NAME
+echo "PYTHON_CODE" | python3 odoo-bin shell -c odoo.conf -d odoo19_freight
 ```
 
-### Actual paths (Odoo19 Freight project)
+### 非交互 one-liner（推荐给 Codex / CI）
 ```bash
 echo "res = env['MODEL'].browse(ID); print(res.NAME, res.FIELD, ...)" | \
-  /Users/lijianqiang/Documents/odoo19_freight/venv/bin/python \
-  /Users/lijianqiang/Documents/odoo19_freight/odoo-bin shell \
-  -c /Users/lijianqiang/Documents/odoo19_freight/odoo.conf \
-  -d odoo19_freight
+  python3 odoo-bin shell -c odoo.conf -d odoo19_freight
 ```
 
 **Important**: This requires `sandbox_permissions: require_escalated` — database access is sandboxed.

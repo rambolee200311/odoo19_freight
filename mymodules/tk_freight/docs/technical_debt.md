@@ -20,7 +20,7 @@
 
 | ID | 分类 | 问题 | 现状/影响 | 修复方向 | 状态 |
 |---|---|---|---|---|---|
-| TD-001 | Confirmed Bug | 成本字段未启用，应付按 sale 计算 | `action_create_vendor_bill` 使用 `data.sale`，成本与利润失真 | vendor 行按不含税成本生成账单 | 待处理 |
+| TD-001 | Confirmed Bug | 成本字段未启用，应付按 sale 计算 | `action_create_vendor_bill` 使用 `data.sale`；供应商账单由供应商提供原始账单，我方非创建方，不属于当前客户应收闭环 | 保留兼容；不作为 Sprint4 主流程技术债 | 已延期（供应商原始账单） |
 | TD-002 | Confirmed Bug | 多币种直接相加 | `_compute_total_amount` 累加 `amount_total_signed`，未折算人民币 | 逐票用 `res.currency._convert` 折算 | 待处理 |
 | TD-003 | TECHNICAL_DEBT | 发票/账单与费用行无双向追溯 | 作废/红冲后 invoiced 不回滚 | 开票后回填发票行，account.move 状态联动 | 待处理 |
 | TD-004 | Confirmed Bug | account.move 联动字段错误 | onchange 强制 partner；destination related 误指 source | 开票方法显式写 partner，修正 related | 待处理 |
@@ -29,6 +29,7 @@
 | TD-007 | TECHNICAL_DEBT | `shipment.invoice` 向导逻辑不可用 | 死代码，无入口 | 保留兼容，不挂接 | 已确认（延期） |
 | TD-008 | MISSING_FEATURE | 税费链路缺失 | 已确认税率录入需求，但服务行无税率字段 | 新增税率/税额/含税字段，开票生成 account.tax | 待处理 |
 | TD-009 | Confirmed Bug | 开票入口重复且部分缺关联 | 无幂等控制；部分入口不写 freight_operation_id | 统一按伙伴+币种分组生成发票 | 待处理 |
+| TD-026 | MISSING_FEATURE | 每日汇率自动更新缺失 | `res.currency.rate` 仅手工/一次性维护，B-23“默认取当前汇率”缺少可靠数据源；外币折算依赖滞后汇率（TD-002 联动） | 新增 Odoo cron 每日更新 `res.currency.rate`；首选 Frankfurter（ECB 官方参考汇率，无需 API Key/注册，工作日 16:00 CET 发布，支持 USD/EUR、历史回溯、可自托管）；备选 ExchangeRate-API（免费 1500 次/月足够每日 1 次，支持 base=CNY 直接适配 Odoo rate 定义）；需处理周末/节假日、失败重试与日志 | 待处理 |
 
 ## 3. P1 业务流程
 
@@ -63,7 +64,6 @@
 3. 手工税额开票方式（U-04）
 4. 报表需求（U-05）
 5. 角色权限（U-06）
-6. 外部财务系统 U8C（U-07）
 
 ## 6. 建议修复顺序
 
