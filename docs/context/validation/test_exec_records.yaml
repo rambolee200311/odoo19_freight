@@ -418,3 +418,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "打开向导（仅 shipment）直接显示货单全部 confirmed 应收费用（CAT320D2→9、场站费/安保费→7）；选客户后筛选；跨客户勾选被拦截；customer_id 不再必填，生成时从勾选费用推导客户"
+
+  - contract_id: FIX-WIZARD-UI-001
+    sprint_name: 向导 select/customer 交互修复
+    context_baseline: "0.1.65"
+    execute_time: "2026-08-13"
+    test_category: "向导视图交互修复"
+    test_target_models: ["freight.statement.wizard"]
+    total_case_count: 4
+    pass_count: 4
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "button_immediate_upgrade PASS；odoo shell arch 断言 4/4 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "select 去除 readonly=\"not selectable\" 依赖；line_ids 内嵌列表 editable=\"bottom\" 且 create/delete 关闭；customer_id 下拉可操作；arch 断言：无 select 只读、列表可编辑、customer 无只读、selectable 列移除"
