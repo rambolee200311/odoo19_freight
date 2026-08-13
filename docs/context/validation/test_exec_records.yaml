@@ -469,3 +469,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "移除 editable=bottom 避免产生无 service_id 空行；生成时对缺 service_id 勾选行给出明确错误（不再抛 ORM 必填错）；端到端实测：向导→勾选 fee2→生成 Statement 23 draft（amount=800）→ void → fee2 confirmed"
+
+  - contract_id: FIX-WIZARD-TOGGLE-001
+    sprint_name: 向导行内按钮勾选/取消
+    context_baseline: "0.1.65"
+    execute_time: "2026-08-13"
+    test_category: "向导交互修复"
+    test_target_models: ["freight.statement.wizard.line"]
+    total_case_count: 4
+    pass_count: 4
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "button_immediate_upgrade PASS；odoo shell 实测 4/4 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "select 改为行内 toggle_select 按钮（避免 checkbox 点击打开行表单，也避免 editable 空行）；实测 toggle True→False→True；视图无 checkbox widget、无 editable、含 toggle_select 按钮"

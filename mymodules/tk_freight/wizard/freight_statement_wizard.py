@@ -53,6 +53,11 @@ class FreightStatementWizardLine(models.TransientModel):
                     ref.statement_id.state in ('draft', 'confirmed', 'draft_invoice')
                     for ref in service.statement_line_ids))
 
+    def toggle_select(self):
+        for line in self:
+            line.select = not line.select
+        return True
+
 
 class FreightStatementWizard(models.TransientModel):
     """Generate a settlement statement from selected freight.service lines."""

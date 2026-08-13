@@ -9485,3 +9485,13 @@ msgstr "可选：%s / 列出：%s"
 msgid "Showing confirmed fees of all shipment customers (%s). Select a customer to filter."
 msgstr "显示货单全部客户 confirmed 费用（%s 条）。选择客户可筛选。"
 
+#. module: tk_freight
+#: model_terms:ir.ui.view,arch_db:tk_freight.freight_statement_wizard_form_view
+msgid "Select"
+msgstr "勾选"
+
+#. module: tk_freight
+#: model_terms:ir.ui.view,arch_db:tk_freight.freight_statement_wizard_form_view
+msgid "Deselect"
+msgstr "取消勾选"
+
