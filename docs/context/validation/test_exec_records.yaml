@@ -401,3 +401,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "wizard create 即按 shipment+customer 填充 line_ids（不依赖 onchange）；真实 consignee 9 显示 3 条 confirmed（28/29/30）、shipper 7 显示 2 条（31/32）；default_get 在唯一客户时自动选中，多客户时留空待选"
+
+  - contract_id: FIX-WIZARD-ALL-FEES-001
+    sprint_name: 向导打开即显示货单全部 confirmed 费用
+    context_baseline: "0.1.65"
+    execute_time: "2026-08-13"
+    test_category: "向导列表修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line"]
+    total_case_count: 4
+    pass_count: 4
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "button_immediate_upgrade PASS；odoo shell 实测 4/4 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "打开向导（仅 shipment）直接显示货单全部 confirmed 应收费用（CAT320D2→9、场站费/安保费→7）；选客户后筛选；跨客户勾选被拦截；customer_id 不再必填，生成时从勾选费用推导客户"

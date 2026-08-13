@@ -62,7 +62,7 @@ class FreightStatementWizard(models.TransientModel):
     shipment_id = fields.Many2one('freight.shipment', string='Freight Operation',
                                   required=True)
     customer_id = fields.Many2one(
-        'res.partner', string='Customer', required=True,
+        'res.partner', string='Customer',
         domain="['|',('shipper','=',True),('consignee','=',True)]")
     line_ids = fields.One2many('freight.statement.wizard.line', 'wizard_id',
                                string='Selectable Services')
@@ -86,56 +86,49 @@ class FreightStatementWizard(models.TransientModel):
     def create(self, vals_list):
         records = super().create(vals_list)
         for rec in records:
-            if rec.shipment_id and rec.customer_id and not rec.line_ids:
-                rec._onchange_customer_id()
+            if rec.shipment_id and not rec.line_ids:
+                rec._populate_lines(
+                    rec._eligible_services_for(rec.shipment_id, rec.customer_id),
+                    rec.customer_id)
         return records
 
     @api.onchange('shipment_id')
     def _onchange_shipment_id(self):
         self.customer_id = False
-        self.line_ids = [(5, 0, 0)]
+        self._populate_lines(
+            self._eligible_services_for(self.shipment_id, False), False)
 
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
-        commands = [(5, 0, 0)]
-        if not self.shipment_id or not self.customer_id:
-            self.line_ids = commands
+        if not self.shipment_id:
+            self.line_ids = [(5, 0, 0)]
             self.eligibility_summary = False
             return
-        eligible = self._get_eligible_services()
+        self._populate_lines(
+            self._eligible_services_for(self.shipment_id, self.customer_id),
+            self.customer_id)
+
+    def _populate_lines(self, eligible, customer):
+        commands = [(5, 0, 0)]
         for service in eligible.sorted('id'):
             vals = self._prepare_wizard_line(service)
             vals['select'] = True
             commands.append((0, 0, vals))
         self.line_ids = commands
-        all_services = self.env['freight.service'].search([
-            ('shipment_id', '=', self.shipment_id.id),
-        ])
-        vendor_count = len(all_services.filtered(lambda s: s.service_type == 'vendor'))
-        customer_fees = self.env['freight.service']
-        for service in all_services:
-            partner = service.shipper_id if service.service_type == 'shipper' \
-                else service.consignee_id
-            if partner and partner.id == self.customer_id.id:
-                customer_fees |= service
-        self.eligibility_summary = _(
-            'Eligible: %s / Listed: %s; excluded reasons: draft %s, used %s, '
-            'canceled %s, invoiced %s, vendor %s') % (
-            len(eligible), len(eligible),
-            len(customer_fees.filtered(lambda s: s.fee_state == 'draft')),
-            len(customer_fees.filtered(lambda s: s.fee_state == 'used')),
-            len(customer_fees.filtered(lambda s: s.fee_state == 'canceled')),
-            len(customer_fees.filtered('invoiced')),
-            vendor_count,
-        )
+        if customer:
+            self.eligibility_summary = _(
+                'Eligible: %s / Listed: %s') % (len(eligible), len(eligible))
+        else:
+            self.eligibility_summary = _(
+                'Showing confirmed fees of all shipment customers (%s). '
+                'Select a customer to filter.') % len(eligible)
 
     @api.model
     def _eligible_services_for(self, shipment, customer):
-        if not shipment or not customer:
+        if not shipment:
             return self.env['freight.service']
         active_statements = self.env['freight.statement'].search([
             ('freight_operation_id', '=', shipment.id),
-            ('customer_id', '=', customer.id),
             ('state', 'in', ('draft', 'confirmed', 'draft_invoice')),
         ])
         used_service_ids = active_statements.statement_line_ids.mapped(
@@ -152,7 +145,12 @@ class FreightStatementWizard(models.TransientModel):
                 continue
             partner = service.shipper_id if service.service_type == 'shipper' \
                 else service.consignee_id
-            if not partner or partner.id != customer.id:
+            if not partner:
+                continue
+            if customer and partner.id != customer.id:
+                continue
+            if not customer and partner.id not in (
+                    shipment.shipper_id.id, shipment.consignee_id.id):
                 continue
             eligible |= service
         return eligible
@@ -221,6 +219,28 @@ class FreightStatementWizard(models.TransientModel):
         selected = self.line_ids.filtered('select')
         if not selected:
             raise ValidationError(_('Please select at least one service line.'))
+        customers = self.env['res.partner']
+        for line in selected:
+            service = line.service_id
+            partner = service.shipper_id if service.service_type == 'shipper' \
+                else service.consignee_id
+            if partner:
+                customers |= partner
+        if not customers:
+            raise ValidationError(_(
+                'Selected fees have no invoice target. Add the shipper/consignee '
+                'before generating a statement.'))
+        if self.customer_id:
+            customer = self.customer_id
+            if any(partner.id != customer.id for partner in customers):
+                raise ValidationError(_(
+                    'Please select fees of the same customer.'))
+        elif len(customers) > 1:
+            raise ValidationError(_(
+                'Please select fees of the same customer, or choose a customer '
+                'before generating a statement.'))
+        else:
+            customer = customers
         for line in selected:
             service = line.service_id
             if service.service_type == 'vendor':
@@ -247,7 +267,7 @@ class FreightStatementWizard(models.TransientModel):
                     'and check the fee state.' % service.name))
         statement = self.env['freight.statement'].create({
             'freight_operation_id': self.shipment_id.id,
-            'customer_id': self.customer_id.id,
+            'customer_id': customer.id,
             'settlement_date': fields.Date.context_today(self),
         })
         line_vals = []

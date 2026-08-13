@@ -9470,3 +9470,18 @@ msgstr "可选费用说明"
 msgid "Eligible: %s / Listed: %s; excluded reasons: draft %s, used %s, canceled %s, invoiced %s, vendor %s"
 msgstr "可选：%s / 列出：%s；排除原因：草稿 %s、已使用 %s、已取消 %s、已开票 %s、供应商 %s"
 
+#. module: tk_freight
+#: code:addons/tk_freight/wizard/freight_statement_wizard.py:0
+msgid "Please select a customer to list confirmed fees."
+msgstr "请先选择客户以显示 confirmed 费用"
+
+#. module: tk_freight
+#: code:addons/tk_freight/wizard/freight_statement_wizard.py:0
+msgid "Eligible: %s / Listed: %s"
+msgstr "可选：%s / 列出：%s"
+
+#. module: tk_freight
+#: code:addons/tk_freight/wizard/freight_statement_wizard.py:0
+msgid "Showing confirmed fees of all shipment customers (%s). Select a customer to filter."
+msgstr "显示货单全部客户 confirmed 费用（%s 条）。选择客户可筛选。"
+
