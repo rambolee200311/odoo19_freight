@@ -68,6 +68,28 @@ class FreightStatementWizard(models.TransientModel):
                                string='Selectable Services')
     eligibility_summary = fields.Text(string='Eligibility Summary', readonly=True)
 
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        shipment_id = res.get('shipment_id') or self.env.context.get(
+            'default_shipment_id')
+        customer_id = res.get('customer_id') or self.env.context.get(
+            'default_customer_id')
+        if shipment_id and not customer_id:
+            shipment = self.env['freight.shipment'].browse(shipment_id)
+            customers = self._customers_with_eligible_fees(shipment)
+            if len(customers) == 1:
+                res['customer_id'] = customers.id
+        return res
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        for rec in records:
+            if rec.shipment_id and rec.customer_id and not rec.line_ids:
+                rec._onchange_customer_id()
+        return records
+
     @api.onchange('shipment_id')
     def _onchange_shipment_id(self):
         self.customer_id = False
@@ -107,19 +129,19 @@ class FreightStatementWizard(models.TransientModel):
             vendor_count,
         )
 
-    def _get_eligible_services(self):
-        self.ensure_one()
-        if not self.shipment_id or not self.customer_id:
+    @api.model
+    def _eligible_services_for(self, shipment, customer):
+        if not shipment or not customer:
             return self.env['freight.service']
         active_statements = self.env['freight.statement'].search([
-            ('freight_operation_id', '=', self.shipment_id.id),
-            ('customer_id', '=', self.customer_id.id),
+            ('freight_operation_id', '=', shipment.id),
+            ('customer_id', '=', customer.id),
             ('state', 'in', ('draft', 'confirmed', 'draft_invoice')),
         ])
         used_service_ids = active_statements.statement_line_ids.mapped(
             'freight_service_id').ids
         services = self.env['freight.service'].search([
-            ('shipment_id', '=', self.shipment_id.id),
+            ('shipment_id', '=', shipment.id),
             ('service_type', 'in', ('shipper', 'consignee')),
             ('fee_state', '=', 'confirmed'),
             ('invoiced', '=', False),
@@ -130,10 +152,40 @@ class FreightStatementWizard(models.TransientModel):
                 continue
             partner = service.shipper_id if service.service_type == 'shipper' \
                 else service.consignee_id
-            if not partner or partner.id != self.customer_id.id:
+            if not partner or partner.id != customer.id:
                 continue
             eligible |= service
         return eligible
+
+    def _get_eligible_services(self):
+        self.ensure_one()
+        return self._eligible_services_for(self.shipment_id, self.customer_id)
+
+    @api.model
+    def _customers_with_eligible_fees(self, shipment):
+        if not shipment:
+            return self.env['res.partner']
+        services = self.env['freight.service'].search([
+            ('shipment_id', '=', shipment.id),
+            ('service_type', 'in', ('shipper', 'consignee')),
+            ('fee_state', '=', 'confirmed'),
+            ('invoiced', '=', False),
+        ])
+        active_statements = self.env['freight.statement'].search([
+            ('freight_operation_id', '=', shipment.id),
+            ('state', 'in', ('draft', 'confirmed', 'draft_invoice')),
+        ])
+        used_ids = active_statements.statement_line_ids.mapped(
+            'freight_service_id').ids
+        customers = self.env['res.partner']
+        for service in services:
+            if service.id in used_ids:
+                continue
+            partner = service.shipper_id if service.service_type == 'shipper' \
+                else service.consignee_id
+            if partner:
+                customers |= partner
+        return customers
 
     def _prepare_wizard_line(self, service):
         company = self.shipment_id.company_id or self.env.company

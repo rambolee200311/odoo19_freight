@@ -384,3 +384,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "覆盖：列表仅 confirmed（客户39 仅 17）、真实客户空列表+说明、货单只读、fee_state/eligibility_summary 展示；取代 FIX-STATEMENT-WIZARD-001 的列出全部费用行为"
+
+  - contract_id: FIX-WIZARD-AUTOFILL-001
+    sprint_name: 向导打开即填充 confirmed 费用
+    context_baseline: "0.1.65"
+    execute_time: "2026-08-13"
+    test_category: "向导自动填充修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line"]
+    total_case_count: 3
+    pass_count: 3
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "button_immediate_upgrade PASS；odoo shell create 即填充断言 3/3 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "wizard create 即按 shipment+customer 填充 line_ids（不依赖 onchange）；真实 consignee 9 显示 3 条 confirmed（28/29/30）、shipper 7 显示 2 条（31/32）；default_get 在唯一客户时自动选中，多客户时留空待选"
