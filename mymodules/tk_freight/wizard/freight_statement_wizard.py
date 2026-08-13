@@ -81,33 +81,29 @@ class FreightStatementWizard(models.TransientModel):
             self.eligibility_summary = False
             return
         eligible = self._get_eligible_services()
-        services = self.env['freight.service'].search([
+        for service in eligible.sorted('id'):
+            vals = self._prepare_wizard_line(service)
+            vals['select'] = True
+            commands.append((0, 0, vals))
+        self.line_ids = commands
+        all_services = self.env['freight.service'].search([
             ('shipment_id', '=', self.shipment_id.id),
-            ('service_type', 'in', ('shipper', 'consignee')),
         ])
-        shown = self.env['freight.service']
-        for service in services:
+        vendor_count = len(all_services.filtered(lambda s: s.service_type == 'vendor'))
+        customer_fees = self.env['freight.service']
+        for service in all_services:
             partner = service.shipper_id if service.service_type == 'shipper' \
                 else service.consignee_id
             if partner and partner.id == self.customer_id.id:
-                shown |= service
-        for service in shown.sorted('id'):
-            vals = self._prepare_wizard_line(service)
-            vals['select'] = service in eligible
-            commands.append((0, 0, vals))
-        self.line_ids = commands
-        vendor_count = self.env['freight.service'].search_count([
-            ('shipment_id', '=', self.shipment_id.id),
-            ('service_type', '=', 'vendor'),
-        ])
+                customer_fees |= service
         self.eligibility_summary = _(
             'Eligible: %s / Listed: %s; excluded reasons: draft %s, used %s, '
             'canceled %s, invoiced %s, vendor %s') % (
-            len(eligible), len(shown),
-            len(shown.filtered(lambda s: s.fee_state == 'draft')),
-            len(shown.filtered(lambda s: s.fee_state == 'used')),
-            len(shown.filtered(lambda s: s.fee_state == 'canceled')),
-            len(shown.filtered('invoiced')),
+            len(eligible), len(eligible),
+            len(customer_fees.filtered(lambda s: s.fee_state == 'draft')),
+            len(customer_fees.filtered(lambda s: s.fee_state == 'used')),
+            len(customer_fees.filtered(lambda s: s.fee_state == 'canceled')),
+            len(customer_fees.filtered('invoiced')),
             vendor_count,
         )
 

@@ -130,3 +130,15 @@
 - 未新增费用版本体系
 
 **验收**: context_loader 0.1.63 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 22/22 断言（口径扫描/并发锁/业务字段写拦截）+ log clean PASS。
+
+## Sprint4-4-3-Wizard-Refactor (2026-08-13)
+
+**目标**: Create Statement 向导改造（confirmed 费用列表 + 只读货单 + 客户重置 + 勾选生成）。
+
+**成果**:
+- wizard 列表仅显示所选客户 `fee_state=confirmed` 应收费用
+- `shipment_id` 只读；切换客户重置列表；费用行可勾选/去勾选
+- 保留 eligibility_summary 可选费用说明与 Fee State 列
+- 未改费用/Statement 状态机与生成事务/并发保护
+
+**验收**: context_loader 0.1.65 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 7/7 断言 + log clean PASS。

@@ -367,3 +367,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "wizard 按客户列出全部 shipper/consignee 费用并显示 fee_state；仅 confirmed 且未开票/未占用的费用可勾选（selectable）；新增 eligibility_summary 可选费用说明；真实客户无可选时列表仍展示并给出原因"
+
+  - contract_id: INT-FREIGHT-SPRINT4-4-3-001
+    sprint_name: Sprint4-4-3 Create Statement 向导改造
+    context_baseline: "0.1.64"
+    execute_time: "2026-08-13"
+    test_category: "向导改造"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line"]
+    total_case_count: 7
+    pass_count: 7
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "context_loader 0.1.65 基线 PASS；verify.py 18/18；button_immediate_upgrade PASS；odoo shell 7/7 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "覆盖：列表仅 confirmed（客户39 仅 17）、真实客户空列表+说明、货单只读、fee_state/eligibility_summary 展示；取代 FIX-STATEMENT-WIZARD-001 的列出全部费用行为"

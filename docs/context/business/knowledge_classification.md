@@ -65,6 +65,7 @@
 | B-57 | canceled 费用不可恢复、不可编辑/删除，可通过复制为新 draft 继续使用 | 2026-08-13 用户确认（U-44） |
 | B-58 | 历史未进入非 voided Statement、且未开票的存量费用初始化为 draft；业务人员需 Confirm 后方可进入新的 Statement 流程 | 2026-08-13 评审确认 |
 | B-59 | 作废后如需修改费用，唯一修改路径为：Statement voided → fee confirmed → unconfirm → draft → 修改 → confirm → 重新生成新 Statement；不得直接修改 confirmed/used 费用（作废后费用无错时可直接重新进入新 Statement） | 2026-08-13 评审确认 |
+| B-60 | Create Statement 向导：列表仅显示所选客户 fee_state=confirmed 的应收费用（shipper/consignee）；shipment_id 只读不可重选；切换 customer_id 重置费用列表；费用行可勾选/去勾选后生成结算单 | 2026-08-13 用户确认 |
 
 ## 已取代决策（SUPERSEDED）
 

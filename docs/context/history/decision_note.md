@@ -294,6 +294,26 @@
 - 未改变费用/结算单业务行为口径，未新增费用版本体系。
 - 验证：context_loader 基线 PASS；verify.py 全门禁 PASS；button_immediate_upgrade + 22/22 odoo shell 断言 + log clean PASS。
 
+### 决策59：Sprint4-4-3 契约起草（Create Statement 向导改造）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-4-3-001`（Sprint4-4-3-Wizard-Refactor），登记 B-60：
+
+- 点击 Create Statement 后 wizard 默认绑定当前货单，货单号只读、不可重选。
+- 选择/切换客户后重置费用列表，列表仅显示该客户 `fee_state=confirmed` 的 shipper/consignee 应收费用。
+- 费用行可勾选/去勾选，勾选后生成结算单草稿；未勾选任何费用被阻止。
+- 取代 FIX-STATEMENT-WIZARD-001 的“列出全部费用”展示行为，回归“仅 confirmed 可列可勾”口径。
+- 不改变费用状态机、Statement 状态机与 Sprint4-4-2 生成事务/并发保护。
+
+### 决策60：Sprint4-4-3 实施完成
+
+**决策**: 按 `INT-FREIGHT-SPRINT4-4-3-001` 完成实施并验证（2026-08-13）：
+
+- wizard 列表仅显示所选客户 `fee_state=confirmed` 的应收费用（shipper/consignee）。
+- `shipment_id` 视图只读；切换 `customer_id` 重置费用列表；费用行可勾选/去勾选后生成。
+- 保留 `eligibility_summary` 可选费用说明与 Fee State 列。
+- 未改变费用/Statement 状态机与 Sprint4-4-2 生成事务/并发保护。
+- 验证：context_loader 基线 PASS；verify.py 全门禁 PASS；button_immediate_upgrade + 7/7 odoo shell 断言 + log clean PASS。
+
 ### 决策41：Sprint4-2 契约起草（结算单生成 + 费用范围确认）
 
 **决策**: 起草 `INT-FREIGHT-SPRINT4-2-001`：Shipment → 费用行 → 生成客户结算单草稿（Customer Statement Draft）。

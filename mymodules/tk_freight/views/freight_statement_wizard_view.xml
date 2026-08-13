@@ -9,7 +9,7 @@
                     <group>
                         <group>
                             <field name="shipment_id" string="Freight Operation"
-                                   required="1"/>
+                                   required="1" readonly="1"/>
                         </group>
                         <group>
                             <field name="customer_id" string="Customer" required="1"/>

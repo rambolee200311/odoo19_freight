@@ -1,0 +1,218 @@
+# ==============================================================
+# Intent: Sprint4-4-3 Create Statement 向导改造
+# 状态：起草（业务规则已由用户确认，无未决 UNKNOWN）
+# 目标：向导列表只展示 confirmed 客户应收费用；货单只读；
+#       客户选择后重置列表；费用行可勾选/去勾选后生成结算单。
+# 注：本 Sprint 取代 FIX-STATEMENT-WIZARD-001 的“列出全部费用”
+#     展示行为，回归“仅 confirmed 可列可勾”口径。
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-4-3-001"
+sprint_version: "Sprint4-4-3-Wizard-Refactor"
+intent_work_type: "Development"
+intent_change_type: "UI Refactor"
+title: "Create Statement 向导改造（confirmed 费用列表 + 只读货单 + 客户重置 + 勾选生成）"
+target_scope: "改造 freight.statement.wizard：列表仅显示所选客户下 fee_state=confirmed 的 shipper/consignee 应收费用；shipment_id 只读不可重选；customer_id 变更时重置费用列表；用户勾选/去勾选费用行后生成结算单。不改变费用状态机、结算单状态机、生成逻辑口径"
+
+context_binding:
+  bind_context_version: "0.1.65"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint4-4-3 起草"
+  related_sprint:
+    - "INT-FREIGHT-SPRINT4-4-1-001"
+    - "INT-FREIGHT-SPRINT4-4-2-001"
+  related_decisions:
+    - "B-53"
+    - "B-55"
+    - "B-46"
+  confirmed_decisions:
+    - id: "B-60"
+      decision_ref: "用户 2026-08-13"
+      status: "CONFIRMED"
+      statement: "Create Statement 向导：列表仅显示所选客户 fee_state=confirmed 的应收费用（shipper/consignee）；shipment_id 只读不可重选；切换 customer_id 重置费用列表；费用行可勾选/去勾选后生成结算单"
+  draft_scope:
+    - "点击 Create Statement 打开 wizard，默认绑定当前货单"
+    - "列表只展示所选客户 confirmed 状态应收费用"
+    - "货单号只读，不可重新选择"
+    - "选择/切换客户后重置费用列表"
+    - "勾选/去勾选费用行后生成结算单"
+  unresolved_unknowns: []
+  confirmed_open_questions: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "record_and_continue"
+  coding_gate: "无未决 UNKNOWN（用户已确认 B-60）"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+  mapping: []
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-3-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/models/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "wizard 费用列表仅展示 confirmed 应收费用（service_type shipper/consignee、fee_state=confirmed）"
+    - "shipment_id 视图只读"
+    - "customer_id onchange 重置 line_ids 与可选费用说明"
+    - "费用行 select 勾选/去勾选（selectable 规则沿用 B-55）"
+    - "zh_CN.po 向导文案"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改费用状态机 / fee_state / Statement 状态机"
+    - "修改结算单生成事务与并发保护（Sprint4-4-2）"
+    - "修改菜单（menus.xml）"
+    - "修改 __manifest__.py"
+    - "新建 data XML"
+    - "修改报表、Controller、前端静态资源"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-3-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "货单表单点击 Create Statement"
+  - "wizard 打开：货单号只读，默认绑定当前货单"
+  - "选择客户"
+  - "费用列表重置，仅显示该客户 confirmed 应收费用"
+  - "勾选/去勾选需要的费用行"
+  - "点击 Generate Statement 生成结算单草稿"
+
+technical_constraints:
+  - "列表过滤：service_type in ('shipper','consignee') 且 fee_state == 'confirmed' 且 invoiced=False 且未被非 voided Statement 占用"
+  - "shipment_id 视图 readonly，不允许在 wizard 内重选货单"
+  - "customer_id 变更必须清空并重建 line_ids（重置列表）"
+  - "select 默认仅对可结算费用为 True；用户可勾选/去勾选"
+  - "生成时沿用 Sprint4-4-2 行锁与 fee_state 二次校验"
+  - "不改变费用/Statement 业务口径"
+
+acceptance_criteria:
+  functional:
+    - "点击 Create Statement 后 wizard 默认绑定当前货单"
+    - "货单号字段只读，不可编辑/重选"
+    - "选择客户后列表仅显示该客户 confirmed 应收费用"
+    - "切换客户后列表重置为新的客户费用"
+    - "费用行可勾选/去勾选"
+    - "勾选费用可生成结算单草稿；未勾选任何费用被阻止"
+    - "真实客户无 confirmed 费用时列表为空并显示可选费用说明"
+  excluded:
+    - "费用状态机 / Statement 状态机修改"
+    - "结算单生成事务/并发逻辑修改"
+    - "菜单、权限、报表、PDF"
+  non_regression:
+    - "B-46 ~ B-60 相关规则不变"
+    - "Sprint4-4-2 并发行锁与 fee_state 二次校验保留"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.64）"
+    - "verify.py 全部强制门禁 PASS"
+    - "XML-RPC 模块升级验证通过"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + 模块升级验证通过（button_immediate_upgrade / odoo_check.py）"
+    - "wizard 只显示 confirmed 应收费用断言 PASS"
+    - "shipment 只读 / 客户切换重置 / 勾选生成断言 PASS"
+  business_review:
+    - "业务负责人人工验收通过"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - "B-60 decision registration"
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-3-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "Create Statement 向导按 B-60 改造完成"
+  - "列表仅显示 confirmed 应收费用；货单只读；客户切换重置；勾选生成"
+  - "所有强制验证通过"
+
+deliverables:
+  - "wizard 费用列表过滤与 selectable 规则"
+  - "shipment_id 只读与 customer_id 重置"
+  - "zh_CN.po 文案与决策/执行记录"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-3-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "确认未改费用/Statement 状态机与生成事务"
+  - "确认 FIX-STATEMENT-WIZARD-001 的‘列出全部费用’行为已回归为仅 confirmed"

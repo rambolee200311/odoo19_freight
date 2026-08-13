@@ -1,0 +1,18 @@
+intent_id: INT-FREIGHT-SPRINT4-4-3-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/wizard/freight_statement_wizard.py
+  - mymodules/tk_freight/views/freight_statement_wizard_view.xml
+  - docs/context/intent/intent_sprint4_4_3_wizard_refactor.yaml
+  - docs/context/business/knowledge_classification.md
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT4-4-3-001/
+  - docs/context/validation/test_exec_records.yaml
+
+scope_notes:
+  - "wizard 列表仅显示所选客户 confirmed 应收费用（取代 FIX-STATEMENT-WIZARD-001 的列出全部费用行为）"
+  - "shipment_id 只读；customer_id 切换重置列表；费用行可勾选/去勾选"
+  - "未改费用/Statement 状态机与生成事务/并发保护"

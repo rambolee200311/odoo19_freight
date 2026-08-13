@@ -3,12 +3,30 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.63
+context_version: 0.1.65
 update_time: 2026-08-13
-adapt_sprint: Sprint4-4-2-Conflict-Resolution
+adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.65:
+    update_content: |
+      Sprint4-4-3 实施完成（决策60）：
+      - wizard 列表仅显示所选客户 confirmed 应收费用
+      - 货单只读；客户切换重置；勾选/去勾选生成
+      - 7/7 断言 PASS，log clean
+    update_type: Sprint4-4-3 实施执行
+    effect_scope: intent_sprint4_4_3 + business + history + validation
+
+  0.1.64:
+    update_content: |
+      Sprint4-4-3 契约起草（决策59，B-60）：
+      - Create Statement 向导只显示 confirmed 应收费用
+      - 货单号只读；客户切换重置列表；费用行勾选/去勾选生成
+      - 取代 FIX-STATEMENT-WIZARD-001 的列出全部费用行为
+    update_type: Sprint4-4-3 Intent 起草
+    effect_scope: intent_sprint4_4_3 + business + history
+
   0.1.63:
     update_content: |
       Sprint4-4-2 实施完成（决策58）：
