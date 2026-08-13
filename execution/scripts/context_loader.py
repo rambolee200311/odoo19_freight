@@ -114,13 +114,11 @@ def read_intent():
     if not files:
         return ('NONE', '', '', 'full')
     def sprint_num(fp):
-        """Return (major, minor) sprint number, e.g. sprint4_1 -> (4, 1)."""
-        m = re.search(r'sprint(\d+)(?:_(\d+)|-(\d+)|\.(\d+))?', os.path.basename(fp))
+        """Return sprint number tuple, e.g. sprint4_4_1 -> (4, 4, 1)."""
+        m = re.search(r'sprint([\d_.-]+)', os.path.basename(fp))
         if not m:
             return (0,)
-        major = int(m.group(1))
-        minor = next((int(g) for g in m.groups()[1:] if g is not None), None)
-        return (major, minor) if minor is not None else (major,)
+        return tuple(int(x) for x in re.findall(r'\d+', m.group(1)))
     best = max(files, key=sprint_num)
     name = os.path.basename(best)
     raw = _read(best)
