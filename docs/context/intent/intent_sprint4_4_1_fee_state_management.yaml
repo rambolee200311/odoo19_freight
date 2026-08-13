@@ -11,7 +11,7 @@ sprint_version: "Sprint4-4-1-Fee-State-Management"
 intent_work_type: "Development"
 intent_change_type: "New Feature"
 title: "freight.service 费用状态管理（draft/confirmed/used/canceled）+ 状态栏与状态操作"
-target_scope: "新增 freight.service.fee_state 状态机；费用表单增加状态栏与 Confirm/Cancel 按钮；wizard 仅允许 confirmed 费用生成 statement；statement 创建成功 → 费用 used；statement 作废 → 费用 confirmed；draft 可编辑/删除/取消；confirmed 不可编辑/删除。不实现草稿发票生成（Sprint4-5）、Vendor Bill、权限组建设"
+target_scope: "新增 freight.service.fee_state 状态机；费用表单增加状态栏与 Confirm/Cancel 按钮；wizard 仅允许 confirmed 费用生成 statement；费用被任一非 voided Statement 占用 → used；statement 作废 → 费用 confirmed；draft 可编辑/删除/取消；confirmed 不可编辑/删除。不实现草稿发票生成（Sprint4-5）、Vendor Bill、权限组建设"
 
 context_binding:
   bind_context_version: "0.1.59"
@@ -39,7 +39,7 @@ business_intent:
     - id: "B-53"
       decision_ref: "用户 2026-08-13"
       status: "CONFIRMED"
-      statement: "费用显式状态四态：draft / confirmed / used / canceled；draft 可编辑/删除/取消；confirmed 不可编辑/删除且可生成 statement；statement 创建成功 → used；statement 作废 → confirmed；canceled 为终态；费用表单增加状态栏与状态切换按钮"
+      statement: "费用显式状态四态：draft / confirmed / used / canceled；draft 可编辑/删除/取消；confirmed 不可编辑/删除且可生成 statement；被任一非 voided Statement 占用 → used；statement 作废 → confirmed；canceled 为终态；费用表单增加状态栏与状态切换按钮"
     - id: "B-54"
       decision_ref: "U-41"
       status: "CONFIRMED"
@@ -63,7 +63,7 @@ business_intent:
   draft_scope:
     - "draft：新建默认，可编辑/删除/取消"
     - "confirmed：费用确认后可生成 statement，不可编辑/删除"
-    - "used：statement 创建成功后费用进入 used"
+    - "used：被任一非 voided Statement 占用时费用进入 used"
     - "canceled：用户可取消 draft 费用"
     - "statement 作废后费用回 confirmed"
   unresolved_unknowns: []

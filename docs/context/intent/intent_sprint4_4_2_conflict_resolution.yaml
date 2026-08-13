@@ -1,0 +1,338 @@
+# ==============================================================
+# Intent: Sprint4-4-2 契约矛盾收口与口径对齐
+# 状态：起草（矛盾项已由 Sprint4-3/4-4/4-4-1 评审确认，无未决 UNKNOWN）
+# 目标：Fee ↔ Statement 一致性收口。
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-4-2-001"
+sprint_version: "Sprint4-4-2-Conflict-Resolution"
+intent_work_type: "Development"
+intent_change_type: "Refactor + Doc Alignment"
+title: "Fee ↔ Statement 一致性收口（契约矛盾清理 + 核心不变量 + 并发保护）"
+target_scope: >
+  统一 fee_state 与 Statement 的占用语义，收口 Sprint4-3/4-4/4-4-1 中已发现的契约矛盾；
+  明确“Statement 作废后如需修改费用”的 unconfirm 路径；建立 fee ↔ Statement 核心
+  不变量及事务级并发保护；statement_locked 仅作为 legacy 兼容字段并标记 DEPRECATED。
+  不新增费用版本体系，不改变既有费用、Statement 业务规则。
+
+context_binding:
+  bind_context_version: "0.1.63"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "internal_review"
+    origin_team: "AI 评审 + 业务负责人"
+    confirmation_ref: "Sprint4-3/4-4/4-4-1 Review Findings"
+  related_sprint:
+    - "INT-FREIGHT-SPRINT4-3-001"
+    - "INT-FREIGHT-SPRINT4-4-001"
+    - "INT-FREIGHT-SPRINT4-4-1-001"
+  related_decisions:
+    - "B-36"
+    - "B-48"
+    - "B-50"
+    - "B-52"
+    - "B-53"
+    - "B-54"
+    - "B-55"
+    - "B-56"
+    - "B-58"
+  confirmed_decisions:
+    - id: "B-59"
+      decision_ref: "Review 2026-08-13"
+      status: "CONFIRMED"
+      statement: "作废后如需修改费用，唯一修改路径为：Statement voided → fee confirmed → unconfirm → draft → 修改 → confirm → 重新生成新 Statement；不得直接修改 confirmed/used 费用（作废后费用无错时可直接重新进入新 Statement）"
+  draft_scope:
+    - "B-36 / B-52 标记 SUPERSEDED_BY B-54 / B-55（或改写为一致口径）"
+    - "B-53 与 B-55 定义统一：used = 被任一非 voided Statement 占用"
+    - "B-50 与 B-55 增加交叉引用，明确‘Draft 中修改费用’必须先作废旧 Draft"
+    - "Sprint4-3 业务流补充 unconfirm 步骤与‘仅当无其他非 voided 引用才释放’条件"
+    - "Sprint4-3 fee_source_policy 注明：业务字段不回写，fee_state 除外"
+    - "Sprint4-4 契约清除‘按 U-40 确认’残留文案，fee_lock_policy.draft 同步 B-55"
+    - "版本根逻辑名 statement_root_id ↔ 物理字段 statement_id 映射仅文档层顺手修正，不作为核心 deliverable"
+    - "同一费用最多一个非 voided Statement：建立核心不变量 + 事务级并发保护（不绑定具体实现）"
+    - "statement_locked 标记 DEPRECATED，仅兼容过渡，禁止新增业务逻辑依赖"
+  unresolved_unknowns: []
+  confirmed_open_questions: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "record_and_continue"
+  coding_gate: "无未决 UNKNOWN（矛盾项已由评审确认）"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+  mapping: []
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/intent/intent_sprint4_3_statement_void_revision.yaml"
+    - "docs/context/intent/intent_sprint4_4_statement_confirm.yaml"
+    - "docs/context/intent/intent_sprint4_4_1_fee_state_management.yaml"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-2-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "知识资产 B-36/B-52/B-53/B-50 口径对齐与 SUPERSEDED 标注"
+    - "Sprint4-3 / Sprint4-4 / Sprint4-4-1 契约文案修订（unconfirm 路径、释放条件、残留 U-40 文案）"
+    - "版本根逻辑名/物理字段映射（documentation_only，顺手修正）"
+    - "statement 创建事务级并发保护（锁定费用 + 事务内二次校验 + 原子创建，实现方式不绑定）"
+    - "statement_locked DEPRECATED 标注（不删除，禁止新代码依赖）"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改费用/结算单业务行为口径（sale/qty/tax/金额/状态转移）"
+    - "删除 legacy status / invoiced / vendor_invoiced 字段"
+    - "实现草稿发票生成（Sprint4-5）、Vendor Bill 生成"
+    - "新增或调整 security group / record rule（B-28）"
+    - "修改菜单（menus.xml）"
+    - "修改 __manifest__.py"
+    - "新建 data XML"
+    - "修改报表、Controller、前端静态资源"
+    - "不得新增费用版本号、revision_id、snapshot 等版本管理字段"
+    - "不得新增独立费用审计表或费用历史状态表"
+    - "不得重新设计费用版本体系"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+  context_audit:
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/intent/intent_sprint4_3_statement_void_revision.yaml"
+    - "docs/context/intent/intent_sprint4_4_statement_confirm.yaml"
+    - "docs/context/intent/intent_sprint4_4_1_fee_state_management.yaml"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-2-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+conflict_resolution:
+  b36_b52:
+    status: "SUPERSEDED"
+    superseded_by: ["B-54", "B-55"]
+    action: "knowledge_classification 与相关契约标注 SUPERSEDED；Sprint4-4 fee_lock_policy.draft 同步 B-55"
+  b50_b55:
+    status: "ALIGNED"
+    action: "B-50/B-55 增加交叉引用；明确 Draft 中修改费用必须先作废旧 Draft，再经 confirmed/unconfirm/draft 修改后重新生成"
+  b53_b55:
+    status: "ALIGNED"
+    action: "B-53 中‘statement 创建成功 → used’统一为‘被任一非 voided Statement 占用 → used’"
+  sprint4_3_flow:
+    status: "FIXED"
+    action: "业务流与验收补充 unconfirm 步骤；释放条件补充‘仅当不存在其他非 voided Statement 引用’"
+  u40_stale_text:
+    status: "FIXED"
+    action: "Sprint4-4 契约清除‘按 U-40 确认’残留文案"
+  statement_root_naming:
+    status: "DOCUMENTED"
+    scope: "documentation_only"
+    action: "仅文档层明确逻辑名 statement_root_id = 物理字段 statement_id（decision_note/intent/knowledge），不做 schema rename，不写代码映射"
+  concurrency:
+    status: "HARDEN"
+    business_rule:
+      - "同一 freight.service fee 在任一时刻最多被一个非 voided Statement 占用"
+    implementation:
+      - "数据库行锁或等价事务级并发控制（实现方式不绑定）"
+    requirement:
+      - "第二事务必须失败，或重新读取后发现 fee_state != confirmed"
+  statement_locked:
+    status: "DEPRECATED"
+    role: "legacy_compatibility_only"
+    business_authority: false
+    state_machine_authority: false
+    new_code_usage: forbidden
+    removal: "future_sprint"
+    action: "本 Sprint 不删除 statement_locked；禁止新增业务逻辑依赖；现有读取仅作为兼容性过渡，不得产生与 fee_state 冲突的业务行为"
+
+statement_generation_transaction:
+  steps:
+    - "锁定待使用 freight.service 费用"
+    - "事务内重新校验 fee_state == confirmed"
+    - "事务内重新校验不存在非 voided Statement 引用"
+    - "创建 Statement header"
+    - "创建 Statement lines"
+    - "费用状态写为 used"
+    - "全部成功后 COMMIT"
+  rollback:
+    - "任一步失败，Statement 与 fee_state 变更全部回滚，不得留下部分 Statement 或 used 费用"
+
+fee_statement_invariant:
+  scope: "transaction_commit_boundary"
+  rules:
+    - "draft fee 不得被任何非 voided Statement 引用"
+    - "confirmed fee 不得被任何非 voided Statement 引用"
+    - "used fee 必须被一个非 voided Statement 引用（恰好一个）"
+    - "canceled fee 不得被任何非 voided Statement 引用，且不可恢复"
+    - "同一 freight.service fee 最多只能被一个非 voided Statement 占用"
+    - "Statement 创建成功提交后，所引用费用必须为 used"
+    - "Statement 创建事务失败，Statement 与 fee_state 必须全部回滚"
+    - "Statement void 成功提交后，若该费用不存在其他非 voided Statement 引用，fee_state 回到 confirmed"
+    - "confirmed → draft 只能通过 unconfirm"
+    - "unconfirm 仅允许在不存在任何非 voided Statement 引用时执行"
+    - "confirmed / used / canceled 不允许直接修改费用业务字段"
+
+used_to_confirmed:
+  trigger: "仅由关联非 voided Statement 执行 void"
+  precondition:
+    - "当前 Statement 确实引用该费用"
+    - "该 Statement void 后，该费用不存在其他非 voided Statement 引用"
+  result:
+    - "fee_state = confirmed"
+
+supersession:
+  - old_decision: "B-36"
+    status: "SUPERSEDED"
+    superseded_by: ["B-54", "B-55"]
+    effective: false
+    historical_record: retained
+  - old_decision: "B-52"
+    status: "SUPERSEDED"
+    superseded_by: ["B-54", "B-55"]
+    effective: false
+    historical_record: retained
+
+naming:
+  logical_concept: "statement_root_id"
+  physical_field: "statement_id"
+  schema_change: false
+  status: "DOCUMENTED"
+  scope: "documentation_only"
+  doc_scope: ["decision_note", "intent", "knowledge_classification"]
+
+acceptance_criteria:
+  functional:
+    - "knowledge_classification 无残留 B-36/B-52 旧口径（SUPERSEDED 或改写）"
+    - "B-53 与 B-55 定义一致"
+    - "Sprint4-3 业务流包含：作废 → confirmed → unconfirm → draft → 修改 → confirm → 重新生成"
+    - "Sprint4-4 契约无‘按 U-40 确认’残留文案"
+  concurrency_test:
+    - "同一 confirmed 费用在两个事务同时生成 Statement：最终只有一个成功"
+    - "并发失败事务不得留下部分 Statement 或 used 费用"
+  state_invariant_tests:
+    - "used fee 直接修改业务字段（金额/数量/税率等）→ FAIL（写拦截）"
+    - "confirmed fee 绕过状态机直接修改业务字段 → FAIL（写拦截）"
+    - "canceled fee 直接修改业务字段 → FAIL（写拦截）"
+    - "Statement-001 voided 后费用回 confirmed，可进入 Statement-002（voided 不阻塞复用）"
+    - "同一费用被两个有效 Statement 占用 → impossible（核心不变量测试）"
+  technical_cleanup:
+    - "statement_locked 标记 DEPRECATED"
+    - "新代码不得依赖 statement_locked"
+    - "现有读取仅用于兼容，不得产生与 fee_state 冲突的行为"
+  excluded:
+    - "草稿发票生成（Sprint4-5）"
+    - "Vendor Bill 生成"
+    - "security group / record rule（B-28）"
+    - "菜单、权限、报表、PDF"
+  non_regression:
+    - "Sprint4-2/4-3/4-4/4-4-1 既有行为不变（费用四态、Statement 状态机、版本链、幂等）"
+    - "B-46 ~ B-58 相关规则不变"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.62）"
+    - "verify.py 全部强制门禁 PASS"
+    - "XML-RPC 模块升级验证通过"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 全部强制门禁 PASS"
+    - "口径扫描：B-36/B-52 无旧口径残留"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + 模块升级验证通过（button_immediate_upgrade / odoo_check.py）"
+    - "并发双开测试 PASS"
+    - "used/confirmed/canceled 直接写业务字段拦截 PASS"
+    - "voided 不阻塞复用 PASS"
+    - "同一费用两个有效 Statement 占用不可能 PASS"
+    - "transaction_commit_boundary 后 fee_statement_invariant 校验 PASS"
+    - "既有费用四态与 Statement 联动回归 PASS"
+  business_review:
+    - "业务负责人人工验收通过"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - "B-59 decision registration"
+    - "B-36/B-52 SUPERSEDED 标注"
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-2-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "Sprint4-3/4-4/4-4-1 评审矛盾全部收口"
+  - "B-36/B-52 SUPERSEDED 标注完成；B-50/B-53 与 B-54/B-55 口径一致"
+  - "Sprint4-3 业务流含 unconfirm 路径；Sprint4-4 无残留 U-40 文案"
+  - "并发双开测试通过；statement_locked deprecated 标注完成"
+  - "B-59 已登记，所有强制验证通过"
+
+deliverables:
+  - "知识资产口径对齐与 SUPERSEDED 标注"
+  - "Sprint4-3/4-4/4-4-1 契约文案修订"
+  - "statement 创建并发保护 + 并发测试"
+  - "statement_locked deprecated 标注"
+  - "决策/执行记录更新"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-2-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "口径扫描确认无 B-36/B-52 旧口径残留"
+  - "确认未改业务行为口径与 legacy 字段"
+  - "确认并发保护不引入 SQL 直写"

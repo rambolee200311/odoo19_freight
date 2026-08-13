@@ -1,0 +1,24 @@
+intent_id: INT-FREIGHT-SPRINT4-4-2-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/wizard/freight_statement_wizard.py
+  - mymodules/tk_freight/models/freight_configuration.py
+  - docs/context/business/knowledge_classification.md
+  - docs/context/intent/intent_sprint4_3_statement_void_revision.yaml
+  - docs/context/intent/intent_sprint4_4_statement_confirm.yaml
+  - docs/context/intent/intent_sprint4_4_1_fee_state_management.yaml
+  - docs/context/intent/intent_sprint4_4_2_conflict_resolution.yaml
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT4-4-2-001/
+  - docs/context/validation/test_exec_records.yaml
+
+scope_notes:
+  - "B-36/B-52 标记 SUPERSEDED_BY B-54/B-55（历史保留）"
+  - "B-50/B-53 与 B-54/B-55 口径统一；Sprint4-3 业务流补 unconfirm 路径"
+  - "Sprint4-4 清除 U-40 残留文案，fee_lock_policy.draft 同步 B-55"
+  - "statement 创建增加 SELECT FOR UPDATE 行锁 + 事务内 fee_state 二次校验"
+  - "statement_locked 标记 DEPRECATED（仅兼容，不参与状态机决策）"
+  - "未改业务行为口径、未新增费用版本体系"

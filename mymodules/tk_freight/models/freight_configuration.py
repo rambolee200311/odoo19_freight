@@ -456,7 +456,9 @@ class FreightService(models.Model):
     vendor_invoice = fields.Many2one('account.move')
     vendor_invoiced = fields.Boolean()
     sale_order_id = fields.Many2one('sale.order')
-    # Statement partial lock (B-52): fees inside confirmed/draft_invoice statements
+    # DEPRECATED (Sprint4-4-2): fee_state is the single authority for fee
+    # usability/locking; statement_locked is kept for legacy compatibility only
+    # and must not be used by new business logic.
     statement_line_ids = fields.One2many('freight.statement.line', 'freight_service_id',
                                          string='Statement Lines')
     statement_locked = fields.Boolean(string='Statement Locked',

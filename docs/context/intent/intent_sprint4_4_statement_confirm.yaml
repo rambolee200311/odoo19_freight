@@ -3,7 +3,7 @@
 # 状态：已确认（U-40 → B-52，可进入编码）
 # 核心原则：
 #   - Draft：允许修改/删除/增加费用，重新生成
-#   - Confirmed：结算单锁定，不可直接修改；费用层锁定策略按 U-40 确认
+#   - Confirmed：结算单锁定，不可直接修改；费用层锁定已确认（B-52 已被 B-55 取代）
 #   - Voided：不可恢复、不可修改，仅作为历史记录
 # ==============================================================
 
@@ -12,7 +12,7 @@ sprint_version: "Sprint4-4-Statement-Confirm"
 intent_work_type: "Development"
 intent_change_type: "Process Flow"
 title: "客户接受 → Statement Confirmed（结算单业务锁点）"
-target_scope: "Statement Draft → Confirmed：确认后结算单 header 与 statement.line 锁定不可直接修改；费用层锁定策略按 U-40 最终确认；Voided 仅历史记录。本 Sprint 不实现草稿发票生成（Sprint4-5）、Vendor Bill、权限组建设"
+target_scope: "Statement Draft → Confirmed：确认后结算单 header 与 statement.line 锁定不可直接修改；费用层锁定已确认（B-52 已被 B-55 取代）；Voided 仅历史记录。本 Sprint 不实现草稿发票生成（Sprint4-5）、Vendor Bill、权限组建设"
 
 context_binding:
   bind_context_version: "0.1.54"
@@ -44,12 +44,12 @@ business_intent:
     - id: "B-52"
       decision_ref: "U-40"
       status: "CONFIRMED"
-      statement: "费用层部分锁定：仅 confirmed / draft_invoice 结算单关联的 freight.service 费用不可修改、不可删除；draft 结算单关联费用与未进入结算单费用保持可编辑；voided 结算单关联费用解除锁定，可再次用于新结算单（对齐 Sprint4-3 作废释放语义）"
+      statement: "费用层部分锁定：仅 confirmed / draft_invoice 结算单关联的 freight.service 费用不可修改、不可删除；draft 结算单关联费用与未进入结算单费用保持可编辑；voided 结算单关联费用解除锁定，可再次用于新结算单（对齐 Sprint4-3 作废释放语义）（SUPERSEDED_BY B-54/B-55，历史保留）"
   draft_scope:
     - "Draft Statement：允许修改费用、删除费用、增加费用、重新生成"
     - "Confirmed Statement：结算单锁定，不能直接修改"
     - "Void Statement：不可恢复修改，只能作为历史记录"
-    - "Shipment 相关费用是否完全锁定按 U-40 最终业务规则处理"
+    - "Shipment 相关费用锁定按 B-52/B-55 已确认规则处理"
   unresolved_unknowns: []
   confirmed_open_questions:
     - id: "U-40"
@@ -84,10 +84,8 @@ state_machine:
 
 fee_lock_policy:
   draft:
-    - "允许修改费用"
-    - "允许删除费用"
-    - "允许增加费用"
-    - "允许重新生成结算单"
+    - "draft 结算单引用费用即 used（B-55）：不可编辑/删除/取消"
+    - "如需修改费用：先作废旧 draft → 费用回 confirmed → unconfirm → draft → 修改 → confirm → 重新生成（B-59）"
   confirmed:
     - "结算单锁定，不可直接修改"
     - "费用层部分锁定（B-52）：confirmed / draft_invoice 关联费用不可修改、不可删除"
@@ -128,7 +126,7 @@ scope:
   allowed_changes:
     - "Statement Confirmed 动作与审计字段（confirmed_uid / confirmed_date）"
     - "Confirmed 后 header / statement.line 不可变（模型层拦截）"
-    - "Confirmed 后费用层锁定（按 U-40 确认范围，模型层/视图层）"
+    - "Confirmed 后费用层锁定（B-52/B-55 已确认，模型层/视图层）"
     - "Draft 费用增删改与重新生成（沿用 Sprint4-2/4-3）"
     - "zh_CN.po 新增确认/锁定文案"
   forbidden_changes:
@@ -165,7 +163,7 @@ business_flow:
   - "Statement Draft"
   - "客户接受"
   - "Statement Confirmed（锁定）"
-  - "费用层锁定（U-40 确认后）"
+  - "费用层锁定（B-52/B-55 已确认）"
   - "后续 Sprint4-5：Confirmed Statement → Draft Invoice"
 
 technical_constraints:
@@ -175,7 +173,7 @@ technical_constraints:
   - "confirmed 结算单关联费用不可被新结算单重复选择"
   - "Draft 期间允许费用修改/删除/增加并重新生成（B-50）"
   - "voided 为终态，不可恢复、不可修改"
-  - "费用层锁定按 U-40 确认范围实现（默认模型层+视图层，不新增 security group）"
+  - "费用层锁定按 B-52/B-55 已确认范围实现（模型层+视图层，不新增 security group）"
 
 acceptance_criteria:
   functional:
@@ -199,7 +197,7 @@ acceptance_criteria:
     - "Sprint4 既有生成、作废、版本链、发票逻辑不受破坏"
   validation:
     - "context_loader.py 基线 PASS（bind 0.1.53）"
-    - "verify.py 全部强制门禁 PASS（U-40 确认后）"
+    - "verify.py 全部强制门禁 PASS"
     - "XML-RPC 模块升级验证通过"
     - "业务负责人人工验收通过"
 
@@ -261,7 +259,7 @@ success_definition:
 
 deliverables:
   - "Statement Confirmed 动作与审计字段"
-  - "confirmed 锁定与费用层锁定（按 U-40 确认）"
+  - "confirmed 锁定与费用层锁定（B-52/B-55）"
   - "zh_CN.po 文案与决策/执行记录"
 
 audit:

@@ -137,6 +137,15 @@ class FreightStatementWizard(models.TransientModel):
                 raise ValidationError(_(
                     'Service "%s" has no invoice target. Add the shipper/consignee '
                     'before generating a statement.' % service.name))
+        services = selected.mapped('service_id')
+        # Serialize concurrent generation: one fee can only be occupied by one
+        # non-voided statement (fee_statement_invariant).
+        self.env.cr.execute(
+            'SELECT id FROM freight_service WHERE id = ANY(%s) FOR UPDATE',
+            [services.ids],
+        )
+        services.invalidate_recordset()
+        for service in services:
             if service.fee_state != 'confirmed':
                 raise ValidationError(_(
                     'Fee "%s" is no longer in confirmed state. Refresh the wizard '

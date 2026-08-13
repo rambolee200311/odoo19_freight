@@ -3,12 +3,58 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.59
+context_version: 0.1.63
 update_time: 2026-08-13
-adapt_sprint: Sprint4-4-1-Fee-State-Management
+adapt_sprint: Sprint4-4-2-Conflict-Resolution
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.63:
+    update_content: |
+      Sprint4-4-2 实施完成（决策58）：
+      - B-36/B-52 SUPERSEDED 标注；B-50/B-53 口径统一
+      - Sprint4-3 补 unconfirm 路径；Sprint4-4 清除 U-40 残留
+      - statement 创建 SELECT FOR UPDATE 行锁 + 事务内二次校验
+      - statement_locked DEPRECATED 标注
+      - 22/22 断言 PASS，log clean
+    update_type: Sprint4-4-2 实施执行
+    effect_scope: intent_sprint4_4_2 + business + history + validation
+
+  0.1.62:
+    update_content: |
+      Sprint4-4-2 契约按第二轮评审修订（决策57）：
+      - fee_statement_invariant 改为 transaction_commit_boundary + 状态规则
+      - used_to_confirmed 结构化（trigger/precondition/result）
+      - B-59 改为“如需修改费用”才走 unconfirm 路径
+      - statement_root_id 命名降级 documentation_only
+      - statement_locked 移入 technical_cleanup
+      - 状态守卫测试扩大为业务字段整体
+    update_type: Sprint4-4-2 契约第二轮评审修订
+    effect_scope: intent_sprint4_4_2 + business + history
+
+  0.1.61:
+    update_content: |
+      Sprint4-4-2 契约按评审修订（决策56）：
+      - statement_locked DEPRECATED（仅兼容，禁止新代码依赖，不删除）
+      - 并发控制改为业务约束 + statement_generation_transaction 事务步骤
+      - 新增 fee_statement_invariant 核心不变量
+      - supersession 结构化（B-36/B-52 保留历史，effective=false）
+      - naming 仅文档层；禁止新增费用版本体系/历史表
+      - 新增 4 个状态不变量验收测试
+    update_type: Sprint4-4-2 契约评审修订
+    effect_scope: intent_sprint4_4_2 + business + history
+
+  0.1.60:
+    update_content: |
+      Sprint4-4-2 契约起草（决策55，B-59）：
+      - B-36/B-52 标记 SUPERSEDED_BY B-54/B-55
+      - B-50/B-55 交叉引用；B-53 与 B-55 定义统一
+      - Sprint4-3 业务流补 unconfirm 路径与释放条件
+      - Sprint4-4 清除 U-40 残留文案；版本根命名映射注释
+      - 并发唯一性数据库级保护 + statement_locked deprecated
+    update_type: Sprint4-4-2 Intent 起草
+    effect_scope: intent_sprint4_4_2 + business + history
+
   0.1.59:
     update_content: |
       Sprint4-4-1 实施完成（决策54）：

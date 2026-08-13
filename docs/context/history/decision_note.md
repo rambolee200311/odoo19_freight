@@ -249,6 +249,51 @@
 - 费用表单新增 fee_state 状态栏与操作按钮。
 - 验证：context_loader 基线 PASS；verify.py 全门禁 PASS；button_immediate_upgrade + 25/25 odoo shell 断言 + log clean PASS。
 
+### 决策55：Sprint4-4-2 契约起草（契约矛盾收口与口径对齐）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-4-2-001`（Sprint4-4-2-Conflict-Resolution），把 Sprint4-3/4-4/4-4-1 评审发现的矛盾收口：
+
+- B-36 / B-52 标记 `SUPERSEDED_BY B-54 / B-55`（或改写为一致口径）。
+- B-50 / B-55 增加交叉引用；B-53 中“statement 创建成功 → used”统一为“被任一非 voided Statement 占用 → used”。
+- Sprint4-3 业务流补充：作废 → confirmed → unconfirm → draft → 修改 → confirm → 重新生成；释放条件补充“仅当不存在其他非 voided Statement 引用”。
+- Sprint4-4 契约清除“按 U-40 确认”残留文案。
+- 版本根逻辑名 `statement_root_id` = 物理字段 `statement_id`（不做 schema rename）。
+- “同一费用最多一个非 voided Statement”增加数据库级并发保护；`statement_locked` 标记 deprecated。
+- 登记 B-59：作废后修改费用的唯一路径（作废 → confirmed → unconfirm → draft → 修改 → confirm → 重新生成）。
+
+### 决策56：Sprint4-4-2 契约按评审修订
+
+**决策**: 按评审意见修订 `INT-FREIGHT-SPRINT4-4-2-001`，定位为“契约收口 + 最小一致性修正”：
+
+- `statement_locked` 明确 `DEPRECATED`：role=legacy_compatibility_only、business_authority=false、state_machine_authority=false、new_code_usage=forbidden、removal=future_sprint；本 Sprint 不删除，禁止新增业务逻辑依赖。
+- 并发控制从“加锁”提升为业务约束 + 事务步骤：`statement_generation_transaction`（锁定费用 → 事务内校验 confirmed → 校验无非 voided 引用 → 创建 header/lines → 写 used → COMMIT，任一步失败全部回滚）；实现方式不绑定。
+- 新增核心不变量 `fee_statement_invariant`：`fee_state = used iff 存在至少一个非 voided Statement 引用`；一个费用最多被一个非 voided Statement 占用。
+- `supersession` 结构化：B-36/B-52 保留历史记录，`effective=false`，`superseded_by B-54/B-55`。
+- `naming` 仅文档层：logical_concept=statement_root_id、physical_field=statement_id、schema_change=false。
+- 新增 forbidden：不得新增费用版本号/revision/snapshot 字段、独立费用审计表、历史状态表、费用版本体系。
+- 新增 4 个状态不变量验收测试（used/confirmed 直写拦截、voided 不阻塞复用、同一费用双有效 Statement 不可能）。
+
+### 决策57：Sprint4-4-2 契约按第二轮评审修订
+
+**决策**: 按第二轮评审修订 `INT-FREIGHT-SPRINT4-4-2-001`：
+
+- `fee_statement_invariant` 重构为 `transaction_commit_boundary` 作用域 + 四条状态规则（draft/confirmed 不得有非 voided 引用；used 必须被恰好一个非 voided Statement 引用；canceled 不得有引用且不可恢复）+ 10 条细化规则。
+- `used_to_confirmed` 结构化：trigger = 仅由关联非 voided Statement void；precondition = 当前 Statement 确实引用该费用 + void 后无其他非 voided 引用；result = confirmed。
+- B-59 改写为“作废后**如需修改费用**才走 unconfirm 路径；费用无错时可直接重新进入新 Statement”。
+- `statement_root_id ↔ statement_id` 降级为 documentation_only，不作为核心 deliverable。
+- `statement_locked` 从 functional acceptance 移入 `technical_cleanup`（DEPRECATED、禁止新代码依赖、仅兼容读取）。
+- 状态守卫测试从“金额”扩大为“业务字段整体”（confirmed/used/canceled 直写业务字段必须失败）。
+
+### 决策58：Sprint4-4-2 实施完成
+
+**决策**: 按 `INT-FREIGHT-SPRINT4-4-2-001` 完成实施并验证（2026-08-13）：
+
+- 口径对齐：B-36/B-52 标记 SUPERSEDED（保留历史）；B-50/B-53 与 B-54/B-55 统一；Sprint4-3 业务流补 unconfirm 路径；Sprint4-4 清除 U-40 残留文案。
+- statement 创建增加 `SELECT FOR UPDATE` 行锁 + 事务内 fee_state 二次校验（statement_generation_transaction）。
+- `statement_locked` 标记 DEPRECATED（仅兼容过渡，不参与状态机决策）。
+- 未改变费用/结算单业务行为口径，未新增费用版本体系。
+- 验证：context_loader 基线 PASS；verify.py 全门禁 PASS；button_immediate_upgrade + 22/22 odoo shell 断言 + log clean PASS。
+
 ### 决策41：Sprint4-2 契约起草（结算单生成 + 费用范围确认）
 
 **决策**: 起草 `INT-FREIGHT-SPRINT4-2-001`：Shipment → 费用行 → 生成客户结算单草稿（Customer Statement Draft）。

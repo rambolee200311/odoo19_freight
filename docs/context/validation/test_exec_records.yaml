@@ -316,3 +316,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "覆盖：存量回填（B-56/B-58）、四态流转、confirmed/used 写删拦截、wizard 仅 confirmed、Statement 创建→used、作废释放（无其他非 voided 引用）、unconfirm、cancel+copy as draft、视图状态栏/按钮/只读"
+
+  - contract_id: INT-FREIGHT-SPRINT4-4-2-001
+    sprint_name: Sprint4-4-2 契约矛盾收口与口径对齐
+    context_baseline: "0.1.62"
+    execute_time: "2026-08-13"
+    test_category: "口径对齐 + 并发保护 + legacy 治理"
+    test_target_models: ["freight.service", "freight.statement", "freight.statement.wizard"]
+    total_case_count: 22
+    pass_count: 22
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "context_loader 0.1.63 基线 PASS；verify.py 18/18；button_immediate_upgrade PASS；odoo shell 22/22 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "覆盖：B-36/B-52 SUPERSEDED、B-50/B-53 统一、Sprint4-3 unconfirm 路径、Sprint4-4 U-40 清理、并发行锁（第二连接超时）、used/confirmed/canceled 业务字段写拦截、voided 复用、单费用单有效 Statement、unconfirm/cancel/copy、statement_locked deprecated 标注"

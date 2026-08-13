@@ -51,7 +51,7 @@ business_intent:
     - id: "B-50"
       decision_ref: "U-39"
       status: "CONFIRMED"
-      statement: "Draft 结算单在费用再次修改后重新生成：旧 Draft 作废（voided）并永久留存，新结算单生成新 version_no；不允许原地刷新/重建同版本"
+      statement: "Draft 结算单在费用再次修改后重新生成：旧 Draft 作废（voided）并永久留存，新结算单生成新 version_no；不允许原地刷新/重建同版本（draft 引用费用即 used，修改需先作废旧 Draft，见 B-55/B-59）"
   draft_scope:
     - "客户拒绝仅允许对 draft 结算单执行作废；禁止对 voided / confirmed / draft_invoice 作废"
     - "作废结算单不回写或重置 freight.service 费用事实"
@@ -136,6 +136,7 @@ void_policy:
 
 fee_source_policy:
   - "作废结算单不回写或重置 freight.service 的费用事实"
+  - "费用业务字段不回写，fee_state 除外（作废时仅 used → confirmed）"
   - "重新生成结算单时，由现有费用选择规则重新计算当前可纳入的 freight.service"
   - "不得通过修改或删除 Statement-001 的 statement.line 实现费用重新归属"
   - "Statement-002 必须重新从当前 freight.service 费用层生成新快照"
@@ -215,7 +216,8 @@ business_flow:
   - "生成结算单（Sprint4-2）→ Statement-001 Draft"
   - "客户审核 → 客户拒绝"
   - "Statement-001 作废（voided 终态），原单与快照不可修改"
-  - "业务人员在费用层显式修改 freight.service"
+  - "费用回 confirmed；如需修改：unconfirm 回 draft → 在费用层修改 → confirm（B-59）"
+  - "费用无错时可直接重新进入新 Statement（B-59）"
   - "重新生成新结算单 → Statement-002 Draft（全新 statement.line 快照）"
   - "Sprint4-4：客户接受 → Confirmed"
 
@@ -223,7 +225,7 @@ acceptance_criteria:
   functional:
     - "客户拒绝后，draft 结算单进入 voided 终态，并记录 voided_uid / voided_date"
     - "voided 结算单 header 与费用快照不可修改（模型级拦截）"
-    - "作废后费用可在 freight.shipment / freight.service 层修改"
+    - "作废后费用回 confirmed；如需修改需先 unconfirm 回 draft，再到 freight.shipment / freight.service 费用层修改（B-59）"
     - "重新生成新结算单 draft，version_no 递增，previous_statement_id 指向旧结算单，版本根沿用既有规则"
     - "Void 操作仅通过 action_void() 执行，禁止对 voided / confirmed / draft_invoice 作废"
   snapshot_isolation:

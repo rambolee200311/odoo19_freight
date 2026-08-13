@@ -117,3 +117,16 @@
 - 费用表单新增状态栏与操作按钮
 
 **验收**: context_loader 0.1.59 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 25/25 断言 + log clean PASS。
+
+## Sprint4-4-2-Conflict-Resolution (2026-08-13)
+
+**目标**: Fee ↔ Statement 一致性收口（契约矛盾清理 + 核心不变量 + 并发保护）。
+
+**成果**:
+- B-36/B-52 标记 SUPERSEDED_BY B-54/B-55（历史保留）；B-50/B-53 口径统一
+- Sprint4-3 业务流补 unconfirm 路径与释放条件；Sprint4-4 清除 U-40 残留文案
+- statement 创建增加 `SELECT FOR UPDATE` 行锁 + 事务内 fee_state 二次校验
+- `statement_locked` 标记 DEPRECATED（仅兼容，不参与状态机决策）
+- 未新增费用版本体系
+
+**验收**: context_loader 0.1.63 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 22/22 断言（口径扫描/并发锁/业务字段写拦截）+ log clean PASS。
