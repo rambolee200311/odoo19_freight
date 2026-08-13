@@ -104,3 +104,16 @@
 - 未新增 security group（B-28）；未实现草稿发票生成（Sprint4-5）、Vendor Bill
 
 **验收**: context_loader 0.1.54 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 14/14 断言 + log clean PASS。
+
+## Sprint4-4-1-Fee-State-Management (2026-08-13)
+
+**目标**: 费用显式状态管理（draft/confirmed/used/canceled）+ 与 Statement 生命周期严格联动。
+
+**成果**:
+- `freight.service.fee_state` 四态与 Confirm/Unconfirm/Cancel/Copy as Draft 动作
+- 写锁以 fee_state 为准；confirmed/used/canceled 不可编辑删除
+- wizard 仅 `fee_state == confirmed` 费用可选；Statement 创建→used（同事务）；作废→confirmed（无其他非 voided 引用）
+- 存量费用初始化：非 voided 引用或 invoiced → used，其余 draft（B-56/B-58）
+- 费用表单新增状态栏与操作按钮
+
+**验收**: context_loader 0.1.59 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 25/25 断言 + log clean PASS。

@@ -78,6 +78,7 @@ class FreightStatementWizard(models.TransientModel):
         services = self.env['freight.service'].search([
             ('shipment_id', '=', self.shipment_id.id),
             ('service_type', 'in', ('shipper', 'consignee')),
+            ('fee_state', '=', 'confirmed'),
             ('invoiced', '=', False),
         ])
         eligible = self.env['freight.service']
@@ -136,6 +137,10 @@ class FreightStatementWizard(models.TransientModel):
                 raise ValidationError(_(
                     'Service "%s" has no invoice target. Add the shipper/consignee '
                     'before generating a statement.' % service.name))
+            if service.fee_state != 'confirmed':
+                raise ValidationError(_(
+                    'Fee "%s" is no longer in confirmed state. Refresh the wizard '
+                    'and check the fee state.' % service.name))
         statement = self.env['freight.statement'].create({
             'freight_operation_id': self.shipment_id.id,
             'customer_id': self.customer_id.id,
@@ -158,6 +163,12 @@ class FreightStatementWizard(models.TransientModel):
                 'settlement_rate': line.settlement_rate or 1.0,
             })
         self.env['freight.statement.line'].create(line_vals)
+        statement_fees = statement.statement_line_ids.mapped('freight_service_id')
+        if any(fee.fee_state != 'confirmed' for fee in statement_fees):
+            raise ValidationError(_(
+                'One or more fees changed state during statement creation. '
+                'The transaction was rolled back.'))
+        statement_fees.write({'fee_state': 'used'})
         return {
             'type': 'ir.actions.act_window',
             'name': _('Settlement Statement'),

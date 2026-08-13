@@ -1,0 +1,24 @@
+intent_id: INT-FREIGHT-SPRINT4-4-1-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/models/freight_configuration.py
+  - mymodules/tk_freight/models/freight_statement.py
+  - mymodules/tk_freight/wizard/freight_statement_wizard.py
+  - mymodules/tk_freight/views/freight_configuration.xml
+  - mymodules/tk_freight/i18n/zh_CN.po
+  - docs/context/intent/intent_sprint4_4_1_fee_state_management.yaml
+  - docs/context/business/knowledge_classification.md
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT4-4-1-001/
+  - docs/context/validation/test_exec_records.yaml
+
+scope_notes:
+  - "FreightService 新增 fee_state（draft/confirmed/used/canceled）与 confirm/unconfirm/cancel/copy_as_draft 动作"
+  - "write/unlink 以 fee_state 为准；confirmed/used/canceled 不可编辑删除；draft 有 statement 引用不可删除"
+  - "wizard 仅 fee_state=confirmed 费用可选；Statement 创建后费用同事务写回 used"
+  - "Statement 作废仅当费用无其他非 voided Statement 引用时释放回 confirmed"
+  - "存量费用初始化：非 voided 引用或 invoiced=True → used；否则 draft（B-56/B-58）"
+  - "费用表单新增 fee_state 状态栏与 Confirm/Unconfirm/Cancel/Copy as Draft 按钮"

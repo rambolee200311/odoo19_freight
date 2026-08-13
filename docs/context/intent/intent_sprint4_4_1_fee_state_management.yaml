@@ -1,0 +1,368 @@
+# ==============================================================
+# Intent: Sprint4-4-1 费用状态管理（draft / confirmed / used / canceled）
+# 状态：已确认（U-41 ~ U-44 → B-54 ~ B-57，可进入编码）
+# 门禁引擎支持多级 sprint 子编号（sprint4_4_1，决策50）。
+# 按评审修订（决策52/53）：fee_state 是费用“可用性/锁定状态”，
+# 不是费用版本状态；Statement 与费用状态通过生成/作废严格联动。
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-4-1-001"
+sprint_version: "Sprint4-4-1-Fee-State-Management"
+intent_work_type: "Development"
+intent_change_type: "New Feature"
+title: "freight.service 费用状态管理（draft/confirmed/used/canceled）+ 状态栏与状态操作"
+target_scope: "新增 freight.service.fee_state 状态机；费用表单增加状态栏与 Confirm/Cancel 按钮；wizard 仅允许 confirmed 费用生成 statement；statement 创建成功 → 费用 used；statement 作废 → 费用 confirmed；draft 可编辑/删除/取消；confirmed 不可编辑/删除。不实现草稿发票生成（Sprint4-5）、Vendor Bill、权限组建设"
+
+context_binding:
+  bind_context_version: "0.1.59"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint4-4-1 起草 + 评估"
+  related_sprint:
+    - "INT-FREIGHT-SPRINT4-4-001"
+    - "INT-FREIGHT-SPRINT4-3-001"
+  related_decisions:
+    - "B-48"
+    - "B-50"
+    - "B-51"
+    - "B-52"
+  confirmed_decisions:
+    - id: "B-53"
+      decision_ref: "用户 2026-08-13"
+      status: "CONFIRMED"
+      statement: "费用显式状态四态：draft / confirmed / used / canceled；draft 可编辑/删除/取消；confirmed 不可编辑/删除且可生成 statement；statement 创建成功 → used；statement 作废 → confirmed；canceled 为终态；费用表单增加状态栏与状态切换按钮"
+    - id: "B-54"
+      decision_ref: "U-41"
+      status: "CONFIRMED"
+      statement: "confirmed 费用可 unconfirm 退回 draft，条件为不存在任何非 voided Statement 引用（历史 voided 引用不阻塞）；退回后可编辑和作废"
+    - id: "B-55"
+      decision_ref: "U-42"
+      status: "CONFIRMED"
+      statement: "used = 费用已被任一非 voided Statement 占用（包括 draft Statement）；used 不可编辑、不可取消；仅当所有关联 Statement 均为 voided 后，才可由 Statement 作废流程释放回 confirmed；费用表单禁止直接执行 used → confirmed"
+    - id: "B-56"
+      decision_ref: "U-43"
+      status: "CONFIRMED"
+      statement: "不修改存量费用业务数据（B-32）；fee_state 初始化按既有业务事实映射：已有非 voided Statement 引用 → used；否则 invoiced=True → used；否则 draft。该初始化仅用于建立 fee_state，不视为业务迁移"
+    - id: "B-57"
+      decision_ref: "U-44"
+      status: "CONFIRMED"
+      statement: "canceled 费用不可恢复、不可编辑/删除，可通过复制为新 draft 继续使用"
+    - id: "B-58"
+      decision_ref: "评审 2026-08-13"
+      status: "CONFIRMED"
+      statement: "历史未进入非 voided Statement、且未开票的存量费用初始化为 draft；业务人员需 Confirm 后方可进入新的 Statement 流程"
+  draft_scope:
+    - "draft：新建默认，可编辑/删除/取消"
+    - "confirmed：费用确认后可生成 statement，不可编辑/删除"
+    - "used：statement 创建成功后费用进入 used"
+    - "canceled：用户可取消 draft 费用"
+    - "statement 作废后费用回 confirmed"
+  unresolved_unknowns: []
+  confirmed_open_questions:
+    - id: "U-41"
+      status: "CONFIRMED"
+      decision_ref: "B-54"
+      statement: "confirmed 可 unconfirm 退回 draft（无 statement 引用时）后再编辑/作废"
+    - id: "U-42"
+      status: "CONFIRMED"
+      decision_ref: "B-55"
+      statement: "被任何非 voided 结算单（含 draft）引用的费用即 used，不可编辑/取消"
+    - id: "U-43"
+      status: "CONFIRMED"
+      decision_ref: "B-56"
+      statement: "存量费用不迁移；开发环境已开票统一 used，未开票默认 draft"
+    - id: "U-44"
+      status: "CONFIRMED"
+      decision_ref: "B-57"
+      statement: "canceled 不可恢复，可复制为新 draft"
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "record_and_continue"
+  coding_gate: "开放项已确认（决策51），无未决 UNKNOWN"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+  mapping:
+    - "U-41 -> B-54"
+    - "U-42 -> B-55"
+    - "U-43 -> B-56"
+    - "U-44 -> B-57"
+
+state_machine:
+  draft:
+    editable: true
+    deletable: true
+    actions: ["confirm", "cancel"]
+    allowed_next: ["confirmed", "canceled"]
+    note: "新建费用默认 draft；可修改/删除/确认/取消；Delete 仅用于无业务引用的纯草稿，Cancel 用于业务废弃并留记录"
+  confirmed:
+    editable: false
+    deletable: false
+    actions: ["unconfirm"]
+    allowed_next: ["used", "draft"]
+    note: "费用确认后可生成 statement；确认后不可编辑/删除；unconfirm 退回 draft 的条件是不存在任何非 voided Statement 引用（历史 voided 引用不阻塞，B-54）"
+  used:
+    editable: false
+    deletable: false
+    actions: []
+    allowed_next: ["confirmed"]
+    transition_owner: "statement"
+    transition_trigger: "statement_void"
+    transition_condition: "仅当该费用不存在任何非 voided Statement 引用"
+    note: "used = 被任一非 voided Statement 占用（B-55）；仅由关联 Statement 作废流程释放回 confirmed（所有关联 Statement 均为 voided 时），费用表单禁止直接操作"
+  canceled:
+    editable: false
+    deletable: false
+    actions: ["copy_as_draft"]
+    allowed_next: []
+    note: "用户取消 draft 后进入终态；不可恢复、不可编辑/删除；可复制为新 draft（B-57）"
+
+fee_form:
+  statusbar: "fee_state（draft/confirmed/used/canceled）"
+  buttons:
+    - "Confirm：draft → confirmed"
+    - "Unconfirm：confirmed → draft（仅无 statement 引用，B-54）"
+    - "Cancel：draft → canceled"
+    - "Copy as Draft：canceled → 新 draft（B-57）"
+  readonly_rule: "confirmed / used / canceled 状态费用字段只读"
+  no_revert_button: "used 状态不允许在费用表单提供 Revert Used / used → confirmed 按钮"
+
+invariants:
+  - "fee_state = used ⇔ 存在至少一个非 voided Statement 引用该费用"
+  - "fee_state = canceled 时不存在任何非 voided Statement 引用"
+  - "同一费用最多只能被一个非 voided Statement 占用"
+  - "存在非 voided Statement 引用时，费用不可编辑、不可删除、不可取消"
+  - "used → confirmed 只能由 Statement Void 流程触发"
+  - "Statement Void 后仅当不存在其他非 voided Statement 引用时，费用才恢复 confirmed"
+  - "Statement 确认不改变 fee_state"
+  - "fee_state 不承担费用历史版本语义；费用变更历史由 audit_log 记录"
+
+copy_as_draft:
+  source_state: "canceled"
+  target_state: "draft"
+  copy_business_fields: true
+  copy_statement_links: false
+  copy_invoice_links: false
+  copy_audit_fields: false
+
+wizard_eligibility_update:
+  - "service_type in ('shipper', 'consignee')"
+  - "fee_state == 'confirmed'"
+  - "partner（shipper_id / consignee_id）与所选客户一致"
+  - "fee_state == confirmed 为进入 Statement 的权威业务条件"
+  - "legacy invoiced / vendor_invoiced 仅作为兼容性安全校验，不作为新状态机的业务来源"
+  - "未进入非 voided 结算单（used 状态已天然排除）"
+  - "wizard 列表过滤不是最终业务约束；创建 Statement 事务内必须重新校验 fee_state 与非 voided Statement 引用（并发防御）"
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/wizard/__init__.py"
+    - "mymodules/tk_freight/views/freight_configuration.xml"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-1-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "freight.service 新增 fee_state 字段与状态流转方法（confirm / unconfirm / cancel / copy_as_draft）"
+    - "费用进入任一非 voided Statement（含 draft）时同一事务写回 used；used → confirmed 仅由 statement 作废动作触发"
+    - "费用表单新增状态栏与 Confirm/Unconfirm/Cancel/Copy as Draft 按钮"
+    - "wizard 可选费用改为 fee_state == confirmed"
+    - "freight_shipment.py 仅在实际调用链需要时修改，先检查调用链，不默认修改"
+    - "zh_CN.po 新增状态/按钮文案"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改/删除 legacy status / invoiced / vendor_invoiced 字段"
+    - "修改草稿发票生成、幂等、红冲、追溯逻辑（Sprint4-5）"
+    - "实现 Vendor Bill 生成"
+    - "新增或调整 security group / record rule（B-28）"
+    - "修改菜单（menus.xml）"
+    - "修改 __manifest__.py"
+    - "新建 data XML"
+    - "修改报表、Controller、前端静态资源"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py（conditional：仅当现有调用链需要时修改，不默认修改）"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/views/freight_configuration.xml"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-1-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "费用录入（freight.service）→ fee_state = draft"
+  - "费用确认（Confirm）→ fee_state = confirmed"
+  - "wizard 仅可选 confirmed 费用 → 生成 Statement"
+  - "费用进入任一非 voided Statement → fee_state = used（同一事务）"
+  - "Statement 作废（statement_void 动作）→ 费用 fee_state = confirmed"
+  - "draft 费用可取消 → fee_state = canceled"
+
+technical_constraints:
+  - "新增 fee_state 字段，不复用/不修改 legacy status"
+  - "used = 费用被任一非 voided Statement（含 draft）引用（B-55）"
+  - "Statement + statement.line 创建与费用 used 写回必须属于同一数据库事务；任一步失败全部回滚，不得先改 used 再创建 Statement"
+  - "used → confirmed 仅由 Statement Void（action_void）触发，且仅当该费用不存在任何非 voided Statement 引用时才允许释放；费用表单禁止直接操作"
+  - "statement 确认（action_confirm）不改变费用状态"
+  - "写锁以 fee_state 为准：confirmed / used / canceled 不可编辑删除"
+  - "fee_state 是费用编辑/取消/生成 Statement 的权威状态；statement_locked 不参与状态机决策，仅用于兼容既有逻辑的辅助一致性校验"
+  - "confirmed 仅可在不存在任何非 voided Statement 引用时 unconfirm 退回 draft（历史 voided 引用不阻塞，B-54）"
+  - "存量费用不迁移（B-32）；fee_state 初始化优先级：已有非 voided Statement 引用 → used；否则 invoiced=True → used；否则 draft（B-56）；历史未结算未开票费用初始化为 draft，需 Confirm 后进入新 Statement（B-58）"
+  - "canceled 不可恢复；复制为新 draft 后使用（B-57）"
+  - "同一费用在任一时刻最多只能被一个非 voided Statement 占用（并发业务不变量）"
+  - "fee_state == confirmed 为进入 Statement 的权威业务条件；legacy invoiced / vendor_invoiced 仅作为兼容性安全校验"
+  - "wizard 列表过滤不是最终业务约束；Statement 创建事务内必须重新校验 fee_state 与非 voided Statement 引用（并发防御）"
+  - "Copy as Draft 只复制费用业务字段，不复制 fee_state、Statement 引用、invoiced/vendor_invoiced、审计字段"
+  - "Delete 仅用于无业务引用的纯草稿；Cancel 用于业务废弃并留记录；不开发独立费用版本（审计继续用 audit_log）"
+  - "费用表单状态栏只读展示；按钮仅对可操作状态可见"
+  - "不新增 security group（B-28）"
+
+acceptance_criteria:
+  functional:
+    - "新建费用默认 draft，可编辑/删除/取消"
+    - "draft → confirmed（Confirm 按钮），confirmed 后不可编辑/删除"
+    - "draft → canceled（Cancel 按钮），canceled 后不可用于 statement"
+    - "confirmed → draft（Unconfirm 按钮，无 statement 引用），退回后可编辑/作废"
+    - "canceled → 复制为新 draft（Copy as Draft）"
+    - "wizard 仅列出 fee_state == confirmed 的费用"
+    - "statement 创建成功后费用自动 used"
+    - "statement 作废后费用自动回 confirmed"
+    - "被 draft 结算单引用的费用即 used，不可编辑/取消"
+    - "费用表单显示 fee_state 状态栏与 Confirm/Unconfirm/Cancel/Copy as Draft 按钮"
+    - "Statement header/line 创建、费用引用建立与 fee_state=used 必须原子提交；任一步失败不得留下部分 Statement 或 used 费用"
+    - "存在业务引用的 draft 费用不得删除，只能按业务流程处理；纯 draft 且无任何 Statement/Invoice 业务引用时允许删除"
+  state_transition_tests:
+    - "confirmed fee → 创建 draft statement → fee=used → fee 不可修改（B-55）"
+    - "used fee → statement void → fee=confirmed → 可重新进入 statement"
+    - "多用户并发生成：Fee A confirmed，Statement-001 / Statement-002 只能一个成功（防重复占用）"
+    - "void 历史不阻塞：Fee A → Statement-001 voided → fee=confirmed → 可进入 Statement-002"
+    - "unconfirm 安全性：confirmed 且无非 voided statement → draft；存在非 voided statement → unconfirm 失败"
+    - "copy as draft 干净：canceled → 新费用 draft、无 statement 引用、可正常 Confirm"
+  excluded:
+    - "草稿发票生成（Sprint4-5）"
+    - "Vendor Bill 生成"
+    - "security group / record rule（B-28）"
+    - "菜单、权限、报表、PDF"
+  non_regression:
+    - "不改变与本 Sprint 相关的已确认业务规则（B-48 / B-50 / B-51 / B-52 / B-53 / B-54 ~ B-57）"
+    - "Sprint4-2 / 4-3 / 4-4 既有生成、作废、确认、锁定逻辑回归通过"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.56）"
+    - "verify.py 全部强制门禁 PASS"
+    - "XML-RPC 模块升级验证通过"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + 模块升级验证通过（button_immediate_upgrade / odoo_check.py）"
+    - "费用四态流转断言 PASS"
+    - "statement 创建/作废与费用状态联动断言 PASS"
+    - "wizard 仅 confirmed 可选断言 PASS"
+  business_review:
+    - "业务负责人人工验收通过"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - "B-53 ~ B-58 decision registration"
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-1-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "费用四态流转与费用表单状态栏/按钮实现"
+  - "wizard 仅 confirmed 费用可生成 statement；创建成功 → used；作废 → confirmed"
+  - "confirmed / used / canceled 不可编辑删除"
+  - "decision_gate 已满足：U-41 → B-54、U-42 → B-55、U-43 → B-56、U-44 → B-57（决策51）；B-58 已登记（决策53）"
+  - "所有强制验证通过"
+
+deliverables:
+  - "freight.service.fee_state 字段与状态流转方法"
+  - "费用表单状态栏 + Confirm/Cancel 按钮"
+  - "statement 创建/作废与费用状态联动"
+  - "zh_CN.po 文案与决策/执行记录"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-1-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "确认未修改 legacy status / invoiced 字段"
+  - "确认未实现草稿发票生成 / Vendor Bill / security group"
+  - "确认 U-41 ~ U-44 冲突项在实现前已确认"

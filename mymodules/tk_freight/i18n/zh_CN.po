@@ -9435,3 +9435,28 @@ msgstr "确认人"
 msgid "Confirmed On"
 msgstr "确认时间"
 
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_service__fee_state
+msgid "Fee State"
+msgstr "费用状态"
+
+#. module: tk_freight
+#: model:ir.model.fields.selection,selection:tk_freight.field_freight_service__fee_state
+msgid "Used"
+msgstr "已使用"
+
+#. module: tk_freight
+#: model:ir.model.fields.selection,selection:tk_freight.field_freight_service__fee_state
+msgid "Canceled"
+msgstr "已取消"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_configuration.py:0
+msgid "Unconfirm"
+msgstr "退回草稿"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_configuration.py:0
+msgid "Copy as Draft"
+msgstr "复制为新草稿"
+

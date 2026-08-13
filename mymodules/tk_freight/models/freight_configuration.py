@@ -437,6 +437,12 @@ class FreightService(models.Model):
     qty = fields.Float(default=1)
     status = fields.Selection([('bill', 'Bill Created'), ('invoice', 'Invoice Created'),
                                ('pending', 'Pending')], default="pending", readonly=True)
+    fee_state = fields.Selection([
+        ('draft', 'Draft'),
+        ('confirmed', 'Confirmed'),
+        ('used', 'Used'),
+        ('canceled', 'Canceled'),
+    ], string='Fee State', default='draft', required=True, tracking=True)
     # Invoice
     shipper_id = fields.Many2one('res.partner', domain="[('shipper','=',True)]")
     consignee_id = fields.Many2one('res.partner', domain="[('consignee','=',True)]")
@@ -464,17 +470,61 @@ class FreightService(models.Model):
                 for line in rec.statement_line_ids)
 
     def write(self, vals):
-        if self.filtered('statement_locked'):
-            raise ValidationError(_(
-                'Fees included in a confirmed statement cannot be modified. '
-                'Void the statement or use a new version.'))
+        for rec in self:
+            if rec.fee_state in ('confirmed', 'used', 'canceled') and \
+                    set(vals) - {'fee_state'}:
+                raise ValidationError(_(
+                    'Fees in confirmed/used/canceled state cannot be modified.'))
         return super().write(vals)
 
     def unlink(self):
-        if self.filtered('statement_locked'):
-            raise ValidationError(_(
-                'Fees included in a confirmed statement cannot be deleted.'))
+        for rec in self:
+            if rec.fee_state in ('confirmed', 'used', 'canceled'):
+                raise ValidationError(_(
+                    'Fees in confirmed/used/canceled state cannot be deleted.'))
+            if rec.statement_line_ids:
+                raise ValidationError(_(
+                    'Draft fees referenced by statements cannot be deleted. '
+                    'Cancel the fee instead if it is no longer needed.'))
         return super().unlink()
+
+    def action_confirm_fee(self):
+        for rec in self:
+            if rec.fee_state != 'draft':
+                raise ValidationError(_('Only draft fees can be confirmed.'))
+        self.write({'fee_state': 'confirmed'})
+        return True
+
+    def action_unconfirm_fee(self):
+        for rec in self:
+            if rec.fee_state != 'confirmed':
+                raise ValidationError(_('Only confirmed fees can be unconfirmed.'))
+            if any(line.statement_id.state in ('draft', 'confirmed', 'draft_invoice')
+                   for line in rec.statement_line_ids):
+                raise ValidationError(_(
+                    'Cannot unconfirm a fee that is referenced by an active statement.'))
+        self.write({'fee_state': 'draft'})
+        return True
+
+    def action_cancel_fee(self):
+        for rec in self:
+            if rec.fee_state != 'draft':
+                raise ValidationError(_('Only draft fees can be canceled.'))
+        self.write({'fee_state': 'canceled'})
+        return True
+
+    def action_copy_as_draft(self):
+        copies = self.env['freight.service']
+        for rec in self:
+            if rec.fee_state != 'canceled':
+                raise ValidationError(_('Only canceled fees can be copied as draft.'))
+            copies |= rec.copy(default={
+                'fee_state': 'draft',
+                'status': 'pending',
+                'invoiced': False,
+                'vendor_invoiced': False,
+            })
+        return copies
 
     @api.model
     def default_get(self, fields_list):

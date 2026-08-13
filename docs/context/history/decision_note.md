@@ -210,6 +210,45 @@
 
 契约 `unresolved_unknowns` 清空，`decision_gate.status = satisfied`，可以进入编码。
 
+### 决策52：Sprint4-4-1 契约按评审修订
+
+**决策**: 按评审意见修订 `INT-FREIGHT-SPRINT4-4-1-001`，明确 fee_state 是费用“可用性/锁定状态”而非费用版本状态：
+
+- `used` 统一定义为“费用被任一非 voided Statement（含 draft）引用”；Statement + statement.line 创建与费用 used 写回必须同一事务，任一步失败全部回滚。
+- `used → confirmed` 仅由 Statement Void 动作触发，费用表单禁止直接操作（不允许 Revert Used 按钮）。
+- `unconfirm` 条件收紧为“不存在任何非 voided Statement 引用”，历史 voided 引用不阻塞。
+- 存量初始化优先级：已有非 voided Statement 引用 → used；否则 invoiced=True → used；否则 draft；不视为业务迁移。
+- `fee_state` 是费用可编辑性的唯一权威状态；`statement_locked` 不参与状态机决策，仅辅助一致性校验。
+- wizard 列表过滤不是最终约束，Statement 创建事务内重新校验（并发防御）。
+- Copy as Draft 只复制业务字段，不复制 fee_state、Statement 引用、开票信息、审计字段。
+- Delete 仅用于无业务引用的纯草稿；Cancel 用于业务废弃并留记录；不开发独立费用版本（audit_log 继续）。
+
+### 决策53：Sprint4-4-1 契约按第二轮评审定稿
+
+**决策**: 按第二轮评审（APPROVE WITH MINOR CHANGES）修订 `INT-FREIGHT-SPRINT4-4-1-001`：
+
+- `used` 定义为“费用已被任一非 voided Statement 占用（包括 draft Statement）”；仅当所有关联 Statement 均为 voided 后，才可由 Statement 作废流程释放回 confirmed。
+- `used → confirmed` 释放条件收紧：仅当该费用不存在任何非 voided Statement 引用时允许；费用表单禁止直接操作。
+- Statement header/line 创建、费用引用建立与 fee_state=used 必须原子提交，任一步失败全部回滚。
+- 新增并发业务不变量：同一费用最多只能被一个非 voided Statement 占用。
+- 登记 B-58：历史未进入非 voided Statement、且未开票的存量费用初始化为 draft，业务人员需 Confirm 后方可进入新 Statement 流程。
+- Delete 仅用于无业务引用的纯草稿；Cancel 用于业务废弃并留记录。
+- `fee_state == confirmed` 为进入 Statement 的权威业务条件；legacy `invoiced / vendor_invoiced` 仅作兼容安全校验。
+- `freight_shipment.py` 改为条件性修改（仅当现有调用链需要时）。
+- 新增 `invariants` 章节（used 等价关系、并发唯一、Void 释放条件、Statement 确认不改状态、audit_log 边界）。
+
+### 决策54：Sprint4-4-1 实施完成
+
+**决策**: 按 `INT-FREIGHT-SPRINT4-4-1-001` 完成实施并验证（2026-08-13）：
+
+- `freight.service.fee_state` 四态（draft / confirmed / used / canceled）与 Confirm / Unconfirm / Cancel / Copy as Draft 动作。
+- 写锁以 fee_state 为准：confirmed / used / canceled 不可编辑删除；draft 被 statement 引用时不可删除。
+- wizard 仅 `fee_state == confirmed` 费用可选；Statement 创建后费用同事务写回 used。
+- Statement 作废仅当费用无其他非 voided Statement 引用时释放回 confirmed。
+- 存量费用初始化：非 voided 引用或 invoiced=True → used，其余 draft（B-56/B-58）。
+- 费用表单新增 fee_state 状态栏与操作按钮。
+- 验证：context_loader 基线 PASS；verify.py 全门禁 PASS；button_immediate_upgrade + 25/25 odoo shell 断言 + log clean PASS。
+
 ### 决策41：Sprint4-2 契约起草（结算单生成 + 费用范围确认）
 
 **决策**: 起草 `INT-FREIGHT-SPRINT4-2-001`：Shipment → 费用行 → 生成客户结算单草稿（Customer Statement Draft）。
@@ -280,3 +319,29 @@
 - `voided` 结算单关联费用解除锁定，可再次用于新结算单（对齐 Sprint4-3 作废释放语义）。
 
 契约 `decision_gate.status = satisfied`，可以进入编码。
+
+### 决策49：Sprint4-4-1 契约起草（费用状态管理）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-4-1-001`（Sprint4-4-1-Fee-State-Management），登记 B-53：费用显式状态四态 draft / confirmed / used / canceled；draft 可编辑/删除/取消；confirmed 不可编辑/删除且可生成 statement；statement 创建成功 → used；statement 作废 → confirmed；canceled 终态；费用表单增加状态栏与 Confirm/Cancel 按钮。
+
+- 评估确认：费用显式状态比纯派生更直观，费用表单需要状态栏与按钮。
+- 评估发现 4 个必须确认的开放项：
+  - U-41：作废后回 confirmed 且 confirmed 不可编辑，与“作废→修改费用→新结算单”闭环冲突。
+  - U-42：statement 创建即 used（含 draft）与 B-50“draft 期间修改费用重新生成”冲突。
+  - U-43：存量费用 fee_state 初始化策略（历史数据不迁移 B-32）。
+  - U-44：canceled 是否允许恢复/编辑/删除。
+
+### 决策50：门禁引擎支持多级 sprint 子编号
+
+**决策**: `context_loader.py` 与 `verify.py` 的 sprint 契约选择从“(主, 子)”升级为“任意层级数字元组”，支持 `sprint4_4_1` / `sprint4-4-1` / `sprint4.4.1` 文件名；`sprint4_4_1 > sprint4_4 > sprint4`。
+
+### 决策51：Sprint4-4-1 开放项确认（U-41 ~ U-44 → B-54 ~ B-57）
+
+**决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-4-1-001` 四个开放项：
+
+- U-41 → B-54：confirmed 可 unconfirm 退回 draft（仅无 statement 引用时），退回后可编辑和作废。
+- U-42 → B-55：被任何非 voided 结算单（含 draft）引用的费用即 used，不可编辑、不可取消；费用修改需先作废旧结算单使其回 confirmed。
+- U-43 → B-56：存量费用不做迁移（B-32）；开发环境已开票（invoiced=True）费用统一 used，未开票费用默认 draft。
+- U-44 → B-57：canceled 费用不可恢复、不可编辑/删除，可通过复制为新 draft 继续使用。
+
+契约 `unresolved_unknowns` 清空，`decision_gate.status = satisfied`，可以进入编码。

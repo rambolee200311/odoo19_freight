@@ -187,12 +187,19 @@ class FreightStatement(models.Model):
         for rec in self:
             if rec.state != 'draft':
                 raise ValidationError(_('Only draft statements can be voided.'))
+            fees = rec.statement_line_ids.mapped('freight_service_id')
             rec.write({
                 'state': 'voided',
                 'voided_uid': self.env.uid,
                 'voided_date': fields.Datetime.now(),
                 'voided_reason': reason or rec.voided_reason,
             })
+            for fee in fees:
+                still_used = fee.statement_line_ids.filtered(
+                    lambda line: line.statement_id.state in
+                    ('draft', 'confirmed', 'draft_invoice'))
+                if not still_used and fee.fee_state == 'used':
+                    fee.write({'fee_state': 'confirmed'})
         return True
 
     def action_confirm(self):

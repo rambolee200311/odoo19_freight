@@ -3,12 +3,68 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.54
+context_version: 0.1.59
 update_time: 2026-08-13
-adapt_sprint: Sprint4-4-Statement-Confirm
+adapt_sprint: Sprint4-4-1-Fee-State-Management
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.59:
+    update_content: |
+      Sprint4-4-1 实施完成（决策54）：
+      - freight.service.fee_state 四态 + Confirm/Unconfirm/Cancel/Copy as Draft
+      - wizard 仅 confirmed 可选；Statement 创建→used（同事务）；作废→confirmed（无其他非 voided 引用）
+      - 存量费用初始化：非 voided 引用或 invoiced → used，其余 draft
+      - 费用表单状态栏与操作按钮
+      - 25/25 断言 PASS，log clean
+    update_type: Sprint4-4-1 实施执行
+    effect_scope: intent_sprint4_4_1 + business + architecture + history + validation
+
+  0.1.58:
+    update_content: |
+      Sprint4-4-1 契约按第二轮评审定稿（决策53）：
+      - used 定义为被任一非 voided Statement 占用；全部 voided 后才释放回 confirmed
+      - 创建/引用/used 写回原子提交；并发不变量：同一费用最多一个非 voided Statement
+      - 登记 B-58：存量未结算未开票费用初始化 draft，需 Confirm 后进入新 Statement
+      - Delete/Cancel 语义区分；invoiced 降级为兼容校验；freight_shipment.py 条件性修改
+      - 新增 invariants 章节
+    update_type: Sprint4-4-1 契约第二轮评审定稿
+    effect_scope: intent_sprint4_4_1 + business + history
+
+  0.1.57:
+    update_content: |
+      Sprint4-4-1 契约按评审修订（决策52）：
+      - used = 被任一非 voided Statement 引用；创建与写回同事务
+      - used → confirmed 仅由 Statement Void 触发
+      - unconfirm 条件为无非 voided Statement 引用
+      - 存量初始化优先级：非 voided 引用 → invoiced=True → draft
+      - fee_state 唯一权威；statement_locked 仅辅助校验
+      - wizard 事务内二次校验；Copy as Draft 只复制业务字段
+    update_type: Sprint4-4-1 契约评审修订
+    effect_scope: intent_sprint4_4_1 + business + history
+
+  0.1.56:
+    update_content: |
+      Sprint4-4-1 开放项确认（决策51）：
+      - U-41 → B-54：confirmed 可 unconfirm 退回 draft（无 statement 引用时）
+      - U-42 → B-55：被任何非 voided 结算单（含 draft）引用即 used，不可编辑/取消
+      - U-43 → B-56：存量费用不迁移；开发环境已开票统一 used，未开票默认 draft
+      - U-44 → B-57：canceled 不可恢复，可复制为新 draft
+      - decision_gate satisfied，可进入编码
+    update_type: Sprint4-4-1 开放项确认
+    effect_scope: intent_sprint4_4_1 + business + history
+
+  0.1.55:
+    update_content: |
+      Sprint4-4-1 契约起草（决策49/50）：
+      - 费用显式状态四态 draft/confirmed/used/canceled（B-53）
+      - 费用表单状态栏 + Confirm/Cancel 按钮
+      - wizard 仅 confirmed 费用可生成 statement；创建→used；作废→confirmed
+      - 开放项 U-41 ~ U-44（作废后修改闭环、draft used 与 B-50、存量初始化、canceled 恢复）
+      - 门禁引擎支持多级 sprint 子编号（sprint4_4_1）
+    update_type: Sprint4-4-1 Intent 起草 + 引擎升级
+    effect_scope: intent_sprint4_4_1 + business + history + execution
+
   0.1.54:
     update_content: |
       Sprint4-4 开放项确认（决策48，B-52）：
