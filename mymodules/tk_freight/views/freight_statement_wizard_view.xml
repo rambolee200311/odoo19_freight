@@ -19,11 +19,8 @@
                     </group>
                     <field name="eligibility_summary" readonly="1"/>
                     <field name="line_ids" nolabel="1" create="False" delete="False">
-                        <list string="Selectable Services">
-                            <button name="toggle_select" type="object" string="Select"
-                                    class="btn-outline-primary" invisible="select"/>
-                            <button name="toggle_select" type="object" string="Deselect"
-                                    class="btn-outline-danger" invisible="not select"/>
+                        <list string="Selectable Services" editable="bottom">
+                            <field name="select" string="Select" widget="checkbox"/>
                             <field name="fee_state" string="Fee State" widget="badge"/>
                             <field name="sequence" string="Sequence"/>
                             <field name="service_type" string="Service To"/>
