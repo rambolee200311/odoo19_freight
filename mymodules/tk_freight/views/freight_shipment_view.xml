@@ -803,15 +803,30 @@
                                         <field name="qty"/>
                                         <field name="sale"/>
                                         <field name="currency_id" widget="badge"/>
+                                        <field name="fee_state" string="Fee State" widget="badge"/>
                                         <field name="status" widget="badge" decoration-success="status=='bill'"
                                                decoration-info="status=='invoice'"
                                                decoration-danger="status=='pending'"/>
                                     </list>
                                     <form>
+                                        <header>
+                                            <button name="action_confirm_fee" type="object" string="Confirm"
+                                                    class="btn-primary" invisible="fee_state != 'draft'"/>
+                                            <button name="action_unconfirm_fee" type="object" string="Unconfirm"
+                                                    invisible="fee_state != 'confirmed'"/>
+                                            <button name="action_cancel_fee" type="object" string="Cancel"
+                                                    class="btn-danger" invisible="fee_state != 'draft'"/>
+                                            <button name="action_copy_as_draft" type="object"
+                                                    string="Copy as Draft" invisible="fee_state != 'canceled'"/>
+                                        </header>
                                         <sheet>
+                                            <group string="Fee State">
+                                                <field name="fee_state" widget="statusbar" readonly="1"
+                                                       options="{'clickable': False}"/>
+                                            </group>
                                             <div class="oe_title">
                                                 <field name="service_type" options="{'horizontal':True}"
-                                                       widget="radio" readonly="invoiced or vendor_invoiced"
+                                                       widget="radio" readonly="invoiced or vendor_invoiced or fee_state != 'draft'"
                                                        force_save="1"/>
                                                 <field name="invoiced" invisible="1"/>
                                                 <field name="vendor_invoiced" invisible="1"/>
@@ -820,34 +835,34 @@
                                                            required="service_type == 'shipper'" class="text-break"
                                                            options="{'no_create': True,'line_breaks': False}"
                                                            placeholder="Shipper"
-                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                           readonly="invoiced or vendor_invoiced or fee_state != 'draft'" force_save="1"/>
                                                     <field name="consignee_id" invisible="service_type != 'consignee'"
                                                            required="service_type == 'consignee'" class="text-break"
                                                            placeholder="Consignee"
                                                            options="{'no_create': True,'line_breaks': False}"
-                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                           readonly="invoiced or vendor_invoiced or fee_state != 'draft'" force_save="1"/>
                                                     <field name="vendor_id" invisible="service_type != 'vendor'"
                                                            required="service_type == 'vendor'" class="text-break"
                                                            placeholder="Vendor"
                                                            options="{'no_create': True,'line_breaks': False}"
-                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                           readonly="invoiced or vendor_invoiced or fee_state != 'draft'" force_save="1"/>
                                                 </h1>
                                             </div>
                                             <group>
                                                 <group string="Service Details">
                                                     <field name="service_id" required="1" options="{'no_create': True}"
-                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
-                                                    <field name="name" readonly="invoiced or vendor_invoiced"
+                                                           readonly="invoiced or vendor_invoiced or fee_state != 'draft'" force_save="1"/>
+                                                    <field name="name" readonly="invoiced or vendor_invoiced or fee_state != 'draft'"
                                                            force_save="1"/>
                                                 </group>
                                                 <group string="Qty &amp; Charges">
-                                                    <field name="qty" readonly="invoiced or vendor_invoiced"
+                                                    <field name="qty" readonly="invoiced or vendor_invoiced or fee_state != 'draft'"
                                                            force_save="1"/>
-                                                    <field name="sale" readonly="invoiced or vendor_invoiced"
+                                                    <field name="sale" readonly="invoiced or vendor_invoiced or fee_state != 'draft'"
                                                            force_save="1"/>
                                                     <field name="currency_id" invisible="0" required="1"
                                                            placeholder="Currency"
-                                                           readonly="invoiced or vendor_invoiced" force_save="1"/>
+                                                           readonly="invoiced or vendor_invoiced or fee_state != 'draft'" force_save="1"/>
                                                 </group>
                                             </group>
                                         </sheet>

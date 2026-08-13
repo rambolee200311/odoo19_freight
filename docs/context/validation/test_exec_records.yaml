@@ -333,3 +333,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "覆盖：B-36/B-52 SUPERSEDED、B-50/B-53 统一、Sprint4-3 unconfirm 路径、Sprint4-4 U-40 清理、并发行锁（第二连接超时）、used/confirmed/canceled 业务字段写拦截、voided 复用、单费用单有效 Statement、unconfirm/cancel/copy、statement_locked deprecated 标注"
+
+  - contract_id: FIX-FEE-FORM-001
+    sprint_name: 货运单内联费用表单状态栏/按钮修复
+    context_baseline: "0.1.63"
+    execute_time: "2026-08-13"
+    test_category: "视图修复"
+    test_target_models: ["freight.service"]
+    total_case_count: 5
+    pass_count: 5
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "button_immediate_upgrade PASS；odoo shell arch 断言 5/5 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "freight_shipment_view.xml Services 内联费用表单补充 fee_state 状态栏、Confirm/Unconfirm/Cancel/Copy as Draft 按钮与 fee_state 列表列；非 draft 状态字段只读"
