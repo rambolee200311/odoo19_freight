@@ -219,28 +219,7 @@ class FreightStatementWizard(models.TransientModel):
         selected = self.line_ids.filtered('select')
         if not selected:
             raise ValidationError(_('Please select at least one service line.'))
-        customers = self.env['res.partner']
-        for line in selected:
-            service = line.service_id
-            partner = service.shipper_id if service.service_type == 'shipper' \
-                else service.consignee_id
-            if partner:
-                customers |= partner
-        if not customers:
-            raise ValidationError(_(
-                'Selected fees have no invoice target. Add the shipper/consignee '
-                'before generating a statement.'))
-        if self.customer_id:
-            customer = self.customer_id
-            if any(partner.id != customer.id for partner in customers):
-                raise ValidationError(_(
-                    'Please select fees of the same customer.'))
-        elif len(customers) > 1:
-            raise ValidationError(_(
-                'Please select fees of the same customer, or choose a customer '
-                'before generating a statement.'))
-        else:
-            customer = customers
+        missing_targets = []
         for line in selected:
             service = line.service_id
             if service.service_type == 'vendor':
@@ -249,9 +228,30 @@ class FreightStatementWizard(models.TransientModel):
             partner = service.shipper_id if service.service_type == 'shipper' \
                 else service.consignee_id
             if not partner:
+                missing_targets.append(service.name)
+        if self.customer_id:
+            customer = self.customer_id
+        else:
+            if missing_targets:
                 raise ValidationError(_(
-                    'Service "%s" has no invoice target. Add the shipper/consignee '
-                    'before generating a statement.' % service.name))
+                    'Selected fees have no invoice target: %s. Add the shipper/consignee '
+                    'before generating a statement.') % ', '.join(missing_targets))
+            customers = self.env['res.partner']
+            for line in selected:
+                service = line.service_id
+                partner = service.shipper_id if service.service_type == 'shipper' \
+                    else service.consignee_id
+                if partner:
+                    customers |= partner
+            if not customers:
+                raise ValidationError(_(
+                    'Selected fees have no invoice target. Add the shipper/consignee '
+                    'before generating a statement.'))
+            if len(customers) > 1:
+                raise ValidationError(_(
+                    'Please select fees of the same customer, or choose a customer '
+                    'before generating a statement.'))
+            customer = customers
         services = selected.mapped('service_id')
         # Serialize concurrent generation: one fee can only be occupied by one
         # non-voided statement (fee_statement_invariant).
