@@ -450,6 +450,31 @@ class FreightService(models.Model):
     vendor_invoice = fields.Many2one('account.move')
     vendor_invoiced = fields.Boolean()
     sale_order_id = fields.Many2one('sale.order')
+    # Statement partial lock (B-52): fees inside confirmed/draft_invoice statements
+    statement_line_ids = fields.One2many('freight.statement.line', 'freight_service_id',
+                                         string='Statement Lines')
+    statement_locked = fields.Boolean(string='Statement Locked',
+                                      compute='_compute_statement_locked')
+
+    @api.depends('statement_line_ids.statement_id.state')
+    def _compute_statement_locked(self):
+        for rec in self:
+            rec.statement_locked = any(
+                line.statement_id.state in ('confirmed', 'draft_invoice')
+                for line in rec.statement_line_ids)
+
+    def write(self, vals):
+        if self.filtered('statement_locked'):
+            raise ValidationError(_(
+                'Fees included in a confirmed statement cannot be modified. '
+                'Void the statement or use a new version.'))
+        return super().write(vals)
+
+    def unlink(self):
+        if self.filtered('statement_locked'):
+            raise ValidationError(_(
+                'Fees included in a confirmed statement cannot be deleted.'))
+        return super().unlink()
 
     @api.model
     def default_get(self, fields_list):

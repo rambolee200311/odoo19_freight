@@ -9420,3 +9420,18 @@ msgstr "作废人"
 msgid "Voided On"
 msgstr "作废时间"
 
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_service__statement_locked
+msgid "Statement Locked"
+msgstr "结算单已锁定"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__confirmed_uid
+msgid "Confirmed By"
+msgstr "确认人"
+
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__confirmed_date
+msgid "Confirmed On"
+msgstr "确认时间"
+

@@ -1,0 +1,275 @@
+# ==============================================================
+# Intent: Sprint4-4 客户接受 → Statement Confirmed（业务锁点）
+# 状态：已确认（U-40 → B-52，可进入编码）
+# 核心原则：
+#   - Draft：允许修改/删除/增加费用，重新生成
+#   - Confirmed：结算单锁定，不可直接修改；费用层锁定策略按 U-40 确认
+#   - Voided：不可恢复、不可修改，仅作为历史记录
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-4-001"
+sprint_version: "Sprint4-4-Statement-Confirm"
+intent_work_type: "Development"
+intent_change_type: "Process Flow"
+title: "客户接受 → Statement Confirmed（结算单业务锁点）"
+target_scope: "Statement Draft → Confirmed：确认后结算单 header 与 statement.line 锁定不可直接修改；费用层锁定策略按 U-40 最终确认；Voided 仅历史记录。本 Sprint 不实现草稿发票生成（Sprint4-5）、Vendor Bill、权限组建设"
+
+context_binding:
+  bind_context_version: "0.1.54"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint4-4 起草"
+  related_sprint:
+    - "INT-FREIGHT-SPRINT4-001"
+    - "INT-FREIGHT-SPRINT4-3-001"
+  related_decisions:
+    - "B-48"
+    - "B-50"
+    - "B-51"
+    - "B-46"
+  confirmed_decisions:
+    - id: "B-51"
+      decision_ref: "用户 2026-08-13"
+      status: "CONFIRMED"
+      statement: "客户接受后 Statement 进入 Confirmed 并锁定，不可直接修改；Voided 不可恢复、不可修改，仅作为历史记录；Draft 允许修改/删除/增加费用并重新生成"
+    - id: "B-52"
+      decision_ref: "U-40"
+      status: "CONFIRMED"
+      statement: "费用层部分锁定：仅 confirmed / draft_invoice 结算单关联的 freight.service 费用不可修改、不可删除；draft 结算单关联费用与未进入结算单费用保持可编辑；voided 结算单关联费用解除锁定，可再次用于新结算单（对齐 Sprint4-3 作废释放语义）"
+  draft_scope:
+    - "Draft Statement：允许修改费用、删除费用、增加费用、重新生成"
+    - "Confirmed Statement：结算单锁定，不能直接修改"
+    - "Void Statement：不可恢复修改，只能作为历史记录"
+    - "Shipment 相关费用是否完全锁定按 U-40 最终业务规则处理"
+  unresolved_unknowns: []
+  confirmed_open_questions:
+    - id: "U-40"
+      status: "CONFIRMED"
+      decision_ref: "B-52"
+      statement: "费用层部分锁定：confirmed / draft_invoice 关联费用不可修改/删除；draft 与 voided 关联费用可编辑"
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "record_and_continue"
+  coding_gate: "开放项已确认（决策48），无未决 UNKNOWN"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+  mapping:
+    - "U-40 -> B-52"
+
+state_machine:
+  draft:
+    editable: true
+    note: "费用可修改/删除/增加，可重新生成新版本（B-50）"
+    allowed_next: [confirmed, voided]
+  confirmed:
+    editable: false
+    note: "客户接受后锁定；不可直接修改 header / statement.line"
+    allowed_next: [draft_invoice]
+  voided:
+    editable: false
+    note: "不可恢复、不可修改，仅历史记录"
+    allowed_next: []
+
+fee_lock_policy:
+  draft:
+    - "允许修改费用"
+    - "允许删除费用"
+    - "允许增加费用"
+    - "允许重新生成结算单"
+  confirmed:
+    - "结算单锁定，不可直接修改"
+    - "费用层部分锁定（B-52）：confirmed / draft_invoice 关联费用不可修改、不可删除"
+    - "已确认结算单关联费用不可被新结算单重复选择"
+  voided:
+    - "不可恢复修改"
+    - "仅作为历史记录"
+
+scope:
+  allowed_files:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/wizard/__init__.py"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+    - "mymodules/tk_freight/views/freight_configuration.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "Statement Confirmed 动作与审计字段（confirmed_uid / confirmed_date）"
+    - "Confirmed 后 header / statement.line 不可变（模型层拦截）"
+    - "Confirmed 后费用层锁定（按 U-40 确认范围，模型层/视图层）"
+    - "Draft 费用增删改与重新生成（沿用 Sprint4-2/4-3）"
+    - "zh_CN.po 新增确认/锁定文案"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改草稿发票生成、幂等、红冲、追溯逻辑（Sprint4-5）"
+    - "实现 Vendor Bill 生成"
+    - "新增或调整 security group / record rule（保持 B-28 现状）"
+    - "将 voided 状态改为可恢复/可修改"
+    - "修改菜单（menus.xml）"
+    - "修改 __manifest__.py"
+    - "新建 data XML"
+    - "修改报表、Controller、前端静态资源"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/views/freight_shipment_view.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "Statement Draft"
+  - "客户接受"
+  - "Statement Confirmed（锁定）"
+  - "费用层锁定（U-40 确认后）"
+  - "后续 Sprint4-5：Confirmed Statement → Draft Invoice"
+
+technical_constraints:
+  - "客户接受仅允许 draft → confirmed，通过 action_confirm() 统一方法执行"
+  - "confirmed 后 header 与 statement.line 不可直接修改"
+  - "confirmed 后禁止 action_void（Sprint4-3 已实现拦截）"
+  - "confirmed 结算单关联费用不可被新结算单重复选择"
+  - "Draft 期间允许费用修改/删除/增加并重新生成（B-50）"
+  - "voided 为终态，不可恢复、不可修改"
+  - "费用层锁定按 U-40 确认范围实现（默认模型层+视图层，不新增 security group）"
+
+acceptance_criteria:
+  functional:
+    - "客户接受后 Statement draft → confirmed，并记录 confirmed_uid / confirmed_date"
+    - "confirmed 结算单 header 与 statement.line 不可直接修改"
+    - "confirmed 结算单禁止作废"
+    - "confirmed 结算单存在时，其关联费用不可被新结算单重复选择"
+    - "Draft 结算单允许修改/删除/增加费用并重新生成"
+    - "voided 结算单不可恢复、不可修改，仅历史记录"
+  fee_lock:
+    - "confirmed / draft_invoice 结算单关联费用不可修改、不可删除（B-52）"
+    - "draft 结算单关联费用与未进入结算单费用可修改/删除"
+    - "voided 结算单关联费用解除锁定，可再次用于新结算单"
+  excluded:
+    - "草稿发票生成（Sprint4-5）"
+    - "Vendor Bill 生成"
+    - "security group / record rule（B-28）"
+    - "菜单、权限、报表、PDF"
+  non_regression:
+    - "不改变与本 Sprint 相关的已确认业务规则（B-51 / B-48 / B-50 / B-46）"
+    - "Sprint4 既有生成、作废、版本链、发票逻辑不受破坏"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.53）"
+    - "verify.py 全部强制门禁 PASS（U-40 确认后）"
+    - "XML-RPC 模块升级验证通过"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + 模块升级验证通过（button_immediate_upgrade / odoo_check.py）"
+    - "draft → confirmed → 锁定断言 PASS"
+    - "confirmed 禁止作废、费用重复选择阻止断言 PASS"
+    - "Draft 费用增删改与重新生成断言 PASS"
+  business_review:
+    - "业务负责人人工验收通过"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - "B-51 decision registration"
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "客户接受后 Statement Confirmed 并锁定"
+  - "confirmed 后 header / statement.line 不可直接修改，禁止作废"
+  - "Draft 允许费用增删改与重新生成；Voided 仅历史"
+  - "decision_gate 已满足：U-40 → B-52（决策48）"
+  - "所有强制验证通过"
+
+deliverables:
+  - "Statement Confirmed 动作与审计字段"
+  - "confirmed 锁定与费用层锁定（按 U-40 确认）"
+  - "zh_CN.po 文案与决策/执行记录"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "确认未实现草稿发票生成 / Vendor Bill / security group"
+  - "确认 confirmed 后不可变与费用锁定的断言完整"

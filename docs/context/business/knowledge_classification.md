@@ -56,6 +56,8 @@
 | B-48 | 客户拒绝 = 当前 draft 结算单进入 voided 终态，不作废原单修改；费用修改回到 freight.shipment / freight.service；重新生成新结算单并创建全新 statement.line 快照；版本链 statement_root_id + version_no + previous_statement_id（版本根引用沿用 Sprint4-2 定义，不做字段重命名），旧结算单永久不可变 | 2026-08-12 用户确认 |
 | B-49 | voided_reason 为可选字段，不强制录入，不作为 Sprint4-3 编码阻塞项 | 2026-08-12 用户确认（U-38） |
 | B-50 | Draft 结算单在费用再次修改后重新生成：旧 Draft 作废（voided）并永久留存，新结算单生成新 version_no；不允许原地刷新/重建同版本 | 2026-08-12 用户确认（U-39） |
+| B-51 | 客户接受后 Statement 进入 Confirmed 并锁定，不可直接修改；Voided 不可恢复、不可修改，仅作为历史记录；Draft 允许修改/删除/增加费用并重新生成 | 2026-08-13 用户确认 |
+| B-52 | 费用层部分锁定：仅 confirmed / draft_invoice 结算单关联的 freight.service 费用不可修改、不可删除；draft 结算单关联费用与未进入结算单费用保持可编辑；voided 结算单关联费用解除锁定，可再次用于新结算单（对齐 Sprint4-3 作废释放语义） | 2026-08-13 用户确认（U-40） |
 
 ## 引用规范
 

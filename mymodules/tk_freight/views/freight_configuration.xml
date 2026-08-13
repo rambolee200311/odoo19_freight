@@ -571,7 +571,7 @@
                         <group string="Service For">
                             <group>
                                 <field name="service_type" options="{'horizontal':True}"
-                                       widget="radio" readonly="invoiced or vendor_invoiced"
+                                       widget="radio" readonly="invoiced or vendor_invoiced or statement_locked"
                                        force_save="1" string="Service Type"/>
                                 <field name="invoiced" invisible="1"/>
                                 <field name="vendor_invoiced" invisible="1"/>
@@ -585,35 +585,35 @@
                         <group>
                             <group>
                                 <field name="shipper_id" invisible="service_type != 'shipper'"
-                                       readonly="invoiced or vendor_invoiced" options="{'no_create':True}"
+                                       readonly="invoiced or vendor_invoiced or statement_locked" options="{'no_create':True}"
                                        force_save="1" string="Shipper"/>
                                 <field name="consignee_id" invisible="service_type != 'consignee'"
-                                       readonly="invoiced or vendor_invoiced" options="{'no_create': True}"
+                                       readonly="invoiced or vendor_invoiced or statement_locked" options="{'no_create': True}"
                                        force_save="1" string="Consignee"/>
                                 <field name="vendor_id" invisible="service_type != 'vendor'"
-                                       readonly="invoiced or vendor_invoiced" options="{'no_create': True}"
+                                       readonly="invoiced or vendor_invoiced or statement_locked" options="{'no_create': True}"
                                        force_save="1" string="Vendor"/>
                             </group>
                         </group>
                         <group string=" Service">
                             <group>
-                                <field name="service_id" required="1" readonly="invoiced or vendor_invoiced"
+                                <field name="service_id" required="1" readonly="invoiced or vendor_invoiced or statement_locked"
                                        force_save="1" string="Service"/>
                             </group>
                             <group>
-                                <field name="name" readonly="invoiced or vendor_invoiced"
+                                <field name="name" readonly="invoiced or vendor_invoiced or statement_locked"
                                        force_save="1" string="Description"/>
                             </group>
                         </group>
                         <group string="Charges">
                             <group>
-                                <field name="qty" readonly="invoiced or vendor_invoiced"
+                                <field name="qty" readonly="invoiced or vendor_invoiced or statement_locked"
                                        force_save="1" string="Quantity"/>
                             </group>
                             <group>
-                                <field name="currency_id" required="1" readonly="invoiced or vendor_invoiced"
+                                <field name="currency_id" required="1" readonly="invoiced or vendor_invoiced or statement_locked"
                                        force_save="1" string="Currency"/>
-                                <field name="sale" readonly="invoiced or vendor_invoiced"
+                                <field name="sale" readonly="invoiced or vendor_invoiced or statement_locked"
                                        force_save="1" string="Price"/>
                                 <!--<field name="cost" string="Cost"/>-->
                             </group>

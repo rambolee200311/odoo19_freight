@@ -3,12 +3,31 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.52
-update_time: 2026-08-12
-adapt_sprint: Sprint4-3-Statement-Void-Revision
+context_version: 0.1.54
+update_time: 2026-08-13
+adapt_sprint: Sprint4-4-Statement-Confirm
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.54:
+    update_content: |
+      Sprint4-4 开放项确认（决策48，B-52）：
+      - 费用层部分锁定：confirmed/draft_invoice 关联费用不可修改/删除
+      - draft 与未进入结算单费用可编辑；voided 关联费用解除锁定
+      - decision_gate satisfied，可进入编码
+    update_type: Sprint4-4 开放项确认
+    effect_scope: intent_sprint4_4 + business + history
+
+  0.1.53:
+    update_content: |
+      Sprint4-4 契约起草（决策47，B-51）：
+      - Draft：费用可增删改并重新生成
+      - Confirmed：结算单锁定不可直接修改，禁止作废，费用不可重复选择
+      - Voided：不可恢复、不可修改，仅历史
+      - 开放项 U-40（费用层是否完全锁定），确认后登记 B-52
+    update_type: Sprint4-4 Intent 起草
+    effect_scope: intent_sprint4_4 + business + history
+
   0.1.52:
     update_content: |
       Sprint4-3 开放项确认（决策46）：

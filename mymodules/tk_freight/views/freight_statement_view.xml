@@ -93,6 +93,10 @@
                                        invisible="not voided_date" string="Voided On"/>
                                 <field name="voided_reason" readonly="1"
                                        invisible="not voided_reason" string="Void Reason"/>
+                                <field name="confirmed_uid" readonly="1"
+                                       invisible="not confirmed_uid" string="Confirmed By"/>
+                                <field name="confirmed_date" readonly="1"
+                                       invisible="not confirmed_date" string="Confirmed On"/>
                             </group>
                         </group>
                         <notebook>

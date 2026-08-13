@@ -260,3 +260,23 @@
 ### 决策46：Sprint4-3 开放项确认（U-39 → B-50）
 
 **决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-3-001` 开放项 U-39：Draft 结算单在费用再次修改后重新生成时，旧 Draft 作废（voided）并永久留存，新结算单生成新 version_no，不允许原地刷新/重建同版本，登记为 B-50。契约 `decision_gate.status = satisfied`，可以进入编码。
+
+### 决策47：Sprint4-4 契约起草（客户接受 → Confirmed）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-4-001`（Sprint4-4-Statement-Confirm），登记 B-51：
+
+- Draft Statement：允许修改/删除/增加费用，允许重新生成。
+- Confirmed Statement：结算单锁定，不可直接修改；关联费用不可被新结算单重复选择；禁止作废。
+- Void Statement：不可恢复、不可修改，仅作为历史记录。
+- 开放项 U-40：Confirmed 后 freight.service 费用层是否完全锁定（默认建议：模型层+视图层锁定普通用户修改，不新增 security group，保持 B-28 现状），确认后登记 B-52。
+- 草稿发票生成（Sprint4-5）、Vendor Bill、权限组建设不在本 Sprint 范围。
+
+### 决策48：Sprint4-4 开放项确认（U-40 → B-52）
+
+**决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-4-001` 开放项 U-40：费用层部分锁定，只锁定已生成结算单的费用。登记 B-52：
+
+- `confirmed / draft_invoice` 结算单关联的 `freight.service` 费用不可修改、不可删除。
+- `draft` 结算单关联费用与未进入结算单的费用保持可编辑。
+- `voided` 结算单关联费用解除锁定，可再次用于新结算单（对齐 Sprint4-3 作废释放语义）。
+
+契约 `decision_gate.status = satisfied`，可以进入编码。

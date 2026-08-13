@@ -1,0 +1,21 @@
+intent_id: INT-FREIGHT-SPRINT4-4-001
+status: EXECUTED
+
+changed_files:
+  - mymodules/tk_freight/models/freight_configuration.py
+  - mymodules/tk_freight/views/freight_configuration.xml
+  - mymodules/tk_freight/views/freight_statement_view.xml
+  - mymodules/tk_freight/i18n/zh_CN.po
+  - docs/context/intent/intent_sprint4_4_statement_confirm.yaml
+  - docs/context/business/knowledge_classification.md
+  - docs/context/history/decision_note.md
+  - docs/context/history/sprint_log.md
+  - docs/context/context_version.yaml
+  - docs/context/intent_records/INT-FREIGHT-SPRINT4-4-001/
+  - docs/context/validation/test_exec_records.yaml
+
+scope_notes:
+  - "FreightService 新增 statement_line_ids / statement_locked 计算字段与 write/unlink 模型锁（B-52）"
+  - "freight.service 表单对已锁定费用只读（statement_locked）"
+  - "Statement 表单展示 confirmed_uid / confirmed_date"
+  - "未新增 security group（B-28 现状）；未实现草稿发票生成（Sprint4-5）、Vendor Bill"

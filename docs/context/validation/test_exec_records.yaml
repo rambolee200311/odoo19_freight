@@ -282,3 +282,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "覆盖：voided 审计字段、作废终态、header/line 不可变、版本链、快照隔离（V1=1000/V2=1200）、反向污染（费用改 1500 后 V1/V2 不变）、Draft 重新生成（B-50，V3 version_no=3）、重复生成拦截、confirmed 禁止作废；新增 voided_reason 可选字段"
+
+  - contract_id: INT-FREIGHT-SPRINT4-4-001
+    sprint_name: Sprint4-4 客户接受 → Confirmed + 费用层部分锁定
+    context_baseline: "0.1.53"
+    execute_time: "2026-08-13"
+    test_category: "确认锁点 + 费用部分锁定"
+    test_target_models: ["freight.statement", "freight.service"]
+    total_case_count: 14
+    pass_count: 14
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "context_loader 0.1.54 基线 PASS；verify.py 18/18；button_immediate_upgrade PASS；odoo shell 14/14 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "覆盖：draft 费用可编辑、confirm 审计、statement_locked、confirmed 费用写/删拦截（B-52）、header 不可变、confirmed 禁止作废、费用不可重复选择、voided 解除锁定、视图字段（confirmed_uid/confirmed_date/statement_locked）"

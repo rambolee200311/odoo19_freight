@@ -91,3 +91,16 @@
 - 未实现客户接受确认（Sprint4-4）、开票、Vendor Bill
 
 **验收**: context_loader 0.1.52 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 12/12 断言（快照隔离/反向污染/重复生成拦截）+ log clean PASS。
+
+## Sprint4-4-Statement-Confirm (2026-08-13)
+
+**目标**: 客户接受 → Statement Confirmed（业务锁点）+ 费用层部分锁定。
+
+**成果**:
+- `freight.service` 新增 `statement_locked`：confirmed / draft_invoice 结算单关联费用锁定
+- `FreightService.write / unlink` 模型层拦截已锁定费用修改/删除（B-52）
+- Draft 关联费用可编辑；Voided 关联费用解除锁定可再次用于新结算单
+- `freight.service` 表单对锁定费用只读；Statement 表单展示 confirmed_uid / confirmed_date
+- 未新增 security group（B-28）；未实现草稿发票生成（Sprint4-5）、Vendor Bill
+
+**验收**: context_loader 0.1.54 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 14/14 断言 + log clean PASS。
