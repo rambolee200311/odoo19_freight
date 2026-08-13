@@ -9460,3 +9460,13 @@ msgstr "退回草稿"
 msgid "Copy as Draft"
 msgstr "复制为新草稿"
 
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement_wizard__eligibility_summary
+msgid "Eligibility Summary"
+msgstr "可选费用说明"
+
+#. module: tk_freight
+#: code:addons/tk_freight/wizard/freight_statement_wizard.py:0
+msgid "Eligible: %s / Listed: %s; excluded reasons: draft %s, used %s, canceled %s, invoiced %s, vendor %s"
+msgstr "可选：%s / 列出：%s；排除原因：草稿 %s、已使用 %s、已取消 %s、已开票 %s、供应商 %s"
+

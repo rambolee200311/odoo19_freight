@@ -15,9 +15,13 @@
                             <field name="customer_id" string="Customer" required="1"/>
                         </group>
                     </group>
+                    <field name="eligibility_summary" readonly="1"/>
                     <field name="line_ids" nolabel="1">
                         <list string="Selectable Services">
-                            <field name="select" string="Select" widget="checkbox"/>
+                            <field name="select" string="Select" widget="checkbox"
+                                   readonly="not selectable"/>
+                            <field name="selectable" column_invisible="1"/>
+                            <field name="fee_state" string="Fee State" widget="badge"/>
                             <field name="sequence" string="Sequence"/>
                             <field name="service_type" string="Service To"/>
                             <field name="partner_id" string="Invoice To"/>

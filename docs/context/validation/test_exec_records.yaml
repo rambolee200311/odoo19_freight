@@ -350,3 +350,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "freight_shipment_view.xml Services 内联费用表单补充 fee_state 状态栏、Confirm/Unconfirm/Cancel/Copy as Draft 按钮与 fee_state 列表列；非 draft 状态字段只读"
+
+  - contract_id: FIX-STATEMENT-WIZARD-001
+    sprint_name: 结算单向导列出客户全部费用并限制勾选
+    context_baseline: "0.1.63"
+    execute_time: "2026-08-13"
+    test_category: "向导修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line"]
+    total_case_count: 9
+    pass_count: 9
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "button_immediate_upgrade PASS；odoo shell onchange/arch 断言 9/9 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "wizard 按客户列出全部 shipper/consignee 费用并显示 fee_state；仅 confirmed 且未开票/未占用的费用可勾选（selectable）；新增 eligibility_summary 可选费用说明；真实客户无可选时列表仍展示并给出原因"

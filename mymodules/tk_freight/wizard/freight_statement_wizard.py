@@ -13,9 +13,12 @@ class FreightStatementWizardLine(models.TransientModel):
 
     wizard_id = fields.Many2one('freight.statement.wizard', ondelete='cascade')
     sequence = fields.Integer(string='Sequence', default=10)
-    select = fields.Boolean(string='Select', default=True)
+    select = fields.Boolean(string='Select', default=False)
     service_id = fields.Many2one('freight.service', string='Freight Service',
                                  readonly=True)
+    fee_state = fields.Selection(related='service_id.fee_state',
+                                 string='Fee State', readonly=True)
+    selectable = fields.Boolean(string='Selectable', compute='_compute_selectable')
     name = fields.Char(string='Description', readonly=True)
     service_type = fields.Selection(related='service_id.service_type',
                                     string='Service To', readonly=True)
@@ -38,6 +41,18 @@ class FreightStatementWizardLine(models.TransientModel):
             line.partner_id = service.shipper_id if service.service_type == 'shipper' \
                 else service.consignee_id
 
+    @api.depends('service_id.fee_state', 'service_id.invoiced',
+                 'service_id.statement_line_ids.statement_id.state')
+    def _compute_selectable(self):
+        for line in self:
+            service = line.service_id
+            line.selectable = (
+                service.fee_state == 'confirmed'
+                and not service.invoiced
+                and not any(
+                    ref.statement_id.state in ('draft', 'confirmed', 'draft_invoice')
+                    for ref in service.statement_line_ids))
+
 
 class FreightStatementWizard(models.TransientModel):
     """Generate a settlement statement from selected freight.service lines."""
@@ -51,6 +66,7 @@ class FreightStatementWizard(models.TransientModel):
         domain="['|',('shipper','=',True),('consignee','=',True)]")
     line_ids = fields.One2many('freight.statement.wizard.line', 'wizard_id',
                                string='Selectable Services')
+    eligibility_summary = fields.Text(string='Eligibility Summary', readonly=True)
 
     @api.onchange('shipment_id')
     def _onchange_shipment_id(self):
@@ -60,9 +76,40 @@ class FreightStatementWizard(models.TransientModel):
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
         commands = [(5, 0, 0)]
-        for service in self._get_eligible_services():
-            commands.append((0, 0, self._prepare_wizard_line(service)))
+        if not self.shipment_id or not self.customer_id:
+            self.line_ids = commands
+            self.eligibility_summary = False
+            return
+        eligible = self._get_eligible_services()
+        services = self.env['freight.service'].search([
+            ('shipment_id', '=', self.shipment_id.id),
+            ('service_type', 'in', ('shipper', 'consignee')),
+        ])
+        shown = self.env['freight.service']
+        for service in services:
+            partner = service.shipper_id if service.service_type == 'shipper' \
+                else service.consignee_id
+            if partner and partner.id == self.customer_id.id:
+                shown |= service
+        for service in shown.sorted('id'):
+            vals = self._prepare_wizard_line(service)
+            vals['select'] = service in eligible
+            commands.append((0, 0, vals))
         self.line_ids = commands
+        vendor_count = self.env['freight.service'].search_count([
+            ('shipment_id', '=', self.shipment_id.id),
+            ('service_type', '=', 'vendor'),
+        ])
+        self.eligibility_summary = _(
+            'Eligible: %s / Listed: %s; excluded reasons: draft %s, used %s, '
+            'canceled %s, invoiced %s, vendor %s') % (
+            len(eligible), len(shown),
+            len(shown.filtered(lambda s: s.fee_state == 'draft')),
+            len(shown.filtered(lambda s: s.fee_state == 'used')),
+            len(shown.filtered(lambda s: s.fee_state == 'canceled')),
+            len(shown.filtered('invoiced')),
+            vendor_count,
+        )
 
     def _get_eligible_services(self):
         self.ensure_one()
