@@ -67,6 +67,20 @@ class FreightStatementWizard(models.TransientModel):
     line_ids = fields.One2many('freight.statement.wizard.line', 'wizard_id',
                                string='Selectable Services')
     eligibility_summary = fields.Text(string='Eligibility Summary', readonly=True)
+    customer_domain = fields.Char(string='Customer Domain',
+                                  compute='_compute_customer_domain')
+
+    @api.depends('shipment_id.shipper_id', 'shipment_id.consignee_id')
+    def _compute_customer_domain(self):
+        for rec in self:
+            ids = []
+            for partner in (rec.shipment_id.shipper_id, rec.shipment_id.consignee_id):
+                if partner:
+                    ids.append(partner.id)
+            if ids:
+                rec.customer_domain = repr([('id', 'in', ids)])
+            else:
+                rec.customer_domain = repr([('id', '=', False)])
 
     @api.model
     def default_get(self, fields_list):

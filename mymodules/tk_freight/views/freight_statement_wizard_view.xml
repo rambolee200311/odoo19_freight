@@ -14,7 +14,7 @@
                         <group>
                             <field name="customer_id" string="Customer"
                                    options="{'no_create': True}"
-                                   domain="['|',('id','=',shipment_id.shipper_id),('id','=',shipment_id.consignee_id)]"/>
+                                   domain="customer_domain"/>
                         </group>
                     </group>
                     <field name="eligibility_summary" readonly="1"/>
