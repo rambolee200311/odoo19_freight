@@ -233,6 +233,11 @@ class FreightStatementWizard(models.TransientModel):
         selected = self.line_ids.filtered('select')
         if not selected:
             raise ValidationError(_('Please select at least one service line.'))
+        missing_service = selected.filtered(lambda line: not line.service_id)
+        if missing_service:
+            raise ValidationError(_(
+                'Some selected fee rows have no freight service. Reopen the '
+                'statement wizard and select the fees again.'))
         missing_targets = []
         for line in selected:
             service = line.service_id

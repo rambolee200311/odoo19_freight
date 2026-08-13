@@ -452,3 +452,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "生成优先使用所选客户；未选客户时从勾选费用推导并列出缺 partner 费用名；端到端实测：customer 7 / fee 2 生成 Statement draft（amount=800）→ fee used → void → fee confirmed"
+
+  - contract_id: FIX-WIZARD-SERVICE-GUARD-001
+    sprint_name: 向导空行与 service_id 防御
+    context_baseline: "0.1.65"
+    execute_time: "2026-08-13"
+    test_category: "向导生成加固"
+    test_target_models: ["freight.statement.wizard", "freight.statement"]
+    total_case_count: 3
+    pass_count: 3
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "button_immediate_upgrade PASS；odoo shell 端到端+防御 3/3 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "移除 editable=bottom 避免产生无 service_id 空行；生成时对缺 service_id 勾选行给出明确错误（不再抛 ORM 必填错）；端到端实测：向导→勾选 fee2→生成 Statement 23 draft（amount=800）→ void → fee2 confirmed"
