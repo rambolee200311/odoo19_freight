@@ -1,6 +1,6 @@
 # ==============================================================
 # Intent: Sprint4-5 Confirmed Statement 生成草稿发票
-# 状态：已按两轮评审修订（决策69/70/71，B-70~B-74 已确认，可进入编码）
+# 状态：已按两轮评审修订 + 菜单小范围扩展（决策69/70/71/73，B-70~B-75 已确认）
 # 用户明确：开票申请暂不设置开发任务（B-42 保持）
 # ==============================================================
 
@@ -12,7 +12,7 @@ title: "Confirmed Statement 生成草稿发票（account.move draft）"
 target_scope: "从 Confirmed Statement 生成草稿应收发票（account.move，move_type=out_invoice，state=draft）。发票行必须来自 Statement Line 快照，禁止从 freight.service 重新计算；Draft / Voided Statement 禁止生成发票；重复生成必须幂等返回已有草稿发票。开票申请 / 审批流不在本 Sprint 开发（B-42 保持）"
 
 context_binding:
-  bind_context_version: "0.1.86"
+  bind_context_version: "0.1.88"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -51,6 +51,11 @@ business_intent:
       decision_status: "CONFIRMED"
       statement: "不变量：state=draft_invoice ⇒ invoice_ids 非空；若为空则 stop_and_escalate，不得静默返回成功"
       rule_refs: ["BR-74", "idempotency_invariant"]
+    - id: "B-75"
+      decision_ref: "决策73"
+      decision_status: "CONFIRMED"
+      statement: "Invoicing 一级菜单下新增 Settlement Statements 独立入口（sequence=1，action=action_freight_statement）"
+      rule_refs: []
   draft_scope:
     - "仅 confirmed 状态结算单提供 Generate Draft Invoice 入口"
     - "按 statement.line.currency_id 分组，每币种生成一张 out_invoice 草稿发票（B-24 整行进单）"
@@ -72,12 +77,14 @@ decision_gate:
     - "决策69 -> B-70 / B-71 / B-72"
     - "决策70 -> 评审修订（幂等持久化、税映射、header/currency/行映射、事务原子性、返回动作、浏览器验收）"
     - "决策71 -> B-73 / B-74（并发行锁、幂等不变量、tax_code 优先映射、取消本 Sprint 自动含税回退、按钮状态矩阵）"
+    - "决策73 -> B-75（小范围扩展：Settlement Statements 独立菜单，仅新增一个 menuitem）"
 
 scope:
   allowed_files:
     - "docs/context/intent/intent_sprint4_5_generate_draft_invoice.yaml"
     - "mymodules/tk_freight/models/freight_statement.py"
     - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/menus.xml"
     - "mymodules/tk_freight/i18n/zh_CN.po"
     - "docs/context/business/business_rules.yaml"
     - "docs/context/business/knowledge_classification.md"
@@ -93,7 +100,6 @@ scope:
     - "mymodules/tk_freight/models/freight_shipment.py"
     - "mymodules/tk_freight/wizard/"
     - "mymodules/tk_freight/security/"
-    - "mymodules/tk_freight/views/menus.xml"
     - "mymodules/tk_freight/__manifest__.py"
     - "mymodules/tk_freight/data/"
     - "mymodules/tk_freight/report/"
@@ -102,6 +108,7 @@ scope:
   allowed_changes:
     - "freight_statement.py：仅允许确认/硬化 action_generate_draft_invoice、_prepare_invoice_line 与状态拦截"
     - "freight_statement_view.xml：仅允许 Generate Draft Invoice 按钮可见性/文案调整"
+    - "menus.xml：仅允许新增 menu_freight_statement（Invoicing → Settlement Statements，sequence=1）并后移应收/应付发票 sequence"
     - "business_rules.yaml：登记 BR-70~BR-74"
   forbidden_changes:
     - "修改 account 模块或官方 addons"
@@ -111,12 +118,14 @@ scope:
     - "发票直接过账/自动确认（B-41）"
     - "Draft / Voided statement 生成发票"
     - "从 freight.service 重新计算发票行"
-    - "修改菜单、权限、manifest、数据 XML、报表、Controller、静态资源"
+    - "修改/移动/删除/重命名既有菜单（仅允许新增 menu_freight_statement）"
+    - "修改权限、manifest、数据 XML、报表、Controller、静态资源"
 
 change_boundary:
   functional_code:
     - "mymodules/tk_freight/models/freight_statement.py"
     - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/views/menus.xml"
   translation:
     - "mymodules/tk_freight/i18n/zh_CN.po"
   context_audit:
@@ -251,6 +260,7 @@ technical_constraints:
 acceptance_criteria:
   functional:
     - "仅 confirmed Statement 显示 Generate Draft Invoice"
+    - "Invoicing 菜单下存在 Settlement Statements 独立入口，点击打开 freight.statement 列表"
     - "draft/draft_invoice/voided Statement UI 不显示入口；draft_invoice 直接调用仅幂等返回，draft/voided 直接调用被拒绝"
     - "每条 Statement Line 原样生成一条 account.move.line，不拆分、不合并、不重算"
     - "account.move.partner_id 来源为 Statement.customer_id"
@@ -277,7 +287,7 @@ acceptance_criteria:
     - "statement 状态机与版本链不变"
     - "fee_state 语义不变"
   validation:
-    - "context_loader.py 基线 PASS（bind 0.1.85）"
+    - "context_loader.py 基线 PASS（bind 0.1.88）"
     - "verify.py 全部强制门禁 PASS（18 项）"
     - "XML-RPC 模块升级验证通过"
     - "服务端断言：draft/voided 拦截、confirmed 创建、快照来源、多币种、幂等、header 关联、事务回滚"
@@ -285,7 +295,7 @@ acceptance_criteria:
 
 validation:
   context:
-    required_version: "0.1.86"
+    required_version: "0.1.88"
     command: "context_loader.py"
     expected: "PASS"
     bind_version_must_match: true
@@ -344,6 +354,7 @@ execution_artifacts:
 success_definition:
   - "Confirmed Statement 生成草稿发票流程按 invoice_contract + idempotency_contract + tax_mapping_contract 落地"
   - "BR-70 ~ BR-74 登记并同步决策记录"
+  - "Settlement Statements 独立菜单入口可用（B-75）"
   - "draft/voided 状态拦截、快照来源、行映射、税映射、按币种分组、事务原子性、并发幂等、不变量与 header 关联断言通过"
   - "context_loader / verify 全部 PASS"
 
@@ -351,6 +362,7 @@ deliverables:
   - "Sprint4-5 意图契约（本文件）"
   - "草稿发票生成流程的契约化硬化与验证记录（服务端 + 浏览器）"
   - "BR-70 ~ BR-74 规则登记"
+  - "Settlement Statements 独立菜单（Invoicing → 结算单）"
 
 audit:
   intent_records: "执行完成后归档至 INT-FREIGHT-SPRINT4-5-001/"

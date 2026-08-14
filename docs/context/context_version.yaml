@@ -3,12 +3,31 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.86
+context_version: 0.1.88
 update_time: 2026-08-14
 adapt_sprint: Sprint4-5-Generate-Draft-Invoice
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.88:
+    update_content: |
+      Sprint4-5 返回动作修复（决策74）：
+      - 单张发票返回 action 的 views 仅保留 form，并设置 res_id
+      - 多张发票保持列表动作
+      - 服务端断言 PASS；待浏览器验收
+    update_type: Sprint4-5 返回动作修复
+    effect_scope: intent_sprint4_5 + history + validation
+
+  0.1.87:
+    update_content: |
+      Sprint4-5 小范围扩展（决策73，B-75）：
+      - Invoicing 下新增 Settlement Statements 独立菜单
+        （sequence=1，action_freight_statement）
+      - 应收/应付发票后移为 sequence 2/3；zh_CN 翻译“结算单”
+      - 契约 allowed_files 同步 menus.xml，仅允许新增该 menuitem
+    update_type: Sprint4-5 菜单小范围扩展
+    effect_scope: intent_sprint4_5 + business + history
+
   0.1.86:
     update_content: |
       Sprint4-5 实施完成（决策72）：

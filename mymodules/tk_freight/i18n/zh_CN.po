@@ -5576,6 +5576,11 @@ msgid "Receivable Invoices"
 msgstr "应收发票"
 
 #. module: tk_freight
+#: model:ir.ui.menu,name:tk_freight.menu_freight_statement
+msgid "Settlement Statements"
+msgstr "结算单"
+
+#. module: tk_freight
 #. odoo-javascript
 #: code:addons/tk_freight/static/src/xml/template.xml:0
 msgid "Invoices and Bills by Month"

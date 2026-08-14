@@ -531,3 +531,18 @@
 - 单张发票返回表单（`view_mode=form` + `res_id`），多张返回列表动作覆盖全部 `invoice_ids`。
 - 断言：draft/voided 拦截、单币种生成、幂等、不变量、多币种两单、qty=0 拦截全部 PASS。
 - 待业务负责人浏览器验收（多币种必测）。
+
+### 决策73：Sprint4-5 小范围扩展（Settlement Statements 独立菜单）
+
+**决策**: 业务负责人发现结算单没有独立菜单，只能从 Shipment 进入；确认为 Sprint4-5 小范围扩展：
+
+- B-75：`Invoicing` 一级菜单下新增 `Settlement Statements`（sequence=1，`action_freight_statement`），应收/应付发票后移为 sequence 2/3。
+- 同步契约 `allowed_files` 增加 `menus.xml`，仅允许新增该 menuitem，禁止移动/删除/重命名既有菜单。
+
+### 决策74：Sprint4-5 返回动作修复（单张发票必须打开 form）
+
+**决策**: 用户实测点 Generate Draft Invoice 后仍打开 list。根因：`_invoice_action` 只改 `view_mode='form'`，但保留了原 action 的 `views` 列表，网页端按第一个 view（list）打开。修复：
+
+- 单张发票时 `views` 仅保留 `form` 视图，同时设置 `res_id` 与空 domain。
+- 多张发票保持列表动作（domain 覆盖全部 invoice_ids）。
+- 服务端断言：`view_mode=form`、`views=[(False,'form')]`、`res_id=invoice.id` PASS（事务回滚）。

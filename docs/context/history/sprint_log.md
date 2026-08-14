@@ -243,5 +243,9 @@
   - 服务端断言 7 组全 PASS（draft/voided 拦截、单币种、幂等、不变量、
     多币种两单、qty=0 拦截），全部事务回滚无数据残留
   - 待业务负责人浏览器验收（多币种必测）
+- 小范围扩展（决策73，B-75）：Invoicing 下新增 Settlement Statements
+  独立菜单（sequence=1，action_freight_statement），应收/应付发票后移
+- 返回动作修复（决策74）：单张发票 views 仅保留 form + res_id，
+  多张发票保持列表；服务端断言 PASS
 
-**验收**: context_loader 0.1.86 基线 PASS；verify.py 18/18 PASS；服务端断言 7/7 PASS；待 human browser acceptance。
+**验收**: context_loader 0.1.88 基线 PASS；verify.py 18/18 PASS；服务端断言 8/8 PASS；待 human browser acceptance。

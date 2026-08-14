@@ -330,7 +330,13 @@ class FreightStatement(models.Model):
             'account.action_move_out_invoice_type')
         action['context'] = {'create': False}
         if open_form:
+            form_views = [
+                (view_id, view_type)
+                for view_id, view_type in action.get('views', [])
+                if view_type == 'form'
+            ]
             action['view_mode'] = 'form'
+            action['views'] = form_views or action.get('views', [])
             action['res_id'] = invoices.id
             action['domain'] = []
         else:
