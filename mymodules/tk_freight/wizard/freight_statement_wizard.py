@@ -238,14 +238,21 @@ class FreightStatementWizard(models.TransientModel):
         selected = self.line_ids.filtered('select')
         if not selected:
             raise ValidationError(_('Please select at least one service line.'))
-        missing_service = selected.filtered(lambda line: not line.service_id)
-        if missing_service:
+        # The web client may submit transient rows that only carry the checkbox
+        # state (UI artifacts without a fee link). Only rows backed by a real
+        # freight.service record can be invoiced, so ignore the artifacts instead
+        # of failing the whole generation because of them.
+        valid_lines = selected.filtered(lambda line: line.service_id)
+        if not valid_lines:
             raise ValidationError(_(
-                'Some selected fee rows have no freight service. Reopen the '
-                'statement wizard and select the fees again.'))
+                'No selected fee row references a real freight service. Reopen '
+                'the statement wizard and select the fees again.'))
+        services = valid_lines.mapped('service_id')
+        sequence_by_service = {
+            line.service_id.id: line.sequence or 10 for line in valid_lines
+        }
         missing_targets = []
-        for line in selected:
-            service = line.service_id
+        for service in services:
             if service.service_type == 'vendor':
                 raise ValidationError(_(
                     'Vendor cost lines cannot be included in a customer statement.'))
@@ -261,8 +268,7 @@ class FreightStatementWizard(models.TransientModel):
                     'Selected fees have no invoice target: %s. Add the shipper/consignee '
                     'before generating a statement.') % ', '.join(missing_targets))
             customers = self.env['res.partner']
-            for line in selected:
-                service = line.service_id
+            for service in services:
                 partner = service.shipper_id if service.service_type == 'shipper' \
                     else service.consignee_id
                 if partner:
@@ -276,7 +282,6 @@ class FreightStatementWizard(models.TransientModel):
                     'Please select fees of the same customer, or choose a customer '
                     'before generating a statement.'))
             customer = customers
-        services = selected.mapped('service_id')
         # Serialize concurrent generation: one fee can only be occupied by one
         # non-voided statement (fee_statement_invariant).
         self.env.cr.execute(
@@ -295,21 +300,15 @@ class FreightStatementWizard(models.TransientModel):
             'settlement_date': fields.Date.context_today(self),
         })
         line_vals = []
-        for line in selected.sorted('sequence'):
-            line_vals.append({
+        for service in services.sorted('id'):
+            vals = self._prepare_wizard_line(service)
+            vals.pop('service_id', None)
+            vals.update({
                 'statement_id': statement.id,
-                'freight_service_id': line.service_id.id,
-                'sequence': line.sequence or 10,
-                'name': line.name,
-                'qty': line.qty,
-                'price_unit': line.price_unit,
-                'currency_id': line.currency_id.id,
-                'tax_code': line.tax_code or False,
-                'tax_name': line.tax_name or False,
-                'tax_rate': line.tax_rate or 0.0,
-                'tax_amount': line.tax_amount or 0.0,
-                'settlement_rate': line.settlement_rate or 1.0,
+                'freight_service_id': service.id,
+                'sequence': sequence_by_service.get(service.id, 10),
             })
+            line_vals.append(vals)
         self.env['freight.statement.line'].create(line_vals)
         statement_fees = statement.statement_line_ids.mapped('freight_service_id')
         if any(fee.fee_state != 'confirmed' for fee in statement_fees):

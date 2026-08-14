@@ -486,3 +486,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "select 改为行内 toggle_select 按钮（避免 checkbox 点击打开行表单，也避免 editable 空行）；实测 toggle True→False→True；视图无 checkbox widget、无 editable、含 toggle_select 按钮"
+
+  - contract_id: FIX-WIZARD-GENERATE-ROBUST-001
+    sprint_name: 向导生成方法加固
+    context_baseline: "0.1.65"
+    execute_time: "2026-08-14"
+    test_category: "向导生成修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line", "freight.statement"]
+    total_case_count: 3
+    pass_count: 3
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；button_immediate_upgrade PASS；odoo shell 端到端+异常场景 3/3 PASS；arch 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "生成方法不再依赖瞬态 wizard 行的 service_id 快照：忽略 UI 重建的空行（仅勾选状态），按真实 freight.service 重新取数生成 statement line；列表隐藏列保留 service_id 防止客户端重建丢关联；实测正常生成（2/3/35）、混入空行仍生成、全空行给出明确 ValidationError"

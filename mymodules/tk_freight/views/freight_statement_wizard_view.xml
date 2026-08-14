@@ -21,6 +21,7 @@
                     <field name="line_ids" nolabel="1" create="False" delete="False">
                         <list string="Selectable Services" editable="bottom">
                             <field name="select" string="Select" widget="checkbox"/>
+                            <field name="service_id" column_invisible="True"/>
                             <field name="fee_state" string="Fee State" widget="badge"/>
                             <field name="sequence" string="Sequence"/>
                             <field name="service_type" string="Service To"/>

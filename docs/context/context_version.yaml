@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.65
-update_time: 2026-08-13
+context_version: 0.1.66
+update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.66:
+    update_content: |
+      Sprint4-4-3 向导生成方法加固（FIX-WIZARD-GENERATE-ROBUST-001）：
+      - 生成以真实 freight.service 为准重新取数，不再依赖瞬态 wizard 行快照
+      - 忽略 UI 重建的空行（仅勾选状态），全空行给出明确 ValidationError
+      - wizard line 列表隐藏列保留 service_id，防止客户端重建丢关联
+      - verify 18/18、模块升级、odoo shell 三场景实测 PASS，log clean
+    update_type: Sprint4-4-3 向导生成修复
+    effect_scope: intent_sprint4_4_3 + validation
+
   0.1.65:
     update_content: |
       Sprint4-4-3 实施完成（决策60）：
