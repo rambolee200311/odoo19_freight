@@ -178,6 +178,22 @@ rules:
     source: B-42
     statement: "开票申请为预留业务节点，本 Sprint 不开发模型/按钮/审批流/状态机/权限"
 
+  - id: BR-70
+    category: finance
+    status: CONFIRMED
+    source: B-70
+    statement: "发票必须来源于 Confirmed Statement；Draft/Voided Statement 禁止生成发票"
+  - id: BR-71
+    category: finance
+    status: CONFIRMED
+    source: B-71
+    statement: "发票行来源为 Statement Line 快照，禁止从 freight.service 重新计算数量/单价/税额"
+  - id: BR-72
+    category: process
+    status: CONFIRMED
+    source: B-72
+    statement: "草稿发票生成幂等，同一 Confirmed Statement 重复操作返回已有草稿发票"
+
 assumptions:
   - id: A-1
     status: CONFIRMED

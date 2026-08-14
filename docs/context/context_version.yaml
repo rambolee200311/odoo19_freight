@@ -3,12 +3,23 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.82
+context_version: 0.1.83
 update_time: 2026-08-14
-adapt_sprint: Sprint4-4-4-Wizard-Refactor
+adapt_sprint: Sprint4-5-Generate-Draft-Invoice
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.83:
+    update_content: |
+      Sprint4-5 契约起草（决策69，B-70/B-71/B-72）：
+      - 发票必须来源于 Confirmed Statement（draft/voided 禁止）
+      - 发票行来自 Statement Line 快照，禁止从 freight.service 重算
+      - 草稿发票生成幂等，重复操作返回已有草稿发票
+      - 开票申请不开发（B-42 保持）；BR-70~72 登记
+      - 现状 action_generate_draft_invoice 已具备基础实现，进入编码前按契约硬化
+    update_type: Sprint4-5 Intent 起草
+    effect_scope: intent_sprint4_5 + business + history
+
   0.1.82:
     update_content: |
       AI Coding Governance 升级（TL-001 ~ TL-005）：

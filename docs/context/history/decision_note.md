@@ -491,3 +491,12 @@
 - `_rebuild_lines` 的赋值自带 `wizard_rebuild=True` 上下文，不再递归进入守卫。
 - `write` 守卫调整顺序：先处理 `(0,0,...)` 重建命令（保留上一次确认的 select），再处理 `(2/3/5/6)` 删除/清空（恢复权威集合）。
 - 实测：onchange 后 select 保留、生成仅 1 行、网页端 `(5,0,0)+(0,0,...)` 保留状态、纯删除恢复全选。
+
+### 决策69：Sprint4-5 契约起草（Confirmed Statement → 草稿发票）
+
+**决策**: 业务负责人明确开票申请暂不设置开发任务（B-42 保持），Sprint4-5 聚焦“Confirmed Statement → Generate Draft Invoice → account.move draft”：
+
+- B-70：发票必须来源于 Confirmed Statement；Draft / Voided Statement 禁止生成发票。
+- B-71：发票行来源为 Statement Line → account.move.line，禁止从 freight.service 重新计算数量/单价/税额。
+- B-72：草稿发票生成幂等，同一 Confirmed Statement 重复操作返回已有草稿发票，不重复创建。
+- 现状 `action_generate_draft_invoice` 已具备基础实现，本 Sprint 按契约固化来源、状态拦截与幂等并补验证。

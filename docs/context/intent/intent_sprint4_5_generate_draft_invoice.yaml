@@ -1,0 +1,250 @@
+# ==============================================================
+# Intent: Sprint4-5 Confirmed Statement 生成草稿发票
+# 状态：已起草（决策69，B-70/B-71/B-72 已确认，待评审后进入编码）
+# 用户明确：开票申请暂不设置开发任务（B-42 保持）
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-5-001"
+sprint_version: "Sprint4-5-Generate-Draft-Invoice"
+intent_work_type: "Development"
+intent_change_type: "Finance Flow Confirmation + Hardening"
+title: "Confirmed Statement 生成草稿发票（account.move draft）"
+target_scope: "从 Confirmed Statement 生成草稿应收发票（account.move，move_type=out_invoice，state=draft）。发票行必须来自 Statement Line 快照，禁止从 freight.service 重新计算；Draft / Voided Statement 禁止生成发票；重复生成必须幂等返回已有草稿发票。开票申请 / 审批流不在本 Sprint 开发（B-42 保持）"
+
+context_binding:
+  bind_context_version: "0.1.83"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+    confirmation_ref: "Sprint4-5 起草（用户明确流程与来源原则）"
+  confirmed_decisions:
+    - id: "B-70"
+      decision_ref: "决策69"
+      decision_status: "CONFIRMED"
+      statement: "发票必须来源于 Confirmed Statement；Draft / Voided Statement 禁止生成发票"
+      rule_refs: ["BR-41", "BR-70"]
+    - id: "B-71"
+      decision_ref: "决策69"
+      decision_status: "CONFIRMED"
+      statement: "发票行来源为 Statement Line → account.move.line，禁止从 freight.service 重新计算数量/单价/税额"
+      rule_refs: ["BR-38", "BR-71"]
+    - id: "B-72"
+      decision_ref: "决策69"
+      decision_status: "CONFIRMED"
+      statement: "草稿发票生成幂等：同一 Confirmed Statement 重复操作返回已有草稿发票，不重复创建"
+      rule_refs: ["BR-38", "BR-41", "BR-72"]
+  draft_scope:
+    - "仅 confirmed 状态结算单提供 Generate Draft Invoice 入口"
+    - "按 statement.line.currency_id 分组，每币种生成一张 out_invoice 草稿发票（B-24 整行进单）"
+    - "发票行使用 statement.line 快照（name/qty/price_unit/tax），header 关联 freight_operation_id + freight_statement_id"
+    - "生成后 statement.state → draft_invoice；重复触发生成返回已有 invoice_ids"
+  draft_recommendations:
+    - "现状 action_generate_draft_invoice 已具备基础实现，本 Sprint 按契约固化来源、状态拦截与幂等并补验证"
+    - "account.move 保持 draft，不自动过账（B-41）"
+  unresolved_unknowns: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: false
+  newly_discovered_unknown_action: "stop_and_escalate"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+  mapping:
+    - "决策69 -> B-70 / B-71 / B-72"
+
+scope:
+  allowed_files:
+    - "docs/context/intent/intent_sprint4_5_generate_draft_invoice.yaml"
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/business_rules.yaml"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-5-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/models/freight_configuration.py"
+    - "mymodules/tk_freight/models/freight_shipment.py"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "freight_statement.py：仅允许确认/硬化 action_generate_draft_invoice、_prepare_invoice_line 与状态拦截"
+    - "freight_statement_view.xml：仅允许 Generate Draft Invoice 按钮可见性/文案调整"
+    - "business_rules.yaml：登记 BR-70~BR-72"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改 freight.service / wizard / shipment 逻辑"
+    - "新增开票申请模型/按钮/审批流/状态机/权限（B-42）"
+    - "新增 Statement Line ↔ Invoice Line 行级关联（B-38）"
+    - "发票直接过账/自动确认（B-41）"
+    - "Draft / Voided statement 生成发票"
+    - "从 freight.service 重新计算发票行"
+    - "修改菜单、权限、manifest、数据 XML、报表、Controller、静态资源"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/models/freight_statement.py"
+    - "mymodules/tk_freight/views/freight_statement_view.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/business/business_rules.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-5-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "Confirmed Statement → 点击 Generate Draft Invoice"
+  - "按 statement.line.currency_id 分组，每币种创建一张 account.move（move_type=out_invoice, state=draft）"
+  - "发票行由 statement.line 快照构造（name/qty/price_unit/tax）"
+  - "header 关联 freight_operation_id + freight_statement_id"
+  - "statement.state → draft_invoice；重复点击返回已有草稿发票"
+  - "Draft / Voided Statement 无该入口，方法级二次拦截"
+
+invoice_contract:
+  source_statement_state: "confirmed"
+  forbidden_statement_states: ["draft", "voided"]
+  invoice_model: "account.move"
+  move_type: "out_invoice"
+  invoice_state: "draft"
+  line_source: "freight.statement.line snapshot"
+  grouping: "by statement_line.currency_id"
+  header_link: ["freight_operation_id", "freight_statement_id"]
+  idempotency: "state=draft_invoice 时返回已有 invoice_ids"
+  forbidden:
+    - "从 freight.service 重算发票行"
+    - "statement.line ↔ invoice.line 行级关联"
+    - "过账/确认"
+    - "开票申请/审批流"
+
+technical_constraints:
+  - "发票创建仅允许 state=confirmed 的 statement（action_generate_draft_invoice 方法级校验）"
+  - "state=draft_invoice 时重复动作直接返回 invoice_ids，不创建新发票"
+  - "发票行只读取 statement_line_ids（快照），禁止反向查询 freight.service 重算"
+  - "按币种分组，每个币种至多一张当前草稿发票（B-24 整行进单）"
+  - "header 级关联字段 freight_statement_id / freight_operation_id 必须写入 account.move"
+  - "account.move 必须保持 draft，不触发过账/确认"
+  - "不建立 statement.line ↔ invoice.line 行级关联（B-38）"
+  - "不动 fee_state / freight.service 状态"
+
+acceptance_criteria:
+  functional:
+    - "draft/voided statement 不显示 Generate Draft Invoice 按钮；直接调用 action_generate_draft_invoice 被拦截"
+    - "confirmed statement 点击生成一张或多张草稿应收发票（按币种）"
+    - "发票行数量/单价/税额与 statement.line 快照一致，不从 freight.service 重算"
+    - "发票 header.freight_operation_id / freight_statement_id 正确"
+    - "重复点击幂等，返回已有发票，不重复创建"
+    - "生成后 statement.state=draft_invoice，发票 state=draft"
+  excluded:
+    - "开票申请/审批流"
+    - "发票过账/确认"
+    - "红字发票 / Credit Note"
+    - "部分开票 / 行级分批"
+    - "Statement Line ↔ Invoice Line 行级追溯"
+    - "confirmed 后原地修改费用/结算单"
+  non_regression:
+    - "B-24/B-38/B-41/B-42 口径不变"
+    - "statement 状态机与版本链不变"
+    - "fee_state 语义不变"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.83）"
+    - "verify.py 全部强制门禁 PASS（18 项）"
+    - "XML-RPC 模块升级验证通过"
+    - "odoo shell 断言：状态拦截/来源/幂等/header 关联"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    required_version: "0.1.83"
+    command: "context_loader.py"
+    expected: "PASS"
+    bind_version_must_match: true
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + button_immediate_upgrade 通过"
+    - "odoo shell 断言：draft/voided 拦截、confirmed 生成、快照来源、按币种、幂等、header 关联"
+  business_review:
+    - "业务负责人人工验收通过"
+  snapshot:
+    verify_gate_count: 18
+    note: "verify.py 18 项门禁为当前基线"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - business_rules
+    - knowledge_classification
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-5-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "Confirmed Statement 生成草稿发票流程按 invoice_contract 落地"
+  - "BR-70 ~ BR-72 登记并同步决策记录"
+  - "draft/voided 状态拦截、快照来源、按币种分组、幂等与 header 关联断言通过"
+  - "context_loader / verify 全部 PASS"
+
+deliverables:
+  - "Sprint4-5 意图契约（本文件）"
+  - "草稿发票生成流程的契约化硬化与验证记录"
+  - "BR-70 ~ BR-72 规则登记"
+
+audit:
+  intent_records: "执行完成后归档至 INT-FREIGHT-SPRINT4-5-001/"
+
+risk_precheck:
+  - "状态拦截回归：draft/voided 不可生成"
+  - "幂等回归：重复生成不重复建票"
+  - "account.move 标准行为不受影响"
+  - "禁止越界到 account / wizard / fee 层"

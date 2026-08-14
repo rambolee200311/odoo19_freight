@@ -224,3 +224,14 @@
 - write 守卫先处理重建命令，再处理删除/清空
 
 **验收**: context_loader 0.1.77 基线 PASS；verify.py 18/18 PASS；odoo shell 实测 4/4 PASS；待 human browser acceptance。
+
+## Sprint4-5-Generate-Draft-Invoice (2026-08-14)
+
+**目标**: 起草“Confirmed Statement → 生成草稿发票”契约；开票申请不开发（B-42 保持）。
+
+**成果**:
+- Intent 契约登记 B-70/B-71/B-72（状态来源、行来源、幂等）
+- BR-70 ~ BR-72 同步 business_rules.yaml
+- 现状 action_generate_draft_invoice 已实现基础流程，进入编码前按契约硬化
+
+**验收**: context_loader 0.1.83 基线 PASS；verify.py 18/18 PASS；待契约评审。
