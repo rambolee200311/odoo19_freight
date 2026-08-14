@@ -155,3 +155,52 @@
 - snapshot readonly 与 sequence 步进；占用唯一事实来源 fee_state（B-67/B-68）
 
 **验收**: context_loader 0.1.71 基线 PASS；verify.py 18/18 PASS；待编码后补充模块升级与运行时断言。
+
+## Sprint4-4-4-Lessons-Learned (2026-08-14)
+
+**目标**: 将 Sprint4-4-4 多轮返工复盘沉淀为可加载上下文资产。
+
+**成果**:
+- 新增 `history/lessons_learned.md` 独立复盘文档
+- `governance/test_lessons.yaml` 新增 TL-FREIGHT-006/007/008
+- 资产清单与版本基线同步（context 0.1.72）
+
+**验收**: context_loader 0.1.72 基线 PASS；verify.py 18/18 PASS。
+
+## Sprint4-4-4-Contract-V1.1-Review (2026-08-14)
+
+**目标**: 按独立评审意见对 Sprint4-4-4 契约做 V1.1 收口，形式化 wizard 生命周期。
+
+**成果**:
+- 生命周期四事件与选择态保留/重置语义
+- eligibility 三层模型与三态包含关系
+- customer 语义、service 绑定边界、并发锁/锁协议、事务原子性
+- 确定性排序、空选择/删除行行为、UI 验收策略
+
+**验收**: context_loader 0.1.73 基线 PASS；verify.py 18/18 PASS。
+
+## Sprint4-4-4-Contract-V2.0 (2026-08-14)
+
+**目标**: 按第二轮独立评审将 Sprint4-4-4 契约重写为“生命周期重构契约”，约束 Agent 不要以打补丁冒充重构。
+
+**成果**:
+- before/after 生命周期与四类事件
+- eligible/selectable/select 三态语义 + service_id 身份锚点
+- rebuild matrix + method responsibility
+- Phase 0 只读分析 / Phase 1 人审设计 / Phase 4 Refactor Review 门禁
+- 结构验收、禁止实现模式、生命周期专项测试
+
+**验收**: context_loader 0.1.74 基线 PASS；verify.py 18/18 PASS；待编码后执行 Phase 0~4。
+
+## Sprint4-4-4-Wizard-Refactor-Implementation (2026-08-14)
+
+**目标**: 按 V2.0 生命周期契约与 FRS 完成 wizard 重构（Phase 2 编码 + Phase 3 验证）。
+
+**成果**:
+- 单一 eligibility helper `_is_service_eligible`
+- 删除 name+qty+price 猜测恢复；service_id 创建即绑定
+- create/onchange 重建全选；普通 write 保留 select；结构性命令恢复权威集合
+- customer invariant / selectable 校验 / 锁后全量 eligibility 重校验
+- sequence 10 步进；snapshot 双层只读
+
+**验收**: context_loader 0.1.75 基线 PASS；verify.py 18/18 PASS；生命周期专项测试 7/7 PASS；待 human browser acceptance。

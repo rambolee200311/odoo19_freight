@@ -3,12 +3,63 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.71
+context_version: 0.1.75
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.75:
+    update_content: |
+      Sprint4-4-4 生命周期重构实施完成（决策66）：
+      - _is_service_eligible 单一 eligibility helper（selectable/eligible/generate 共用）
+      - 删除 name+qty+price 猜测恢复；缺失 service_id 明确报错
+      - create/onchange 重建且全选；普通 write 保留 select；结构性 line 命令恢复权威集合
+      - customer invariant、selected selectable 校验、FOR UPDATE 后全量 eligibility 重校验
+      - sequence 按确定性顺序 10/20/30 步进；tax_amount/settlement_rate 双层只读
+      - FRS（create_statement_wizar.md）纳入 Sprint4-4-4 编码依据
+      - 生命周期专项测试 7/7 PASS；verify.py 18/18
+    update_type: Sprint4-4-4 实施执行
+    effect_scope: intent_sprint4_4_4 + business + history + validation
+
+  0.1.74:
+    update_content: |
+      Sprint4-4-4 契约 V2.0 生命周期重构重写（决策65）：
+      - before/after 生命周期 + 四类生命周期事件
+      - eligible/selectable/select 三态正式语义与身份锚点
+      - service_id 创建即绑定，禁止 snapshot 反向恢复
+      - rebuild 矩阵与方法职责矩阵
+      - Phase 0 只读分析 / Phase 1 人审设计 / Phase 4 Refactor Review
+      - 结构验收、禁止实现模式、代码清理要求
+      - 生命周期专项测试与成功定义结构化
+      - bind/validation 统一 0.1.74
+    update_type: Sprint4-4-4 契约 V2.0 重写
+    effect_scope: intent_sprint4_4_4 + business + history
+
+  0.1.73:
+    update_content: |
+      Sprint4-4-4 契约按独立评审 V1.1 收口（决策64）：
+      - wizard 生命周期四事件：initial_create / ordinary_write /
+        customer_change / eligible_rebuild
+      - eligibility 三层模型 + selected ⊆ selectable ⊆ eligible
+      - customer_id=False 语义；service 绑定可重建/不可恢复边界
+      - 并发锁对象/时机/锁后全量重校验 + lock_protocol
+      - 生成事务原子性与 9 步顺序；确定性排序与 sequence=10 步进
+      - 空选择、删除行行为；UI 验收策略与 human browser acceptance
+      - bind/validation 统一 0.1.73
+    update_type: Sprint4-4-4 契约评审修订
+    effect_scope: intent_sprint4_4_4 + business + history
+
+  0.1.72:
+    update_content: |
+      Sprint4-4-4 复盘教训入库（决策63）：
+      - 新增 history/lessons_learned.md 独立复盘文档
+      - governance/test_lessons.yaml 新增 TL-FREIGHT-006~008
+        （真实 UI 验证纪律 / 行关联禁止猜测 / 修复纪律）
+      - cognition_asset_map / README 资产清单同步
+    update_type: Sprint4-4-4 复盘教训沉淀
+    effect_scope: history + governance + cognition
+
   0.1.71:
     update_content: |
       Sprint4-4-4 开放项确认（决策62，U-45 → B-69）：

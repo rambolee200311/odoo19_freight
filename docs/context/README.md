@@ -14,7 +14,7 @@ docs/context/
 ├── context_version.yaml         # 版本基线
 ├── architecture/                # 架构认知
 ├── business/                    # 业务铁律与财务口径
-├── history/                     # 决策、Bug、迭代记录
+├── history/                     # 决策、Bug、迭代、复盘教训记录
 ├── constraints/                 # 禁止变更清单
 ├── cognition/                   # 认知控制规则
 ├── governance/                  # 治理、风险、审计

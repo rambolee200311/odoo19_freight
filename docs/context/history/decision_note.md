@@ -428,3 +428,50 @@
 ### 决策62：Sprint4-4-4 开放项确认（U-45 → B-69）
 
 **决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-4-4-001` 开放项 U-45：打开向导时 eligible 费用行默认全部勾选（select=True），用户去勾不需要的费用；默认不勾选不采用。登记 B-69。契约 `decision_gate.status = satisfied`，可以进入编码。
+
+### 决策63：Sprint4-4-4 复盘教训入库
+
+**决策**: 将 Sprint4-4-4 wizard 多轮返工复盘沉淀为上下文资产：
+
+- 新增 `history/lessons_learned.md`：根因、主要错误、教训与修正动作。
+- `governance/test_lessons.yaml` 新增 TL-FREIGHT-006（真实 UI 验证纪律）、TL-FREIGHT-007（One2many 行关联禁止猜测恢复）、TL-FREIGHT-008（同症状第三次必须停止打补丁）。
+- `cognition_asset_map.md` 与 `README.md` 资产清单同步。
+
+### 决策64：Sprint4-4-4 契约按独立评审 V1.1 收口
+
+**决策**: 按独立评审意见修订 `INT-FREIGHT-SPRINT4-4-4-001`，把“状态何时重建/何时不重建”形式化：
+
+- `wizard_lifecycle_contract`：initial_create / ordinary_write / customer_change / eligible_rebuild 四类事件动作明确，普通 write 不重建、不重置 select。
+- `eligibility_model` + `selection_contract`：`_is_service_eligible(service, customer)` 为唯一事实来源，`selected ⊆ selectable ⊆ eligible`。
+- `customer_semantics`：`customer_id=False` 表示不指定客户，不报错；非空必须是本货单 shipper/consignee。
+- `service_binding_contract`：缺 `service_id` 仅允许按 authoritative eligible 重建，禁止 name+qty+price 猜测。
+- `concurrency_contract` + `lock_protocol`：锁 selected 实际费用行，锁后全量重校验；所有 fee_state 写路径必须同锁协议，未确认则 stop_and_escalate。
+- `generate_transaction` + `generate_statement_contract`：9 步原子顺序，任一步失败整体 rollback。
+- `eligible_ordering` + `sequence_contract`：确定性排序（当前以 service.id 升序），sequence=10,20,30…。
+- `selection_empty` / `line_collection_contract`：空选择报错；用户删除行被禁止并由服务端恢复。
+- `validation_policy`：static/runtime PASS 不等于 functional PASS，完成必须包含 human browser acceptance。
+- bind/validation 统一为 0.1.73。
+
+### 决策65：Sprint4-4-4 契约 V2.0 生命周期重构重写
+
+**决策**: 按第二轮独立评审重写 `INT-FREIGHT-SPRINT4-4-4-001`，从“业务需求契约”升级为“生命周期重构契约”：
+
+- 定义 `before/after` 生命周期与 initial_create / ordinary_write / customer_change / eligible_rebuild 四类事件。
+- 定义 eligible / selectable / select 三态正式语义，并明确 service_id 是 Wizard Line 业务身份锚点；snapshot 字段不承担身份恢复。
+- 新增 `rebuild_matrix` 与 `method_responsibility`，明确 write 不 rebuild、customer change 才 rebuild。
+- 新增 `coding_gate` 四阶段：Phase 0 只读分析（禁改文件）→ Phase 1 目标设计（人审）→ Phase 2 编码 → Phase 3 验证 → Phase 4 Refactor Review（人审）。
+- 新增 `refactor_acceptance`（结构验收）、`forbidden_implementation_patterns`、`code_cleanup`、`wizard_lifecycle_tests`、`refactor_review` 与结构化 `success_definition`。
+- 并发语义收紧：`concurrency_invariant` + `post_lock_validation`；customer invariant 服务端强制校验；Statement 创建只使用 wizard.line.service_id。
+- bind/validation 统一为 0.1.74。
+
+### 决策66：Sprint4-4-4 生命周期重构实施完成
+
+**决策**: 按 `INT-FREIGHT-SPRINT4-4-4-001` V2.0 契约与 `create_statement_wizar.md` 完成编码：
+
+- 新增 `_is_service_eligible(service, customer, shipment)` 单一 eligibility 权威，`_compute_selectable` / `_eligible_services_for` / generate 锁后校验全部复用。
+- 删除 `name+qty+price` 猜测恢复与 `toggle_select` 死代码；`service_id` 缺失明确报错。
+- 生命周期契约落地：create/onchange 重建并全选；普通 write 保留 select；结构性 line 命令恢复权威 eligible 集合。
+- generate 增加 customer invariant、selected selectable 校验、FOR UPDATE 后完整 eligibility 重校验。
+- `sequence` 按确定性排序 10/20/30 步进；`tax_amount/settlement_rate` 模型与视图双层只读。
+- FRS `create_statement_wizar.md` 纳入 Sprint4-4-4 编码依据。
+- 生命周期专项测试 7/7 PASS；verify.py 18/18。

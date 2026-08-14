@@ -24,12 +24,14 @@
 | `business/freight_rule.md` | 业务铁律与已确认口径 |
 | `business/finance_flow.md` | 财务单据流与核算口径 |
 | `business/business_debt_register.md` | 业务技术债摘要 |
+| `business/create_statement_wizar.md` | Create Statement Wizard 功能需求规格（Sprint4-4-4 编码依据） |
 | `business/knowledge_classification.md` | 事实/推测/未知知识分类 |
 | `business/business_rules.yaml` | 机器可读业务规则表（verify 对比器输入） |
 | `business/export_freight_coverage.md` | 现有功能 vs 出口货代业务覆盖矩阵 |
 | `business/reference/china_export_freight_forwarding_domain_model.md` | 中国出口货代行业 Domain Reference（REFERENCE_ONLY） |
 | `history/decision_note.md` | 架构与业务决策记录 |
 | `history/bug_record.md` | Bug 记录 |
+| `history/lessons_learned.md` | 跨迭代复盘教训（验证纪律/数据契约/修复纪律） |
 | `history/sprint_log.md` | 迭代日志 |
 | `history/sprint_snapshot.md` | 迭代快照 |
 | `constraints/forbidden_change.yaml` | 禁止变更清单 |
