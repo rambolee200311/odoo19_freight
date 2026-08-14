@@ -56,7 +56,10 @@ class FreightStatementWizardLine(models.TransientModel):
     def toggle_select(self):
         for line in self:
             line.select = not line.select
-        return True
+        for wizard in self.mapped('wizard_id'):
+            wizard.selected_service_ids = [(6, 0, wizard.line_ids.filtered(
+                'select').mapped('service_id').ids)]
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
 
 
 class FreightStatementWizard(models.TransientModel):
@@ -146,6 +149,7 @@ class FreightStatementWizard(models.TransientModel):
         commands = [(5, 0, 0)]
         for service in eligible.sorted('id'):
             vals = self._prepare_wizard_line(service)
+            vals['select'] = True
             commands.append((0, 0, vals))
         self.line_ids = commands
         if customer:

@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.67
+context_version: 0.1.68
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.68:
+    update_content: |
+      Sprint4-4-3 向导列表恢复行内勾选/取消（FIX-WIZARD-ROW-TOGGLE-001）：
+      - 费用列表行内 Select/Deselect 按钮，点击直接同步 selected_service_ids
+      - 列表恢复可见勾选状态，不再依赖 many2many_tags
+      - 默认打开全部费用已勾选；生成仍以 Many2many 真实费用为准
+      - 实测取消/恢复、仅选 800 元费用生成、混入空行不受影响
+    update_type: Sprint4-4-3 向导勾选交互修复
+    effect_scope: intent_sprint4_4_3 + validation
+
   0.1.67:
     update_content: |
       Sprint4-4-3 向导选择机制改为稳定 Many2many（FIX-WIZARD-SELECTION-M2M-001）：

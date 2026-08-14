@@ -520,3 +520,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "向导新增 selected_service_ids Many2many + many2many_tags 选择，line_ids 仅只读展示；生成直接读取 selected_service_ids，彻底摆脱网页端重建行丢失 service_id 的问题；实测仅选 fee2（800 元）生成 Statement draft、混入无 service_id 空行仍生成、未选费用报错、arch 无 checkbox/editable"
+
+  - contract_id: FIX-WIZARD-ROW-TOGGLE-001
+    sprint_name: 向导列表行内勾选恢复
+    context_baseline: "0.1.67"
+    execute_time: "2026-08-14"
+    test_category: "向导勾选交互修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line", "freight.statement"]
+    total_case_count: 6
+    pass_count: 6
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；button_immediate_upgrade PASS；odoo shell 6/6 PASS；arch 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "费用列表恢复行内 Select/Deselect 按钮并显示勾选状态；toggle_select 服务端同步 selected_service_ids 后 reload；默认 4 条全部勾选；取消 fee3 后 m2m=[2,35]，恢复后=[2,3,35]，仅选 fee2 生成 Statement draft、混入无 service_id 空行仍生成，void 后 fee 回 confirmed"
