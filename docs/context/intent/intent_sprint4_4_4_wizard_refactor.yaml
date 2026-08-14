@@ -1,6 +1,6 @@
 # ==============================================================
 # Intent: Sprint4-4-4 Create Statement 向导生命周期重构
-# 状态：起草（代码评审问题已收口；U-45 默认勾选态待业务确认）
+# 状态：已确认（U-45 → B-69，可进入编码）
 # 目标：修复 wizard 行数据生命周期不稳、选择状态与 eligible 脱节、
 #       service_id 猜测式恢复、锁后校验不完整等问题。
 # 注：本 Sprint 不新增业务口径，只把 Sprint4-4-2/4-4-3 已确认规则
@@ -15,7 +15,7 @@ title: "Create Statement 向导生命周期重构（行绑定、选择态、elig
 target_scope: "重构 freight.statement.wizard：wizard.line.service_id 从创建即稳定绑定；select 选择态在普通 write 中保留、仅在客户切换/eligible 重建时按契约重置；移除 name+qty+price 猜测式恢复；生成前校验 selectable 并在 FOR UPDATE 后全量重校验 eligible；customer_id 显式归属校验；eligibility 收口为单一 helper。不改变费用状态机、Statement 状态机、占用事实来源（fee_state 权威，Sprint4-4-2）"
 
 context_binding:
-  bind_context_version: "0.1.70"
+  bind_context_version: "0.1.71"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -69,6 +69,10 @@ business_intent:
       decision_ref: "Sprint4-4-4 起草（对齐 Sprint4-4-2）"
       decision_status: "CONFIRMED"
       statement: "费用被 Statement 占用的唯一事实来源是 fee_state；statement_line_ids/statement.state 仅作为状态迁移触发与防御，不构成第二套占用引擎"
+    - id: "B-69"
+      decision_ref: "U-45"
+      decision_status: "CONFIRMED"
+      statement: "打开向导时 eligible 费用行默认全部勾选（select=True），用户去勾不需要的费用；默认不勾选不采用"
   draft_scope:
     - "wizard.line.service_id 创建即绑定，禁止猜测恢复"
     - "create/onchange 生命周期与 select 保留语义"
@@ -80,19 +84,18 @@ business_intent:
   unresolved_unknowns: []
   confirmed_open_questions:
     - id: "U-45"
-      status: "OPEN"
-      decision_ref: "待确认 → B-69"
-      statement: "打开向导时 eligible 费用行默认勾选态：默认不勾选（用户显式选择，防误生成）或默认全部勾选（沿用 Sprint4-4-3）；确认前不进入编码"
+      status: "CONFIRMED"
+      decision_ref: "B-69"
+      statement: "打开向导时 eligible 费用行默认全部勾选（沿用 Sprint4-4-3），用户去勾不需要的费用"
 
 unknown_policy:
   unresolved_unknowns_allowed: true
   newly_discovered_unknown_action: "stop_and_escalate"
-  coding_gate: "U-45 确认后登记为 B-69 方可进入编码"
+  coding_gate: "U-45 → B-69 已确认（默认全选），无未决 UNKNOWN"
 
 decision_gate:
-  status: "blocked_by_unknown"
-  required_before_coding:
-    - "U-45 → B-69（默认勾选态）"
+  status: "satisfied"
+  required_before_coding: []
   mapping:
     - "U-45 -> B-69"
 
@@ -172,6 +175,7 @@ technical_constraints:
 
 acceptance_criteria:
   functional:
+    - "打开向导时 eligible 费用行默认全部勾选（B-69）"
     - "打开向导即绑定 eligible 行，service_id 全部非空"
     - "模拟客户端提交缺 service_id 空行命令后，服务端重建为完整 eligible 行"
     - "用户只勾选 800 元场站费生成成功，且不会残留其他客户费用（如 CAT320D2）"
@@ -202,7 +206,7 @@ validation:
     - "odoo shell 断言：行绑定、选择保留、猜测移除、锁后全量校验、customer 校验、sequence"
     - "浏览器人工验证：原生 checkbox 可用"
   business_review:
-    - "U-45 默认勾选态确认后，业务负责人验收通过"
+    - "U-45 → B-69 已确认（默认全选），业务负责人验收通过"
   snapshot:
     verify_gate_count: 18
     note: "verify.py 18 项门禁为当前基线"
@@ -226,8 +230,7 @@ loop_policy:
 
 affected_assets:
   business:
-    - "B-61 ~ B-68 decision registration"
-    - "U-45 open question"
+    - "B-61 ~ B-69 decision registration"
   architecture: []
   governance: []
   history:

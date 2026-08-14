@@ -410,3 +410,21 @@
 - U-44 → B-57：canceled 费用不可恢复、不可编辑/删除，可通过复制为新 draft 继续使用。
 
 契约 `unresolved_unknowns` 清空，`decision_gate.status = satisfied`，可以进入编码。
+
+### 决策61：Sprint4-4-4 契约起草（向导生命周期重构）
+
+**决策**: 起草 `INT-FREIGHT-SPRINT4-4-4-001`（Sprint4-4-4-Wizard-Refactor），登记 B-61 ~ B-68：
+
+- B-61：`wizard.line.service_id` 创建即绑定，禁止 name+qty+price 猜测恢复。
+- B-62：create/onchange 强制行集合等于 eligible 且绑定 service_id；普通 write 保留用户 select。
+- B-63：生成前强制校验 `selectable`。
+- B-64：FOR UPDATE 行锁后全量重校验 eligible（fee_state / invoiced / 非 voided 占用 / 归属）。
+- B-65：`customer_id` 必须是当前 shipment 的 shipper/consignee 显式 invariant。
+- B-66：eligibility 收口为单一 helper，消除两套规则漂移。
+- B-67：`tax_amount/settlement_rate` 补 readonly，Statement Line `sequence` 按 10 步进。
+- B-68：费用占用唯一事实来源为 `fee_state`，statement 引用仅作迁移触发/防御。
+- 开放项 U-45：打开向导默认勾选态，确认后登记 B-69。
+
+### 决策62：Sprint4-4-4 开放项确认（U-45 → B-69）
+
+**决策**: 业务负责人确认 `INT-FREIGHT-SPRINT4-4-4-001` 开放项 U-45：打开向导时 eligible 费用行默认全部勾选（select=True），用户去勾不需要的费用；默认不勾选不采用。登记 B-69。契约 `decision_gate.status = satisfied`，可以进入编码。

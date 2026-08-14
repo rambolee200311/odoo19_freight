@@ -142,3 +142,16 @@
 - 未改费用/Statement 状态机与生成事务/并发保护
 
 **验收**: context_loader 0.1.65 基线 PASS；verify.py 全部强制门禁 PASS；button_immediate_upgrade + 7/7 断言 + log clean PASS。
+
+## Sprint4-4-4-Wizard-Refactor (2026-08-14)
+
+**目标**: Create Statement 向导生命周期重构（行绑定、选择态、eligibility 单一引擎、锁后全量校验）。
+
+**成果**:
+- 契约起草：service_id 创建即绑定，禁止猜测式恢复（B-61）
+- create/onchange 生命周期与 select 保留/重置语义（B-62）；默认全部勾选（U-45 → B-69）
+- selectable 强制校验、FOR UPDATE 后全量 eligible 重校验（B-63/B-64）
+- customer_id 归属显式校验、eligibility 单一 helper（B-65/B-66）
+- snapshot readonly 与 sequence 步进；占用唯一事实来源 fee_state（B-67/B-68）
+
+**验收**: context_loader 0.1.71 基线 PASS；verify.py 18/18 PASS；待编码后补充模块升级与运行时断言。

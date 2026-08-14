@@ -3,12 +3,21 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.70
+context_version: 0.1.71
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.71:
+    update_content: |
+      Sprint4-4-4 开放项确认（决策62，U-45 → B-69）：
+      - 打开向导时 eligible 费用行默认全部勾选（select=True）
+      - 用户去勾不需要的费用；默认不勾选不采用
+      - decision_gate satisfied，可进入编码
+    update_type: Sprint4-4-4 开放项确认
+    effect_scope: intent_sprint4_4_4 + business + history
+
   0.1.70:
     update_content: |
       Sprint4-4-4 向导生命周期重构契约起草（决策61，B-61~B-68）：
