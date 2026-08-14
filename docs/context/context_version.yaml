@@ -3,12 +3,24 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.69
+context_version: 0.1.70
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.70:
+    update_content: |
+      Sprint4-4-4 向导生命周期重构契约起草（决策61，B-61~B-68）：
+      - service_id 创建即绑定，禁止 name+qty+price 猜测恢复
+      - create/onchange 生命周期与 select 保留/重置语义
+      - selectable 强制校验、FOR UPDATE 后全量 eligible 重校验
+      - customer_id 归属显式校验；eligibility 单一 helper
+      - snapshot readonly 与 sequence 步进；占用唯一事实来源 fee_state
+      - 开放项 U-45（默认勾选态）待确认，确认前不进入编码
+    update_type: Sprint4-4-4 Intent 起草
+    effect_scope: intent_sprint4_4_4 + business + history
+
   0.1.69:
     update_content: |
       Sprint4-4-3 向导 checkbox 根因修复（FIX-WIZARD-CHECKBOX-ROOTCAUSE-001）：

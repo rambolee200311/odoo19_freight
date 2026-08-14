@@ -1,0 +1,266 @@
+# ==============================================================
+# Intent: Sprint4-4-4 Create Statement 向导生命周期重构
+# 状态：起草（代码评审问题已收口；U-45 默认勾选态待业务确认）
+# 目标：修复 wizard 行数据生命周期不稳、选择状态与 eligible 脱节、
+#       service_id 猜测式恢复、锁后校验不完整等问题。
+# 注：本 Sprint 不新增业务口径，只把 Sprint4-4-2/4-4-3 已确认规则
+#     在 wizard 内收口为单一事实来源。
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-4-4-001"
+sprint_version: "Sprint4-4-4-Wizard-Refactor"
+intent_work_type: "Development"
+intent_change_type: "Lifecycle Refactor"
+title: "Create Statement 向导生命周期重构（行绑定、选择态、eligibility 单一引擎、锁后全量校验）"
+target_scope: "重构 freight.statement.wizard：wizard.line.service_id 从创建即稳定绑定；select 选择态在普通 write 中保留、仅在客户切换/eligible 重建时按契约重置；移除 name+qty+price 猜测式恢复；生成前校验 selectable 并在 FOR UPDATE 后全量重校验 eligible；customer_id 显式归属校验；eligibility 收口为单一 helper。不改变费用状态机、Statement 状态机、占用事实来源（fee_state 权威，Sprint4-4-2）"
+
+context_binding:
+  bind_context_version: "0.1.70"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "code_review_and_customer_demand"
+    origin_team: "业务负责人（用户）+ 独立代码评审"
+    confirmation_ref: "Sprint4-4-4 起草（评审 12 项逐条核实后收口）"
+  related_sprint:
+    - "INT-FREIGHT-SPRINT4-4-2-001"
+    - "INT-FREIGHT-SPRINT4-4-3-001"
+  related_decisions:
+    - "B-54"
+    - "B-55"
+    - "B-59"
+    - "B-60"
+  confirmed_decisions:
+    - id: "B-61"
+      decision_ref: "Sprint4-4-4 起草"
+      decision_status: "CONFIRMED"
+      statement: "wizard.line.service_id 必须从创建/eligible 重建时绑定真实 freight.service；禁止在业务层用 name+qty+price 猜测恢复 service_id，缺失关联时给出明确错误并要求重开向导"
+    - id: "B-62"
+      decision_ref: "Sprint4-4-4 起草"
+      decision_status: "CONFIRMED"
+      statement: "wizard 生命周期：服务端在 create/onchange 后强制行集合等于 eligible 集合且每行绑定 service_id；普通 write 保留用户 select 状态；仅客户切换或 eligible 重建时按契约重置"
+    - id: "B-63"
+      decision_ref: "Sprint4-4-4 起草"
+      decision_status: "CONFIRMED"
+      statement: "selectable 必须生效：action_generate_statement 对 selected 行校验 selectable，不可选行被勾选时明确报错，不再仅靠 eligible 兜底"
+    - id: "B-64"
+      decision_ref: "Sprint4-4-4 起草"
+      decision_status: "CONFIRMED"
+      statement: "FOR UPDATE 行锁后必须全量重校验 eligible（fee_state、invoiced、非 voided Statement 占用、shipment/customer 归属），仅校验 fee_state 不充分"
+    - id: "B-65"
+      decision_ref: "Sprint4-4-4 起草"
+      decision_status: "CONFIRMED"
+      statement: "customer_id 必须是当前 shipment 的 shipper/consignee，作为显式 invariant 校验，与 customer_domain 视图约束一致"
+    - id: "B-66"
+      decision_ref: "Sprint4-4-4 起草"
+      decision_status: "CONFIRMED"
+      statement: "eligibility 收口为单一 helper（如 _is_service_eligible），_compute_selectable 与 _eligible_services_for 均调用同一事实来源，消除两套规则漂移"
+    - id: "B-67"
+      decision_ref: "Sprint4-4-4 起草"
+      decision_status: "CONFIRMED"
+      statement: "wizard snapshot 语义统一：tax_amount/settlement_rate 补 readonly；Statement Line sequence 按 10/20/30 步进，保证稳定显示顺序"
+    - id: "B-68"
+      decision_ref: "Sprint4-4-4 起草（对齐 Sprint4-4-2）"
+      decision_status: "CONFIRMED"
+      statement: "费用被 Statement 占用的唯一事实来源是 fee_state；statement_line_ids/statement.state 仅作为状态迁移触发与防御，不构成第二套占用引擎"
+  draft_scope:
+    - "wizard.line.service_id 创建即绑定，禁止猜测恢复"
+    - "create/onchange 生命周期与 select 保留语义"
+    - "selectable 生成前强制校验"
+    - "FOR UPDATE 后全量 eligible 重校验"
+    - "customer_id 归属显式校验"
+    - "eligibility 单一 helper"
+    - "snapshot 字段只读与 sequence 步进"
+  unresolved_unknowns: []
+  confirmed_open_questions:
+    - id: "U-45"
+      status: "OPEN"
+      decision_ref: "待确认 → B-69"
+      statement: "打开向导时 eligible 费用行默认勾选态：默认不勾选（用户显式选择，防误生成）或默认全部勾选（沿用 Sprint4-4-3）；确认前不进入编码"
+
+unknown_policy:
+  unresolved_unknowns_allowed: true
+  newly_discovered_unknown_action: "stop_and_escalate"
+  coding_gate: "U-45 确认后登记为 B-69 方可进入编码"
+
+decision_gate:
+  status: "blocked_by_unknown"
+  required_before_coding:
+    - "U-45 → B-69（默认勾选态）"
+  mapping:
+    - "U-45 -> B-69"
+
+scope:
+  allowed_files:
+    - "docs/context/intent/intent_sprint4_4_4_wizard_refactor.yaml"
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-4-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/models/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/views/menus.xml"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/business/business_rules.yaml"
+    - "mymodules/tk_freight/data/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  allowed_changes:
+    - "wizard line service_id 创建即绑定；移除 name+qty+price 猜测恢复"
+    - "create/onchange 生命周期：行集合=eligible、select 保留/重置语义"
+    - "action_generate_statement 增加 selectable 校验与锁后全量 eligible 重校验"
+    - "customer_id 归属显式校验"
+    - "eligibility 单一 helper（wizard 文件内收口）"
+    - "tax_amount/settlement_rate readonly；sequence 10 步进"
+    - "zh_CN.po 向导文案"
+  forbidden_changes:
+    - "修改 account 模块或官方 addons"
+    - "修改费用状态机 / fee_state / Statement 状态机"
+    - "修改 freight_statement.py / freight_statement.line 结构"
+    - "修改菜单、权限、报表、PDF、Controller、前端静态资源"
+    - "修改 business_rules.yaml 的占用事实来源口径"
+    - "新建 data XML"
+
+change_boundary:
+  functional_code:
+    - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
+    - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/business/knowledge_classification.md"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-4-001/"
+    - "docs/context/validation/test_exec_records.yaml"
+
+business_flow:
+  - "货单表单点击 Create Statement"
+  - "wizard 打开：货单只读；服务端按 eligible 重建行集合，每行绑定 service_id"
+  - "用户选择客户（可选），列表按客户 eligible 重建"
+  - "用户用原生 checkbox 勾选/去勾选费用行"
+  - "点击 Generate Statement：校验勾选行 selectable 与 customer 归属"
+  - "FOR UPDATE 行锁后全量重校验 eligible"
+  - "创建 Statement Draft，费用写回 used"
+
+technical_constraints:
+  - "line_ids 保持可编辑原生 checkbox 列表，service_id 为可见列（readonly）"
+  - "create()/onchange 重建行时保留客户端已提交且可绑定的 select 状态；客户切换按 B-60 重置"
+  - "禁止 name+qty+price 猜测 service_id；无 service_id 且无法绑定 → 明确 ValidationError"
+  - "生成前校验 selected.filtered(lambda x: not x.selectable) 为空"
+  - "锁后重跑 _eligible_services_for 等价条件，任一不满足即回滚报错"
+  - "customer_id 校验：为空或等于 shipment.shipper_id/consignee_id，否则报错"
+  - "_compute_selectable 与 _eligible_services_for 共用 _is_service_eligible(service, customer)"
+  - "tax_amount/settlement_rate readonly；Statement Line sequence=10*n"
+  - "占用唯一事实来源 fee_state（B-68），statement 引用仅作防御"
+
+acceptance_criteria:
+  functional:
+    - "打开向导即绑定 eligible 行，service_id 全部非空"
+    - "模拟客户端提交缺 service_id 空行命令后，服务端重建为完整 eligible 行"
+    - "用户只勾选 800 元场站费生成成功，且不会残留其他客户费用（如 CAT320D2）"
+    - "勾选不可选行（fee_state 变化/已占用）时给出明确错误"
+    - "customer_id 非本货单 shipper/consignee 时给出明确错误"
+    - "锁后 invoiced 或 active statement 状态变化被拦截"
+    - "tax_amount/settlement_rate 在视图中只读；sequence 为 10 步进"
+    - "无 service_id 且无法绑定的行：明确报错，不猜测"
+  non_regression:
+    - "B-54/B-55/B-59/B-60 相关规则不变"
+    - "Sprint4-4-2 并发行锁与 fee_state 占用写回保留"
+    - "原生 checkbox 列表不打开行表单、不产生空行"
+  validation:
+    - "context_loader.py 基线 PASS（bind 0.1.69）"
+    - "verify.py 全部强制门禁 PASS"
+    - "XML-RPC 模块升级验证通过"
+    - "业务负责人人工验收通过"
+
+validation:
+  context:
+    - "context_loader.py 基线 PASS"
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "Python/XML/Odoo19 兼容校验 PASS"
+  runtime:
+    - "常驻 Odoo + button_immediate_upgrade 通过"
+    - "odoo shell 断言：行绑定、选择保留、猜测移除、锁后全量校验、customer 校验、sequence"
+    - "浏览器人工验证：原生 checkbox 可用"
+  business_review:
+    - "U-45 默认勾选态确认后，业务负责人验收通过"
+  snapshot:
+    verify_gate_count: 18
+    note: "verify.py 18 项门禁为当前基线"
+
+loop_policy:
+  max_iteration: 5
+  retry_scope:
+    mode: "affected_asset_only"
+  scope_expansion:
+    allowed: false
+    require_human: true
+  stop_condition:
+    success:
+      - all_validation_pass
+      - human_accept
+    hard_stop:
+      - risk_block
+      - scope_violation
+      - forbidden_change
+      - new_unknown
+
+affected_assets:
+  business:
+    - "B-61 ~ B-68 decision registration"
+    - "U-45 open question"
+  architecture: []
+  governance: []
+  history:
+    - decision_note
+    - sprint_log
+
+execution_artifacts:
+  intent_records:
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-4-001/"
+  validation_records:
+    - "docs/context/validation/test_exec_records.yaml"
+  context_version:
+    - "docs/context/context_version.yaml"
+
+success_definition:
+  - "wizard 行生命周期稳定：service_id 创建即绑定，select 状态语义明确"
+  - "猜测式恢复移除；selectable、customer 归属、锁后全量校验生效"
+  - "eligibility 单一 helper，无两套规则漂移"
+  - "所有强制验证通过，业务负责人人工验收通过"
+
+deliverables:
+  - "wizard 生命周期与选择态重构"
+  - "selectable / customer / 锁后全量校验"
+  - "eligibility 单一 helper"
+  - "snapshot readonly 与 sequence 步进"
+  - "决策记录（B-61~B-68，U-45→B-69）与执行记录"
+
+audit:
+  intent_records: "docs/context/intent_records/INT-FREIGHT-SPRINT4-4-4-001/"
+
+risk_precheck:
+  - "forbidden_change.yaml 基线扫描"
+  - "verify.py 全部强制门禁"
+  - "Git diff scope check（scope.allowed_files / forbidden_paths）"
+  - "确认未改费用/Statement 状态机与占用事实来源"
+  - "确认移除 name+qty+price 猜测逻辑"
