@@ -92,5 +92,4 @@ tk_freight.access_booking_order_line_portal,access_booking_order_line_portal,tk_
 tk_freight.access_freight_statement,access_freight_statement,tk_freight.model_freight_statement,base.group_user,1,1,1,1
 tk_freight.access_freight_statement_line,access_freight_statement_line,tk_freight.model_freight_statement_line,base.group_user,1,1,1,1
 tk_freight.access_freight_statement_wizard,access_freight_statement_wizard,tk_freight.model_freight_statement_wizard,base.group_user,1,1,1,1
-tk_freight.access_freight_statement_wizard_line,access_freight_statement_wizard_line,tk_freight.model_freight_statement_wizard_line,base.group_user,1,1,1,1
 

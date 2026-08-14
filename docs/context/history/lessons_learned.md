@@ -43,7 +43,7 @@ Sprint4-4-3 及后续 wizard 修复连续多轮被业务负责人打回：用户
 
 同日下午最终修复改为**彻底放弃 One2many 行勾选**：
 
-- `freight.statement.wizard` 仅保留 `selected_service_ids`（`freight.service` Many2many）与 `eligible_service_domain` 计算域。
+- `freight.statement.wizard` 仅保留 `selected_service_ids`（`freight.service` Many2many）与 `eligible_service_domain` 计算域；视图使用原生 `many2many_checkboxes`，勾选列表直接写 Many2many，不经过 One2many。
 - 生成结算单直接读 `selected_service_ids`，用户选几条就生成几条。
 - 删除 `line_ids` 勾选、`write()` 命令守卫、`selectable` / `_rebuild_lines`。
 - 服务端实测：选客户 7 后只勾 `场站费 800`，生成 `STM/202608/0041` 仅 1 行；作废后费用回 `confirmed`。

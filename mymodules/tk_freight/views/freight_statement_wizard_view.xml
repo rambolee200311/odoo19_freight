@@ -21,7 +21,7 @@
                         <field name="customer_domain" invisible="1"/>
                         <field name="eligible_service_domain" invisible="1"/>
                         <field name="selected_service_ids" string="Selected Fees"
-                               widget="many2many_tags"
+                               widget="many2many_checkboxes"
                                domain="eligible_service_domain"
                                options="{'no_create': True, 'no_create_edit': True}"/>
                     </group>

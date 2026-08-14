@@ -165,6 +165,7 @@ scope:
     - "docs/context/README.md"
     - "mymodules/tk_freight/wizard/freight_statement_wizard.py"
     - "mymodules/tk_freight/views/freight_statement_wizard_view.xml"
+    - "mymodules/tk_freight/security/ir.model.access.csv"
     - "mymodules/tk_freight/i18n/zh_CN.po"
     - "docs/context/business/knowledge_classification.md"
     - "docs/context/history/decision_note.md"
@@ -176,6 +177,7 @@ scope:
     - "odoo/"
     - "addons/"
     - "mymodules/tk_freight/models/"
+    # EXCEPTION: ir.model.access.csv 仅允许删除 access_freight_statement_wizard_line
     - "mymodules/tk_freight/security/"
     - "mymodules/tk_freight/views/menus.xml"
     - "mymodules/tk_freight/__manifest__.py"

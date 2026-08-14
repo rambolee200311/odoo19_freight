@@ -2,7 +2,7 @@
 # 测试/开发教训（context_loader 风险注入输入）
 # ==============================================
 
-test_lessons_version: "0.1.1"
+test_lessons_version: "0.1.2"
 source_sprints: ["Sprint0"]
 
 rules:
@@ -67,5 +67,5 @@ rules:
     category: "wizard 选择机制"
     source: "Sprint4-4-4 Wizard 最终修复（2026-08-14）"
     problem: "One2many 瞬态行 checkbox 被网页端重建后选择状态与服务端脱节，write 命令守卫越叠越错"
-    rule: "wizard 多选直接使用 Many2many tags 挂在真实业务对象上；禁止用 One2many checkbox + write 命令守卫实现选择状态"
+    rule: "wizard 多选直接使用 Many2many 原生控件（many2many_tags / many2many_checkboxes）挂在真实业务对象上；禁止用 One2many checkbox + write 命令守卫实现选择状态"
     severity: "LEVEL2"

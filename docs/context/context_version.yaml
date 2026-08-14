@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.78
+context_version: 0.1.79
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-4-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.79:
+    update_content: |
+      Sprint4-4-4 Wizard 可见选择落地（TL-FREIGHT-009 细化）：
+      - selected_service_ids 视图改用 Odoo 19 原生 many2many_checkboxes
+        checkbox 列表，勾选直接写 Many2many，不经过 One2many/write 守卫
+      - 移除旧 freight.statement.wizard.line 模型的 security access 残留
+      - intent 范围同步 ir.model.access.csv（仅删除 wizard line 权限行）
+    update_type: Sprint4-4-4 可见选择实施
+    effect_scope: intent_sprint4_4_4 + wizard + security + governance
+
   0.1.78:
     update_content: |
       Sprint4-4-4 Wizard 最终修复复盘（TL-FREIGHT-009）：
