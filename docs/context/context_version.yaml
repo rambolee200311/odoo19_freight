@@ -3,12 +3,23 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.89
+context_version: 0.1.90
 update_time: 2026-08-14
 adapt_sprint: Sprint4-6-Output-Statement
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.90:
+    update_content: |
+      Sprint4-6 契约开放项确认（B-76 ~ B-80 / BR-76 ~ BR-80）：
+      - 输出结算单打印不分状态，voided 也可输出
+      - 关联运输信息取 statement.line.product_id.name
+      - 不新增公司英文名/传真字段；freight.statement 新增 forwarder_contact
+      - 收款账户读取 company_id.bank_ids 按币种分组
+      - 多币种按币种分组显示原币小计，RMB 总应收按 amount_total_company 汇总
+    update_type: Sprint4-6 契约开放项确认
+    effect_scope: intent_sprint4_6 + business + history
+
   0.1.89:
     update_content: |
       Sprint4-6 Intent 起草（输出结算单）：

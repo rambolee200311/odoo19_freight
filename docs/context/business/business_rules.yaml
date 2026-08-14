@@ -203,6 +203,31 @@ rules:
     status: CONFIRMED
     source: B-74
     statement: "state=draft_invoice 时 invoice_ids 必须非空；为空时 stop_and_escalate，不得静默返回成功"
+  - id: BR-76
+    category: report
+    status: CONFIRMED
+    source: B-76
+    statement: "输出结算单打印不分状态，draft / confirmed / draft_invoice / voided 均可输出"
+  - id: BR-77
+    category: report
+    status: CONFIRMED
+    source: B-77
+    statement: "费用明细首列“关联运输信息”默认取 statement.line.product_id.name"
+  - id: BR-78
+    category: report
+    status: CONFIRMED
+    source: B-78
+    statement: "不新增公司英文名称/传真字段，缺失时隐藏；freight.statement 新增 forwarder_contact 字段记录对接货代人员"
+  - id: BR-79
+    category: report
+    status: CONFIRMED
+    source: B-79
+    statement: "对公收款账户读取 statement.company_id.bank_ids，按币种分组展示"
+  - id: BR-80
+    category: finance
+    status: CONFIRMED
+    source: B-80
+    statement: "多币种按币种分组显示原币小计，同时显示 RMB 总应收；跨币种按 amount_total_company 换算本币（人民币）后直接相加"
 
 assumptions:
   - id: A-1

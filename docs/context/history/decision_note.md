@@ -556,3 +556,13 @@
 - 每个 Statement 版本独立打印；默认 draft / confirmed / draft_invoice 可输出，voided 禁止输出。
 - 对公收款账户默认读取 `company_id.bank_ids` 按币种分组；多币种默认分组展示并汇总 RMB。
 - 开放项 Q-S4-6-01 ~ Q-S4-6-05 待业务负责人确认后再进入编码。
+
+### 决策76：Sprint4-6 开放项确认（输出结算单口径定稿）
+
+**决策**: 业务负责人确认 Sprint4-6 五个开放项，契约升级为可编码版本：
+
+- B-76 / BR-76：输出结算单打印不分状态，draft / confirmed / draft_invoice / voided 均可输出。
+- B-77 / BR-77：费用明细首列“关联运输信息”默认取 `statement.line.product_id.name`。
+- B-78 / BR-78：不新增公司英文名称/传真字段，缺失时隐藏；`freight.statement` 新增 `forwarder_contact` 字段记录对接货代人员。
+- B-79 / BR-79：对公收款账户读取 `statement.company_id.bank_ids`，按币种分组展示。
+- B-80 / BR-80：多币种按币种分组显示原币小计，同时显示 RMB 总应收；跨币种按 `amount_total_company` 换算本币（人民币）后直接相加。

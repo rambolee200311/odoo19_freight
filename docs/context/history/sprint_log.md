@@ -261,3 +261,17 @@
 - 开放项 Q-S4-6-01 ~ Q-S4-6-05 待业务负责人确认后进入编码
 
 **验收**: context_loader 0.1.89 基线 PASS；verify.py 18/18 PASS；待契约评审与开放项确认。
+
+## Sprint4-6-Output-Statement-Confirmed (2026-08-14)
+
+**目标**: 按业务负责人确认将 Sprint4-6 契约开放项转为已确认口径（B-76 ~ B-80）。
+
+**成果**:
+- 打印不分状态：draft / confirmed / draft_invoice / voided 均可输出
+- 关联运输信息取 `statement.line.product_id.name`
+- 不新增公司英文名/传真字段；`freight.statement` 新增 `forwarder_contact`
+- 对公收款账户读取 `company_id.bank_ids` 按币种分组
+- 多币种按币种分组显示原币小计，RMB 总应收按 `amount_total_company` 汇总
+- BR-76 ~ BR-80 同步 business_rules.yaml
+
+**验收**: context_loader 0.1.90 基线 PASS；verify.py 18/18 PASS；契约已可进入编码。
