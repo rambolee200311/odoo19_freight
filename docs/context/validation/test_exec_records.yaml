@@ -571,3 +571,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "覆盖：身份绑定+默认全选、普通 write 保留 select 不重建、删除攻击恢复权威集合、客户切换重建全选、缺失 service_id 明确报错不猜测、非法 customer invariant、仅选 fee2 生成 sequence=10 且 void 后费用回 confirmed"
+
+  - contract_id: FIX-WIZARD-REBUILD-SELECT-001
+    sprint_name: Sprint4-4-4 网页端重建命令 select 保留
+    context_baseline: "0.1.75"
+    execute_time: "2026-08-14"
+    test_category: "生命周期修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line", "freight.statement"]
+    total_case_count: 2
+    pass_count: 2
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；odoo shell 实测 2/2 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "网页端保存勾选发送 (0,0,...) 重建行命令；write 守卫改为按 service_id 保留客户端 select 后对齐 eligible，仅删除/清空命令恢复全选；实测只勾 fee2 生成 1 行、删除攻击恢复 3 行全选"

@@ -204,3 +204,13 @@
 - sequence 10 步进；snapshot 双层只读
 
 **验收**: context_loader 0.1.75 基线 PASS；verify.py 18/18 PASS；生命周期专项测试 7/7 PASS；待 human browser acceptance。
+
+## Sprint4-4-4-Rebuild-Select-Fix (2026-08-14)
+
+**目标**: 修复网页端重建行命令导致 select 被重置为全选的问题。
+
+**成果**:
+- `write` 守卫区分重建命令与删除/清空命令
+- 重建命令按 service_id 保留客户端 select；删除/清空恢复权威集合
+
+**验收**: context_loader 0.1.76 基线 PASS；verify.py 18/18 PASS；odoo shell 实测 2/2 PASS；待 human browser acceptance。

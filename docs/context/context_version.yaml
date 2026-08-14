@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.75
+context_version: 0.1.76
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.76:
+    update_content: |
+      Sprint4-4-4 网页端重建命令 select 保留修复（决策67）：
+      - 网页端保存勾选时发送 (0,0,...) 重建行命令
+      - write 守卫改为：重建命令保留客户端 select（按 service_id 对齐），
+        仅删除/清空命令恢复权威集合
+      - 实测：只勾 800 元场站费生成 1 行；删除攻击恢复 3 行全选
+    update_type: Sprint4-4-4 实施修复
+    effect_scope: intent_sprint4_4_4 + history + validation
+
   0.1.75:
     update_content: |
       Sprint4-4-4 生命周期重构实施完成（决策66）：

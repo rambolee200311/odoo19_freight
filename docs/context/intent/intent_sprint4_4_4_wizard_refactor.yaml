@@ -28,7 +28,7 @@ core_refactor_goal:
   - "generate 是最终一致性边界"
 
 context_binding:
-  bind_context_version: "0.1.75"
+  bind_context_version: "0.1.76"
   asset_snapshot_profile: "development"
 
 context_policy:
