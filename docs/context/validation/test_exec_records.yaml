@@ -537,3 +537,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "费用列表恢复行内 Select/Deselect 按钮并显示勾选状态；toggle_select 服务端同步 selected_service_ids 后 reload；默认 4 条全部勾选；取消 fee3 后 m2m=[2,35]，恢复后=[2,3,35]，仅选 fee2 生成 Statement draft、混入无 service_id 空行仍生成，void 后 fee 回 confirmed"
+
+  - contract_id: FIX-WIZARD-CHECKBOX-ROOTCAUSE-001
+    sprint_name: 向导 checkbox 根因修复
+    context_baseline: "0.1.68"
+    execute_time: "2026-08-14"
+    test_category: "向导勾选根因修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line", "freight.statement"]
+    total_case_count: 3
+    pass_count: 3
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；button_immediate_upgrade PASS；odoo shell 3/3 PASS；arch 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "数据库定位到 wizard 72 selected_service_ids 残留 [1,2,3,35]（含 CAT320D2）而费用行被重建为无 service_id 空行；修复：删除 stale Many2many，勾选只以行 checkbox 为准，service_id 可见列保留关联，生成前按名称/数量/单价自动匹配；实测仅选 fee2 生成成功、重建行自动匹配成功、全空行明确报错"

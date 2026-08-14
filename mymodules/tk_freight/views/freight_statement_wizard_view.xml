@@ -19,15 +19,11 @@
                     </group>
                     <field name="eligibility_summary" readonly="1"/>
                     <field name="line_ids" nolabel="1" create="False" delete="False"
-                           readonly="1">
-                        <list string="Eligible Fees">
-                            <field name="select" string="Selected" widget="badge"/>
-                            <button name="toggle_select" type="object" string="Select"
-                                    class="btn-outline-primary" icon="fa-check"
-                                    invisible="select"/>
-                            <button name="toggle_select" type="object" string="Deselect"
-                                    class="btn-outline-danger" icon="fa-times"
-                                    invisible="not select"/>
+                           readonly="0">
+                        <list string="Eligible Fees" editable="bottom">
+                            <field name="select" string="Select" widget="checkbox"/>
+                            <field name="service_id" string="Freight Service"
+                                   readonly="1"/>
                             <field name="fee_state" string="Fee State" widget="badge"/>
                             <field name="sequence" string="Sequence"/>
                             <field name="service_type" string="Service To"/>

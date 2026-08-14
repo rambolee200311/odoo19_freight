@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.68
+context_version: 0.1.69
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.69:
+    update_content: |
+      Sprint4-4-3 向导 checkbox 根因修复（FIX-WIZARD-CHECKBOX-ROOTCAUSE-001）：
+      - 移除 stale 的 selected_service_ids Many2many，勾选状态只以费用行 checkbox 为准
+      - service_id 改为列表可见列，强制网页端保留费用关联
+      - 生成前对缺失费用关联的行按显示快照自动匹配 eligible freight.service
+      - 实测正常 checkbox、重建行自动匹配、全空行明确报错
+    update_type: Sprint4-4-3 向导 checkbox 根因修复
+    effect_scope: intent_sprint4_4_3 + validation
+
   0.1.68:
     update_content: |
       Sprint4-4-3 向导列表恢复行内勾选/取消（FIX-WIZARD-ROW-TOGGLE-001）：
