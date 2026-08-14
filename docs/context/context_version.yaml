@@ -3,12 +3,23 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.79
+context_version: 0.1.80
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-4-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.80:
+    update_content: |
+      Sprint4-4-4 Wizard 最终验收复盘（TL-FREIGHT-010）：
+      - 最终方案：One2many 表格 + 默认不勾选 + select_map 保留选择
+        + wizard_rebuild 上下文防递归
+      - 实测默认 4 行不选，勾选场站费 800 后重建保留，生成仅 1 行
+      - lessons_learned.md 第 8 节登记 4 种方案 / 11 次打回复盘
+      - 第 7 节 Many2many 方案标记为过渡方案并被替代
+    update_type: Sprint4-4-4 最终验收复盘
+    effect_scope: intent_sprint4_4_4 + history + governance
+
   0.1.79:
     update_content: |
       Sprint4-4-4 Wizard 可见选择落地（TL-FREIGHT-009 细化）：
