@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.66
+context_version: 0.1.67
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.67:
+    update_content: |
+      Sprint4-4-3 向导选择机制改为稳定 Many2many（FIX-WIZARD-SELECTION-M2M-001）：
+      - 放弃 One2many 瞬态行勾选，新增 selected_service_ids Many2many + tags 控件
+      - 生成直接读取 selected_service_ids，不再依赖 UI 重建的 line_ids
+      - 费用列表改为只读展示；eligible_service_ids 限定可选范围
+      - 实测仅选 800 元费用生成成功，混入空行不受影响，未选报错
+    update_type: Sprint4-4-3 向导选择机制修复
+    effect_scope: intent_sprint4_4_3 + validation
+
   0.1.66:
     update_content: |
       Sprint4-4-3 向导生成方法加固（FIX-WIZARD-GENERATE-ROBUST-001）：

@@ -18,10 +18,14 @@
                         </group>
                     </group>
                     <field name="eligibility_summary" readonly="1"/>
-                    <field name="line_ids" nolabel="1" create="False" delete="False">
-                        <list string="Selectable Services" editable="bottom">
-                            <field name="select" string="Select" widget="checkbox"/>
-                            <field name="service_id" column_invisible="True"/>
+                    <field name="selected_service_ids" string="Selected Fees"
+                           widget="many2many_tags"
+                           options="{'no_create': True, 'no_create_edit': True}"
+                           domain="[('id','in', eligible_service_ids)]"/>
+                    <field name="eligible_service_ids" invisible="1"/>
+                    <field name="line_ids" nolabel="1" create="False" delete="False"
+                           readonly="1">
+                        <list string="Eligible Fees">
                             <field name="fee_state" string="Fee State" widget="badge"/>
                             <field name="sequence" string="Sequence"/>
                             <field name="service_type" string="Service To"/>

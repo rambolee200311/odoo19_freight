@@ -70,10 +70,21 @@ class FreightStatementWizard(models.TransientModel):
         'res.partner', string='Customer',
         domain="['|',('shipper','=',True),('consignee','=',True)]")
     line_ids = fields.One2many('freight.statement.wizard.line', 'wizard_id',
-                               string='Selectable Services')
+                               string='Eligible Fees')
+    selected_service_ids = fields.Many2many(
+        'freight.service', string='Selected Fees')
+    eligible_service_ids = fields.Many2many(
+        'freight.service', string='Eligible Fee Ids',
+        compute='_compute_eligible_service_ids')
     eligibility_summary = fields.Text(string='Eligibility Summary', readonly=True)
     customer_domain = fields.Char(string='Customer Domain',
                                   compute='_compute_customer_domain')
+
+    @api.depends('shipment_id', 'customer_id')
+    def _compute_eligible_service_ids(self):
+        for rec in self:
+            rec.eligible_service_ids = rec._eligible_services_for(
+                rec.shipment_id, rec.customer_id)
 
     @api.depends('shipment_id.shipper_id', 'shipment_id.consignee_id')
     def _compute_customer_domain(self):
@@ -105,33 +116,36 @@ class FreightStatementWizard(models.TransientModel):
     def create(self, vals_list):
         records = super().create(vals_list)
         for rec in records:
-            if rec.shipment_id and not rec.line_ids:
-                rec._populate_lines(
-                    rec._eligible_services_for(rec.shipment_id, rec.customer_id),
-                    rec.customer_id)
+            if rec.shipment_id:
+                eligible = rec._eligible_services_for(
+                    rec.shipment_id, rec.customer_id)
+                rec._populate_lines(eligible, rec.customer_id)
+                rec.selected_service_ids = [(6, 0, eligible.ids)]
         return records
 
     @api.onchange('shipment_id')
     def _onchange_shipment_id(self):
         self.customer_id = False
-        self._populate_lines(
-            self._eligible_services_for(self.shipment_id, False), False)
+        eligible = self._eligible_services_for(self.shipment_id, False)
+        self._populate_lines(eligible, False)
+        self.selected_service_ids = [(6, 0, eligible.ids)]
 
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
         if not self.shipment_id:
             self.line_ids = [(5, 0, 0)]
+            self.selected_service_ids = [(5, 0, 0)]
             self.eligibility_summary = False
             return
-        self._populate_lines(
-            self._eligible_services_for(self.shipment_id, self.customer_id),
-            self.customer_id)
+        eligible = self._eligible_services_for(
+            self.shipment_id, self.customer_id)
+        self._populate_lines(eligible, self.customer_id)
+        self.selected_service_ids = [(6, 0, eligible.ids)]
 
     def _populate_lines(self, eligible, customer):
         commands = [(5, 0, 0)]
         for service in eligible.sorted('id'):
             vals = self._prepare_wizard_line(service)
-            vals['select'] = True
             commands.append((0, 0, vals))
         self.line_ids = commands
         if customer:
@@ -235,22 +249,17 @@ class FreightStatementWizard(models.TransientModel):
 
     def action_generate_statement(self):
         self.ensure_one()
-        selected = self.line_ids.filtered('select')
-        if not selected:
-            raise ValidationError(_('Please select at least one service line.'))
-        # The web client may submit transient rows that only carry the checkbox
-        # state (UI artifacts without a fee link). Only rows backed by a real
-        # freight.service record can be invoiced, so ignore the artifacts instead
-        # of failing the whole generation because of them.
-        valid_lines = selected.filtered(lambda line: line.service_id)
-        if not valid_lines:
+        services = self.selected_service_ids
+        if not services:
+            raise ValidationError(_('Please select at least one fee.'))
+        eligible = self._eligible_services_for(
+            self.shipment_id, self.customer_id)
+        not_eligible = services - eligible
+        if not_eligible:
             raise ValidationError(_(
-                'No selected fee row references a real freight service. Reopen '
-                'the statement wizard and select the fees again.'))
-        services = valid_lines.mapped('service_id')
-        sequence_by_service = {
-            line.service_id.id: line.sequence or 10 for line in valid_lines
-        }
+                'Fee(s) "%s" are no longer eligible for this statement. Refresh '
+                'the wizard and select the fees again.') % ', '.join(
+                    not_eligible.mapped('name')))
         missing_targets = []
         for service in services:
             if service.service_type == 'vendor':
@@ -306,7 +315,7 @@ class FreightStatementWizard(models.TransientModel):
             vals.update({
                 'statement_id': statement.id,
                 'freight_service_id': service.id,
-                'sequence': sequence_by_service.get(service.id, 10),
+                'sequence': 10,
             })
             line_vals.append(vals)
         self.env['freight.statement.line'].create(line_vals)

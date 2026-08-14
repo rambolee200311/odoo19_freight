@@ -503,3 +503,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "生成方法不再依赖瞬态 wizard 行的 service_id 快照：忽略 UI 重建的空行（仅勾选状态），按真实 freight.service 重新取数生成 statement line；列表隐藏列保留 service_id 防止客户端重建丢关联；实测正常生成（2/3/35）、混入空行仍生成、全空行给出明确 ValidationError"
+
+  - contract_id: FIX-WIZARD-SELECTION-M2M-001
+    sprint_name: 向导选择机制 Many2many 化
+    context_baseline: "0.1.66"
+    execute_time: "2026-08-14"
+    test_category: "向导选择机制修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line", "freight.statement"]
+    total_case_count: 4
+    pass_count: 4
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；button_immediate_upgrade PASS；odoo shell 4/4 PASS；arch 断言 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "向导新增 selected_service_ids Many2many + many2many_tags 选择，line_ids 仅只读展示；生成直接读取 selected_service_ids，彻底摆脱网页端重建行丢失 service_id 的问题；实测仅选 fee2（800 元）生成 Statement draft、混入无 service_id 空行仍生成、未选费用报错、arch 无 checkbox/editable"
