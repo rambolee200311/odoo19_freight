@@ -187,12 +187,22 @@ rules:
     category: finance
     status: CONFIRMED
     source: B-71
-    statement: "发票行来源为 Statement Line 快照，禁止从 freight.service 重新计算数量/单价/税额"
+    statement: "发票行来源为 Statement Line 快照，一条 Statement Line 原样生成一条 Invoice Line（不拆分/不合并/不重算）；税按 tax_code 优先映射 account.tax，映射失败 stop，禁止本 Sprint 自动含税回退，禁止从 freight.service 重新计算"
   - id: BR-72
     category: process
     status: CONFIRMED
     source: B-72
-    statement: "草稿发票生成幂等，同一 Confirmed Statement 重复操作返回已有草稿发票"
+    statement: "freight.statement.invoice_ids 是草稿发票生成结果唯一持久化引用；全部发票创建成功后才写入，重复操作直接返回该字段"
+  - id: BR-73
+    category: process
+    status: CONFIRMED
+    source: B-73
+    statement: "同一 Statement 的草稿发票生成必须行锁串行；后获得锁的请求重新读取 state/invoice_ids 后直接返回已有结果"
+  - id: BR-74
+    category: finance
+    status: CONFIRMED
+    source: B-74
+    statement: "state=draft_invoice 时 invoice_ids 必须非空；为空时 stop_and_escalate，不得静默返回成功"
 
 assumptions:
   - id: A-1

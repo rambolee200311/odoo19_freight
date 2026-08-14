@@ -500,3 +500,34 @@
 - B-71：发票行来源为 Statement Line → account.move.line，禁止从 freight.service 重新计算数量/单价/税额。
 - B-72：草稿发票生成幂等，同一 Confirmed Statement 重复操作返回已有草稿发票，不重复创建。
 - 现状 `action_generate_draft_invoice` 已具备基础实现，本 Sprint 按契约固化来源、状态拦截与幂等并补验证。
+
+### 决策70：Sprint4-5 契约按独立评审修订
+
+**决策**: 独立评审通过主链路，要求先钉死两个契约矛盾后进入编码：
+
+- B-72 落地为方案 A：`freight.statement.invoice_ids` 是本流程唯一持久化生成结果引用，全部发票创建成功后写入，重复调用直接返回该字段（`idempotency_contract`）。
+- B-71 补齐税映射：按 `(type_tax_use=sale, amount=tax_rate, company_id)` 查找 `account.tax`；`tax_amount` 与计算值一致则写 `tax_ids`，否则把 `amount_total` 折算进 `price_unit` 且不写 `tax_ids`（`tax_mapping_contract`）。
+- 明确 `partner_id=statement.customer_id`、`invoice.currency_id=statement.line.currency_id` 且不折算、`one statement.line → one invoice.line`。
+- 事务原子性：全部发票与 `invoice_ids` 写入成功后才 `statement.state → draft_invoice`；失败整体回滚，statement 保持 confirmed。
+- 返回动作：单张开表单，多张开列表/表单动作覆盖全部 invoice_ids。
+- 验收拆成服务端断言 + 浏览器验收，多币种必须真实浏览器验证。
+
+### 决策71：Sprint4-5 契约按第二轮评审修订（并发幂等与税映射收口）
+
+**决策**: 第二轮评审给出 9/10，编码前收口三个点：
+
+- B-73 并发幂等：生成入口先对 `freight.statement` 行锁（FOR UPDATE）再检查 `state/invoice_ids`；并发请求串行，后到请求重新读取并返回已有结果，禁止创建两套发票（`idempotency_concurrency`）。
+- 税映射改为 `tax_code` 优先定位 `account.tax`，`tax_rate/tax_amount` 仅作一致性校验；映射失败或 `qty=0` 时 `stop_and_escalate`，取消本 Sprint 自动含税回退（`tax_mapping_contract` 修订）。
+- B-74 不变量：`state=draft_invoice ⇒ invoice_ids 非空`；为空时 `stop_and_escalate`，不得静默返回成功（`idempotency_invariant`）。
+- 补 `state_ui_contract` 按钮/方法状态矩阵：confirmed 允许生成，draft_invoice 仅幂等返回，draft/voided 拒绝。
+
+### 决策72：Sprint4-5 实施完成（服务端断言通过）
+
+**决策**: 按契约在 `freight_statement.py` 完成最小硬化，服务端断言全部通过（事务回滚，无数据残留）：
+
+- 生成入口先 `SELECT ... FOR UPDATE` 锁 `freight.statement`，再检查 `state/invoice_ids`（B-73）。
+- `state=draft_invoice` 且 `invoice_ids` 为空 → `ValidationError`（B-74 不变量）。
+- `_prepare_invoice_line` 取消 tax-inclusive fallback：`qty=0`、税额快照不一致、`account.tax` 无法唯一映射均 `stop_and_escalate`。
+- 单张发票返回表单（`view_mode=form` + `res_id`），多张返回列表动作覆盖全部 `invoice_ids`。
+- 断言：draft/voided 拦截、单币种生成、幂等、不变量、多币种两单、qty=0 拦截全部 PASS。
+- 待业务负责人浏览器验收（多币种必测）。

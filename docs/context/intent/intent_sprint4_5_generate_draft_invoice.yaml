@@ -1,6 +1,6 @@
 # ==============================================================
 # Intent: Sprint4-5 Confirmed Statement 生成草稿发票
-# 状态：已起草（决策69，B-70/B-71/B-72 已确认，待评审后进入编码）
+# 状态：已按两轮评审修订（决策69/70/71，B-70~B-74 已确认，可进入编码）
 # 用户明确：开票申请暂不设置开发任务（B-42 保持）
 # ==============================================================
 
@@ -12,7 +12,7 @@ title: "Confirmed Statement 生成草稿发票（account.move draft）"
 target_scope: "从 Confirmed Statement 生成草稿应收发票（account.move，move_type=out_invoice，state=draft）。发票行必须来自 Statement Line 快照，禁止从 freight.service 重新计算；Draft / Voided Statement 禁止生成发票；重复生成必须幂等返回已有草稿发票。开票申请 / 审批流不在本 Sprint 开发（B-42 保持）"
 
 context_binding:
-  bind_context_version: "0.1.83"
+  bind_context_version: "0.1.86"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -24,7 +24,7 @@ business_intent:
   source:
     type: "customer_demand"
     origin_team: "业务负责人（用户）"
-    confirmation_ref: "Sprint4-5 起草（用户明确流程与来源原则）"
+    confirmation_ref: "Sprint4-5 起草 + 两轮独立评审（决策69/70/71）"
   confirmed_decisions:
     - id: "B-70"
       decision_ref: "决策69"
@@ -32,15 +32,25 @@ business_intent:
       statement: "发票必须来源于 Confirmed Statement；Draft / Voided Statement 禁止生成发票"
       rule_refs: ["BR-41", "BR-70"]
     - id: "B-71"
-      decision_ref: "决策69"
+      decision_ref: "决策69/70"
       decision_status: "CONFIRMED"
-      statement: "发票行来源为 Statement Line → account.move.line，禁止从 freight.service 重新计算数量/单价/税额"
-      rule_refs: ["BR-38", "BR-71"]
+      statement: "发票行来源为 Statement Line → account.move.line：一条 Statement Line 原样生成一条 Invoice Line，不拆分、不合并、不重算；税映射按 tax_mapping_contract 执行"
+      rule_refs: ["BR-38", "BR-71", "tax_mapping_contract"]
     - id: "B-72"
-      decision_ref: "决策69"
+      decision_ref: "决策69/70"
       decision_status: "CONFIRMED"
-      statement: "草稿发票生成幂等：同一 Confirmed Statement 重复操作返回已有草稿发票，不重复创建"
-      rule_refs: ["BR-38", "BR-41", "BR-72"]
+      statement: "freight.statement.invoice_ids 是本流程唯一持久化生成结果引用：全部发票创建成功后写入，重复调用直接返回该字段，不重复创建"
+      rule_refs: ["BR-38", "BR-41", "BR-72", "idempotency_contract"]
+    - id: "B-73"
+      decision_ref: "决策71"
+      decision_status: "CONFIRMED"
+      statement: "草稿发票生成并发幂等：同一 Statement 的生成动作必须串行；后获得锁的请求重新读取 state/invoice_ids 后直接返回已有结果"
+      rule_refs: ["BR-73", "idempotency_concurrency"]
+    - id: "B-74"
+      decision_ref: "决策71"
+      decision_status: "CONFIRMED"
+      statement: "不变量：state=draft_invoice ⇒ invoice_ids 非空；若为空则 stop_and_escalate，不得静默返回成功"
+      rule_refs: ["BR-74", "idempotency_invariant"]
   draft_scope:
     - "仅 confirmed 状态结算单提供 Generate Draft Invoice 入口"
     - "按 statement.line.currency_id 分组，每币种生成一张 out_invoice 草稿发票（B-24 整行进单）"
@@ -60,6 +70,8 @@ decision_gate:
   required_before_coding: []
   mapping:
     - "决策69 -> B-70 / B-71 / B-72"
+    - "决策70 -> 评审修订（幂等持久化、税映射、header/currency/行映射、事务原子性、返回动作、浏览器验收）"
+    - "决策71 -> B-73 / B-74（并发行锁、幂等不变量、tax_code 优先映射、取消本 Sprint 自动含税回退、按钮状态矩阵）"
 
 scope:
   allowed_files:
@@ -90,7 +102,7 @@ scope:
   allowed_changes:
     - "freight_statement.py：仅允许确认/硬化 action_generate_draft_invoice、_prepare_invoice_line 与状态拦截"
     - "freight_statement_view.xml：仅允许 Generate Draft Invoice 按钮可见性/文案调整"
-    - "business_rules.yaml：登记 BR-70~BR-72"
+    - "business_rules.yaml：登记 BR-70~BR-74"
   forbidden_changes:
     - "修改 account 模块或官方 addons"
     - "修改 freight.service / wizard / shipment 逻辑"
@@ -131,32 +143,128 @@ invoice_contract:
   invoice_state: "draft"
   line_source: "freight.statement.line snapshot"
   grouping: "by statement_line.currency_id"
-  header_link: ["freight_operation_id", "freight_statement_id"]
-  idempotency: "state=draft_invoice 时返回已有 invoice_ids"
   forbidden:
     - "从 freight.service 重算发票行"
     - "statement.line ↔ invoice.line 行级关联"
     - "过账/确认"
     - "开票申请/审批流"
 
+invoice_header_contract:
+  partner_id: "freight.statement.customer_id"
+  freight_statement_id: "source statement"
+  freight_operation_id: "source statement.freight_operation_id"
+  derivation_rule: "不得再从 shipment.shipper_id / consignee_id / freight.service 重新推导"
+
+currency_contract:
+  grouping_key: "statement.line.currency_id"
+  invoice_currency: "该组 statement.line 的 currency_id，直接写入 account.move.currency_id"
+  amount_source: "statement.line snapshot"
+  conversion: "none"
+  note: "禁止按 partner / company / journal 自动决定币种，禁止汇率折算"
+
+line_mapping:
+  rule: "one statement.line -> one account.move.line"
+  split: false
+  merge: false
+  recompute: false
+  snapshot_fields:
+    - "name"
+    - "qty"
+    - "price_unit"
+    - "tax_rate / tax_amount（按 tax_mapping_contract）"
+
+idempotency_contract:
+  source_of_existing_invoice_ids: "freight.statement.invoice_ids"
+  creation_rule: "invoice_ids 仅在全部发票记录成功创建后写入"
+  retry_rule: "statement.state=draft_invoice 时重复调用直接返回持久化的 invoice_ids"
+  partial_failure: "事务回滚，statement 保持 confirmed，不残留部分发票"
+
+idempotency_concurrency:
+  lock_resource: "freight.statement"
+  lock_timing: "在检查 state / invoice_ids 之前获取行锁（SELECT ... FOR UPDATE）"
+  serialized_scope: "同一 Statement 的草稿发票生成"
+  rule: "并发请求必须串行；后获得锁的请求重新读取 state/invoice_ids 后直接返回已有结果，禁止再创建"
+
+idempotency_invariant:
+  - "state=draft_invoice ⇒ invoice_ids 非空"
+  - "state=draft_invoice 且 invoice_ids 为空 ⇒ stop_and_escalate，不得静默返回成功"
+
+tax_mapping_contract:
+  source_fields: ["statement.line.tax_code", "statement.line.tax_name",
+                  "statement.line.tax_rate", "statement.line.tax_amount"]
+  tax_identity_rule: "优先以 statement.line.tax_code 作为稳定业务标识查找 account.tax；tax_rate/tax_amount 仅作一致性校验，不作为主要 lookup key"
+  tax_ids_rule: "若 tax_amount 与 amount_untaxed × tax_rate/100 一致且找到唯一匹配 tax，则写入 account.move.line.tax_ids"
+  tax_mapping_failure: "stop_and_escalate：明确报错提示税映射缺失，禁止本 Sprint 自动改成含税 price_unit"
+  recompute_forbidden: true
+  zero_qty: "stop_and_escalate：qty=0 时不得推导 price_unit"
+
+transaction_contract:
+  atomicity: true
+  success:
+    - "全部币种草稿发票创建成功"
+    - "invoice_ids 写入 freight.statement"
+    - "statement.state -> draft_invoice"
+  failure:
+    - "所有发票创建回滚"
+    - "statement 保持 confirmed"
+    - "不残留部分发票结果"
+
+draft_invoice_semantics:
+  meaning: "本 Statement 已成功完成草稿发票生成（整个事务成功），而非存在某一张草稿发票"
+  state_change_timing: "仅在全部发票与 invoice_ids 写入成功后一次性发生"
+  idempotency_gate: "state=draft_invoice 即表示生成结果已持久化，可直接返回 invoice_ids"
+
+state_ui_contract:
+  confirmed:
+    generate_button: true
+    direct_method: "allow generation"
+  draft_invoice:
+    generate_button: false
+    direct_method: "idempotent return only"
+  draft:
+    generate_button: false
+    direct_method: "reject"
+  voided:
+    generate_button: false
+    direct_method: "reject"
+
+return_contract:
+  one_invoice: "打开该发票表单（res_id=invoice.id）"
+  multiple_invoices: "打开包含全部生成发票的列表/表单动作（domain 覆盖 invoice_ids）"
+  forbidden: "不得随意返回第一张发票或空动作"
+
 technical_constraints:
   - "发票创建仅允许 state=confirmed 的 statement（action_generate_draft_invoice 方法级校验）"
-  - "state=draft_invoice 时重复动作直接返回 invoice_ids，不创建新发票"
+  - "幂等依据为 freight.statement.invoice_ids（B-72 方案 A）：state=draft_invoice 时直接返回该字段，不重新查询/不创建"
+  - "并发：生成入口必须先在检查 state/invoice_ids 前对 freight.statement 行锁（FOR UPDATE），后到请求串行并重新读取返回已有结果"
+  - "不变量：state=draft_invoice 且 invoice_ids 为空时 stop_and_escalate"
   - "发票行只读取 statement_line_ids（快照），禁止反向查询 freight.service 重算"
-  - "按币种分组，每个币种至多一张当前草稿发票（B-24 整行进单）"
-  - "header 级关联字段 freight_statement_id / freight_operation_id 必须写入 account.move"
+  - "按 statement.line.currency_id 分组，每币种一张草稿发票；invoice.currency_id 直接等于该组币种，禁止折算"
+  - "一条 Statement Line 原样生成一条 Invoice Line：不拆分、不合并、不重算"
+  - "header：partner_id=statement.customer_id；freight_statement_id / freight_operation_id 必须写入 account.move"
+  - "税映射按 tax_mapping_contract：tax_code 优先定位，tax_rate/tax_amount 一致性校验；映射失败或 qty=0 → stop_and_escalate"
+  - "事务原子性：任一张发票创建失败则全部回滚，statement 保持 confirmed，不进入 draft_invoice"
   - "account.move 必须保持 draft，不触发过账/确认"
   - "不建立 statement.line ↔ invoice.line 行级关联（B-38）"
   - "不动 fee_state / freight.service 状态"
 
 acceptance_criteria:
   functional:
-    - "draft/voided statement 不显示 Generate Draft Invoice 按钮；直接调用 action_generate_draft_invoice 被拦截"
-    - "confirmed statement 点击生成一张或多张草稿应收发票（按币种）"
-    - "发票行数量/单价/税额与 statement.line 快照一致，不从 freight.service 重算"
-    - "发票 header.freight_operation_id / freight_statement_id 正确"
-    - "重复点击幂等，返回已有发票，不重复创建"
-    - "生成后 statement.state=draft_invoice，发票 state=draft"
+    - "仅 confirmed Statement 显示 Generate Draft Invoice"
+    - "draft/draft_invoice/voided Statement UI 不显示入口；draft_invoice 直接调用仅幂等返回，draft/voided 直接调用被拒绝"
+    - "每条 Statement Line 原样生成一条 account.move.line，不拆分、不合并、不重算"
+    - "account.move.partner_id 来源为 Statement.customer_id"
+    - "account.move.currency_id 来源为对应 Statement Line currency_id"
+    - "不同 currency 的 Statement Lines 分别生成对应草稿发票"
+    - "所有 invoice 创建成功后 Statement.state 才变为 draft_invoice"
+    - "生成失败时事务回滚，Statement 保持 confirmed，不残留部分发票"
+    - "重复生成返回原有 invoice_ids，不创建新 invoice"
+    - "并发两个请求同时生成：只创建一套发票，后到请求返回同一 invoice_ids"
+    - "state=draft_invoice 且 invoice_ids 为空：stop_and_escalate，不静默返回成功"
+    - "税映射缺失（tax_code 无法唯一定位 account.tax）：stop_and_escalate，不自动改成含税价格"
+    - "invoice.freight_statement_id / freight_operation_id 正确"
+    - "account.move.state=draft"
+    - "不修改 freight.service / fee_state"
   excluded:
     - "开票申请/审批流"
     - "发票过账/确认"
@@ -169,15 +277,15 @@ acceptance_criteria:
     - "statement 状态机与版本链不变"
     - "fee_state 语义不变"
   validation:
-    - "context_loader.py 基线 PASS（bind 0.1.83）"
+    - "context_loader.py 基线 PASS（bind 0.1.85）"
     - "verify.py 全部强制门禁 PASS（18 项）"
     - "XML-RPC 模块升级验证通过"
-    - "odoo shell 断言：状态拦截/来源/幂等/header 关联"
-    - "业务负责人人工验收通过"
+    - "服务端断言：draft/voided 拦截、confirmed 创建、快照来源、多币种、幂等、header 关联、事务回滚"
+    - "浏览器验收：Confirmed → 点击生成 → 查看发票客户/币种/行 → 返回 Statement → 重复点击幂等；多币种必须真实浏览器验证"
 
 validation:
   context:
-    required_version: "0.1.83"
+    required_version: "0.1.86"
     command: "context_loader.py"
     expected: "PASS"
     bind_version_must_match: true
@@ -186,8 +294,12 @@ validation:
   build:
     - "Python/XML/Odoo19 兼容校验 PASS"
   runtime:
-    - "常驻 Odoo + button_immediate_upgrade 通过"
-    - "odoo shell 断言：draft/voided 拦截、confirmed 生成、快照来源、按币种、幂等、header 关联"
+    server_side:
+      - "常驻 Odoo + button_immediate_upgrade 通过"
+      - "odoo shell 断言：draft/voided 拦截、confirmed 生成、Statement Line 来源、多币种、幂等、header 关联、事务回滚、并发串行（双请求仅一套发票）、draft_invoice⇒invoice_ids 非空"
+    browser:
+      - "Confirmed Statement → 点击 Generate Draft Invoice → 查看 Invoice → 检查客户/币种/每一行 → 返回 Statement → 再点击确认按钮状态"
+      - "多币种场景必须真实浏览器验证一次"
   business_review:
     - "业务负责人人工验收通过"
   snapshot:
@@ -230,21 +342,24 @@ execution_artifacts:
     - "docs/context/context_version.yaml"
 
 success_definition:
-  - "Confirmed Statement 生成草稿发票流程按 invoice_contract 落地"
-  - "BR-70 ~ BR-72 登记并同步决策记录"
-  - "draft/voided 状态拦截、快照来源、按币种分组、幂等与 header 关联断言通过"
+  - "Confirmed Statement 生成草稿发票流程按 invoice_contract + idempotency_contract + tax_mapping_contract 落地"
+  - "BR-70 ~ BR-74 登记并同步决策记录"
+  - "draft/voided 状态拦截、快照来源、行映射、税映射、按币种分组、事务原子性、并发幂等、不变量与 header 关联断言通过"
   - "context_loader / verify 全部 PASS"
 
 deliverables:
   - "Sprint4-5 意图契约（本文件）"
-  - "草稿发票生成流程的契约化硬化与验证记录"
-  - "BR-70 ~ BR-72 规则登记"
+  - "草稿发票生成流程的契约化硬化与验证记录（服务端 + 浏览器）"
+  - "BR-70 ~ BR-74 规则登记"
 
 audit:
   intent_records: "执行完成后归档至 INT-FREIGHT-SPRINT4-5-001/"
 
 risk_precheck:
   - "状态拦截回归：draft/voided 不可生成"
-  - "幂等回归：重复生成不重复建票"
+  - "幂等回归：invoice_ids 持久化后重复生成不重复建票"
+  - "并发回归：双请求串行，仅一套发票"
+  - "税映射回归：tax_code 优先定位，失败 stop，不自动含税回退"
+  - "多币种原子性：任一张失败全部回滚，statement 保持 confirmed"
   - "account.move 标准行为不受影响"
   - "禁止越界到 account / wizard / fee 层"

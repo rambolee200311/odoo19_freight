@@ -3,12 +3,43 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.83
+context_version: 0.1.86
 update_time: 2026-08-14
 adapt_sprint: Sprint4-5-Generate-Draft-Invoice
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.86:
+    update_content: |
+      Sprint4-5 实施完成（决策72）：
+      - freight_statement.py 最小硬化：FOR UPDATE 行锁并发幂等、
+        draft_invoice⇒invoice_ids 非空不变量、税映射失败即停、
+        单/多发票返回动作
+      - 服务端断言 7/7 PASS（全部事务回滚无残留）
+      - 待业务负责人浏览器验收（多币种必测）
+    update_type: Sprint4-5 实施执行
+    effect_scope: intent_sprint4_5 + business + history + validation
+
+  0.1.85:
+    update_content: |
+      Sprint4-5 契约按第二轮评审修订（决策71，B-73/B-74）：
+      - 并发幂等：freight.statement 行锁串行，后到请求返回已有 invoice_ids
+      - 税映射：tax_code 优先定位 account.tax，失败 stop，取消自动含税回退
+      - 不变量：draft_invoice ⇒ invoice_ids 非空
+      - 补 state_ui_contract 按钮/方法状态矩阵
+    update_type: Sprint4-5 契约第二轮评审修订
+    effect_scope: intent_sprint4_5 + business + history
+
+  0.1.84:
+    update_content: |
+      Sprint4-5 契约按独立评审修订（决策70）：
+      - B-72 落地为方案 A：freight.statement.invoice_ids 唯一持久化引用
+      - B-71 补齐 tax_mapping_contract（tax_ids / tax-inclusive price_unit）
+      - 明确 partner_id / currency / one line to one line / 事务原子性 / 返回动作
+      - 验收拆服务端断言 + 浏览器验收（多币种必测）
+    update_type: Sprint4-5 契约评审修订
+    effect_scope: intent_sprint4_5 + business + history
+
   0.1.83:
     update_content: |
       Sprint4-5 契约起草（决策69，B-70/B-71/B-72）：

@@ -216,21 +216,49 @@ class FreightStatement(models.Model):
             })
         return True
 
-    def _find_sale_tax(self, rate):
+    def _find_sale_tax(self, rate, name=False):
+        """Resolve the statement tax snapshot to a unique account.tax.
+
+        account.tax has no tax_code column, so statement.line.tax_code stays a
+        snapshot traceability value while account.tax is resolved by
+        tax_name/amount/company. A unique match is required (tax_mapping_contract).
+        """
         if not rate:
             return self.env['account.tax']
-        return self.env['account.tax'].sudo().search([
+        domain = [
             ('type_tax_use', '=', 'sale'),
             ('amount', '=', rate),
             ('company_id', '=', self.company_id.id),
-        ], limit=1)
+        ]
+        taxes = self.env['account.tax'].sudo().search(domain)
+        if name:
+            exact = taxes.filtered(lambda tax: tax.name == name)
+            if len(exact) == 1:
+                return exact
+        if len(taxes) == 1:
+            return taxes
+        return self.env['account.tax']
 
     def _prepare_invoice_line(self, line):
-        """Draft invoice line preserving the statement tax-adjusted total."""
-        base_price = line.amount_untaxed / line.qty if line.qty else line.price_unit
-        computed_tax = round(line.amount_untaxed * line.tax_rate / 100.0, 2)
-        tax = self._find_sale_tax(line.tax_rate)
-        if tax and round(line.tax_amount, 2) == computed_tax:
+        """Build one account.move.line from one statement.line snapshot."""
+        if not line.qty:
+            raise ValidationError(_(
+                'Cannot generate an invoice line for "%s": quantity is 0.') % line.name)
+        base_price = line.amount_untaxed / line.qty
+        tax_rate = line.tax_rate or 0.0
+        if tax_rate:
+            computed_tax = round(line.amount_untaxed * tax_rate / 100.0, 2)
+            if round(line.tax_amount or 0.0, 2) != computed_tax:
+                raise ValidationError(_(
+                    'Tax snapshot mismatch for "%s": expected tax %s but statement '
+                    'has %s. Fix the statement before generating invoices.') % (
+                        line.name, computed_tax, line.tax_amount or 0.0))
+            tax = self._find_sale_tax(tax_rate, line.tax_name)
+            if not tax:
+                raise ValidationError(_(
+                    'Cannot find account.tax for "%s" (rate %s%%). Add the tax '
+                    'mapping before generating the draft invoice.') % (
+                        line.name, tax_rate))
             return {
                 'product_id': line.product_id.id,
                 'name': line.name,
@@ -238,19 +266,30 @@ class FreightStatement(models.Model):
                 'price_unit': base_price,
                 'tax_ids': [(6, 0, tax.ids)],
             }
-        price_unit = line.amount_total / line.qty if line.qty else line.amount_total
         return {
             'product_id': line.product_id.id,
             'name': line.name,
             'quantity': line.qty,
-            'price_unit': price_unit,
+            'price_unit': base_price,
         }
 
     def action_generate_draft_invoice(self):
         """Generate one draft out_invoice per original currency (B-24 / B-38)."""
         self.ensure_one()
+        # B-73: serialize concurrent generation on the statement row before
+        # reading state/invoice_ids; the later request sees the committed result.
+        self.env.cr.execute(
+            'SELECT id FROM freight_statement WHERE id = %s FOR UPDATE',
+            [self.id],
+        )
+        self.invalidate_recordset(['state', 'invoice_ids'])
         if self.state == 'draft_invoice':
-            return self._invoice_action(self.invoice_ids)
+            if not self.invoice_ids:
+                raise ValidationError(_(
+                    'Statement %s is marked draft_invoice but has no linked draft '
+                    'invoices. Check the data before continuing.') % self.name)
+            return self._invoice_action(
+                self.invoice_ids, open_form=len(self.invoice_ids) == 1)
         if self.state != 'confirmed':
             raise ValidationError(_(
                 'Only confirmed statements can generate draft customer invoices.'))
@@ -284,13 +323,18 @@ class FreightStatement(models.Model):
                 'draft_invoice_date': fields.Datetime.now(),
                 'invoice_ids': [(4, invoice.id, 0) for invoice in invoices],
             })
-        return self._invoice_action(invoices)
+        return self._invoice_action(invoices, open_form=len(invoices) == 1)
 
-    def _invoice_action(self, invoices):
+    def _invoice_action(self, invoices, open_form=False):
         action = self.env['ir.actions.act_window']._for_xml_id(
             'account.action_move_out_invoice_type')
-        action['domain'] = [('id', 'in', invoices.ids)]
         action['context'] = {'create': False}
+        if open_form:
+            action['view_mode'] = 'form'
+            action['res_id'] = invoices.id
+            action['domain'] = []
+        else:
+            action['domain'] = [('id', 'in', invoices.ids)]
         return action
 
     def button_open_invoices(self):

@@ -227,11 +227,21 @@
 
 ## Sprint4-5-Generate-Draft-Invoice (2026-08-14)
 
-**目标**: 起草“Confirmed Statement → 生成草稿发票”契约；开票申请不开发（B-42 保持）。
+**目标**: 起草并经两轮评审修订“Confirmed Statement → 生成草稿发票”契约；开票申请不开发（B-42 保持）。
 
 **成果**:
 - Intent 契约登记 B-70/B-71/B-72（状态来源、行来源、幂等）
 - BR-70 ~ BR-72 同步 business_rules.yaml
 - 现状 action_generate_draft_invoice 已实现基础流程，进入编码前按契约硬化
+- 按独立评审（决策70）补 idempotency_contract / tax_mapping_contract /
+  invoice_header_contract / currency_contract / line_mapping /
+  transaction_contract / return_contract，验收拆服务端 + 浏览器
+- 按第二轮评审（决策71）补并发幂等（行锁串行）、tax_code 优先税映射并取消
+  自动含税回退、draft_invoice⇒invoice_ids 非空不变量、按钮状态矩阵；B-73/B-74
+- 实施完成（决策72）：freight_statement.py 最小硬化
+  （FOR UPDATE 行锁、不变量拦截、税映射失败即停、单/多发票返回动作）
+  - 服务端断言 7 组全 PASS（draft/voided 拦截、单币种、幂等、不变量、
+    多币种两单、qty=0 拦截），全部事务回滚无数据残留
+  - 待业务负责人浏览器验收（多币种必测）
 
-**验收**: context_loader 0.1.83 基线 PASS；verify.py 18/18 PASS；待契约评审。
+**验收**: context_loader 0.1.86 基线 PASS；verify.py 18/18 PASS；服务端断言 7/7 PASS；待 human browser acceptance。
