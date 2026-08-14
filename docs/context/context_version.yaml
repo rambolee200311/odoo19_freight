@@ -3,12 +3,21 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.80
+context_version: 0.1.81
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-4-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.81:
+    update_content: |
+      参考纪律入库（TL-FREIGHT-011）：
+      - 教训：8 小时耗时根因是未先查框架/项目内 wizard 参考
+      - 规则：实现不熟悉 UI 交互前先搜框架源码与已有实现，禁止凭假设打补丁
+      - lessons_learned.md 第 9 节登记参考纪律
+    update_type: 参考纪律复盘
+    effect_scope: history + governance
+
   0.1.80:
     update_content: |
       Sprint4-4-4 Wizard 最终验收复盘（TL-FREIGHT-010）：

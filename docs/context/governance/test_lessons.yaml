@@ -2,7 +2,7 @@
 # 测试/开发教训（context_loader 风险注入输入）
 # ==============================================
 
-test_lessons_version: "0.1.3"
+test_lessons_version: "0.1.4"
 source_sprints: ["Sprint0"]
 
 rules:
@@ -75,4 +75,11 @@ rules:
     source: "Sprint4-4-4 Wizard 最终复盘（2026-08-14）"
     problem: "wizard 多选在稳定（Many2many）与表格展示（One2many）之间反复横跳 4 种方案、11 次打回；只追求稳定牺牲了业务需要的表格列"
     rule: "变更 wizard 选择机制前必须先固化用户可见展示需求（列/勾选/默认态）与验收标准；保留 One2many 表格时重建必须用 select_map 显式保留选择，禁止猜测网页端命令"
+    severity: "LEVEL2"
+
+  - id: "TL-FREIGHT-011"
+    category: "先查参考再动手"
+    source: "Sprint4-4-4 Wizard 最终复盘（2026-08-14）"
+    problem: "wizard 实现卡了 8 小时，未先查阅框架源码与项目已有 wizard 参考（DeliveryOrderNewWizard、many2many_checkboxes），反复自造复杂方案"
+    rule: "实现不熟悉的 UI 交互（wizard/勾选/多选）前必须先搜索框架源码与项目内已有实现作为参考，再定机制；禁止直接凭假设写代码并在失败后继续打补丁"
     severity: "LEVEL2"
