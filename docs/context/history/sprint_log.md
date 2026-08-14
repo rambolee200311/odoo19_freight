@@ -214,3 +214,13 @@
 - 重建命令按 service_id 保留客户端 select；删除/清空恢复权威集合
 
 **验收**: context_loader 0.1.76 基线 PASS；verify.py 18/18 PASS；odoo shell 实测 2/2 PASS；待 human browser acceptance。
+
+## Sprint4-4-4-Rebuild-Recursion-Fix (2026-08-14)
+
+**目标**: 修复 `_rebuild_lines` 递归触发 write 守卫导致 select 被重置的根因。
+
+**成果**:
+- 重建赋值自带 `wizard_rebuild` 上下文
+- write 守卫先处理重建命令，再处理删除/清空
+
+**验收**: context_loader 0.1.77 基线 PASS；verify.py 18/18 PASS；odoo shell 实测 4/4 PASS；待 human browser acceptance。

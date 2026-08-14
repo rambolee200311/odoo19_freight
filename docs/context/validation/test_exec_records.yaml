@@ -588,3 +588,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "网页端保存勾选发送 (0,0,...) 重建行命令；write 守卫改为按 service_id 保留客户端 select 后对齐 eligible，仅删除/清空命令恢复全选；实测只勾 fee2 生成 1 行、删除攻击恢复 3 行全选"
+
+  - contract_id: FIX-WIZARD-REBUILD-RECURSION-001
+    sprint_name: Sprint4-4-4 重建递归触发 write 守卫修复
+    context_baseline: "0.1.76"
+    execute_time: "2026-08-14"
+    test_category: "生命周期修复"
+    test_target_models: ["freight.statement.wizard", "freight.statement.wizard.line", "freight.statement"]
+    total_case_count: 4
+    pass_count: 4
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；odoo shell 实测 4/4 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "根因：_rebuild_lines 的 (5,0,0) 重建赋值递归触发 write 守卫被当作用户清空；修复后重建赋值自带 wizard_rebuild 上下文、守卫先处理 (0,0,...) 重建；实测 onchange 保留 select、生成仅 fee2 1 行、网页端清空+重建保留状态、纯删除恢复 3 行全选"

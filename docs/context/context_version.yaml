@@ -3,12 +3,22 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.76
+context_version: 0.1.77
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-3-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.77:
+    update_content: |
+      Sprint4-4-4 重建递归触发 write 守卫根因修复（决策68）：
+      - _rebuild_lines 内部 (5,0,0) 重建赋值自带 wizard_rebuild 上下文
+      - write 守卫先处理 (0,0,...) 重建命令，再处理删除/清空
+      - 实测 onchange 保留 select、生成仅 1 行、
+        网页端 (5,0,0)+(0,0,...) 保留状态、纯删除恢复全选
+    update_type: Sprint4-4-4 实施修复
+    effect_scope: intent_sprint4_4_4 + history + validation
+
   0.1.76:
     update_content: |
       Sprint4-4-4 网页端重建命令 select 保留修复（决策67）：

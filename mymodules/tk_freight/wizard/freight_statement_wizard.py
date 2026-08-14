@@ -121,8 +121,32 @@ class FreightStatementWizard(models.TransientModel):
             return super().write(vals)
         if 'line_ids' in vals:
             codes = {cmd[0] for cmd in vals['line_ids']}
+            if codes & {0}:
+                # Web client rebuilds rows as create commands and its redraw may
+                # not reflect unchecked rows. Keep the last confirmed server-side
+                # selection and only apply explicit (1,...) select updates, then
+                # align the rows to the authoritative eligible set.
+                pre_map = {
+                    line.service_id.id: line.select
+                    for line in self.line_ids if line.service_id
+                }
+                res = super().write(vals)
+                for cmd in vals['line_ids']:
+                    if cmd[0] == 1 and cmd[2].get('select') is not None:
+                        line = self.env['freight.statement.wizard.line'].browse(
+                            cmd[1])
+                        if line.service_id:
+                            pre_map[line.service_id.id] = bool(cmd[2]['select'])
+                for rec in self:
+                    if rec.shipment_id:
+                        eligible = rec._eligible_services_for(
+                            rec.shipment_id, rec.customer_id)
+                        rec.with_context(wizard_rebuild=True)._rebuild_lines(
+                            eligible, rec.customer_id, select_map=pre_map)
+                return res
             if codes & {2, 3, 5, 6}:
-                # User cannot delete/clear rows; restore the authoritative set.
+                # User cannot delete/clear rows without a full rebuild; restore
+                # the authoritative eligible set.
                 res = super().write(vals)
                 for rec in self:
                     if rec.shipment_id:
@@ -131,29 +155,17 @@ class FreightStatementWizard(models.TransientModel):
                         rec.with_context(wizard_rebuild=True)._rebuild_lines(
                             eligible, rec.customer_id)
                 return res
-            if codes & {0}:
-                # Web client rebuilds rows as create commands. Preserve the
-                # client-submitted select state keyed by service_id, then align
-                # the rows to the authoritative eligible set.
-                res = super().write(vals)
-                for rec in self:
-                    if rec.shipment_id:
-                        eligible = rec._eligible_services_for(
-                            rec.shipment_id, rec.customer_id)
-                        select_map = {
-                            line.service_id.id: line.select
-                            for line in rec.line_ids if line.service_id
-                        }
-                        rec.with_context(wizard_rebuild=True)._rebuild_lines(
-                            eligible, rec.customer_id, select_map=select_map)
-                return res
         return super().write(vals)
 
     @api.onchange('shipment_id')
     def _onchange_shipment_id(self):
         self.customer_id = False
+        current_map = {
+            line.service_id.id: line.select
+            for line in self.line_ids if line.service_id
+        }
         eligible = self._eligible_services_for(self.shipment_id, False)
-        self._rebuild_lines(eligible, False)
+        self._rebuild_lines(eligible, False, select_map=current_map)
 
     @api.onchange('customer_id')
     def _onchange_customer_id(self):
@@ -161,20 +173,28 @@ class FreightStatementWizard(models.TransientModel):
             self.line_ids = [(5, 0, 0)]
             self.eligibility_summary = False
             return
+        current_map = {
+            line.service_id.id: line.select
+            for line in self.line_ids if line.service_id
+        }
         eligible = self._eligible_services_for(
             self.shipment_id, self.customer_id)
-        self._rebuild_lines(eligible, self.customer_id)
+        self._rebuild_lines(
+            eligible, self.customer_id, select_map=current_map)
 
-    def _rebuild_lines(self, eligible, customer, select_map=None):
+    def _rebuild_lines(self, eligible, customer, select_map=None,
+                       default_select=True):
         commands = [(5, 0, 0)]
         for service in eligible.sorted('id'):
             vals = self._prepare_wizard_line(service)
             if select_map is None:
                 vals['select'] = True
             else:
-                vals['select'] = select_map.get(service.id, False)
+                vals['select'] = select_map.get(service.id, default_select)
             commands.append((0, 0, vals))
-        self.line_ids = commands
+        # Rebuilding is an explicit lifecycle event; never let this assignment
+        # re-enter the write guard as a user clear/rebuild.
+        self.with_context(wizard_rebuild=True).line_ids = commands
         if customer:
             self.eligibility_summary = _(
                 'Eligible: %s / Listed: %s') % (len(eligible), len(eligible))
