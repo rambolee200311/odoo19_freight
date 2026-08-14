@@ -38,3 +38,14 @@ Sprint4-4-3 及后续 wizard 修复连续多轮被业务负责人打回：用户
 - Intent: `docs/context/intent/intent_sprint4_4_4_wizard_refactor.yaml`
 - 决策: `docs/context/history/decision_note.md`（决策61/62）
 - 教训规则: `docs/context/governance/test_lessons.yaml`
+
+## 7. 最终结论（2026-08-14 二次复盘）
+
+同日下午最终修复改为**彻底放弃 One2many 行勾选**：
+
+- `freight.statement.wizard` 仅保留 `selected_service_ids`（`freight.service` Many2many）与 `eligible_service_domain` 计算域。
+- 生成结算单直接读 `selected_service_ids`，用户选几条就生成几条。
+- 删除 `line_ids` 勾选、`write()` 命令守卫、`selectable` / `_rebuild_lines`。
+- 服务端实测：选客户 7 后只勾 `场站费 800`，生成 `STM/202608/0041` 仅 1 行；作废后费用回 `confirmed`。
+
+最终教训：wizard 多选状态必须直接挂在真实业务对象上（Many2many），不要在瞬态行 checkbox 上模拟选择状态，更不要写命令解析守卫去猜网页端行为。

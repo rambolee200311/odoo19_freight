@@ -3,12 +3,23 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.77
+context_version: 0.1.78
 update_time: 2026-08-14
-adapt_sprint: Sprint4-4-3-Wizard-Refactor
+adapt_sprint: Sprint4-4-4-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.78:
+    update_content: |
+      Sprint4-4-4 Wizard 最终修复复盘（TL-FREIGHT-009）：
+      - 彻底移除 One2many 行勾选与 write 命令守卫
+      - freight.statement.wizard 改为 selected_service_ids Many2many +
+        eligible_service_domain 计算域，生成直接读选中真实费用
+      - 服务端实测只选 800 元场站费生成 1 行；作废后费用回 confirmed
+      - lessons_learned.md 补最终结论；test_lessons.yaml 注入 TL-FREIGHT-009
+    update_type: Sprint4-4-4 最终修复复盘
+    effect_scope: intent_sprint4_4_4 + history + governance + validation
+
   0.1.77:
     update_content: |
       Sprint4-4-4 重建递归触发 write 守卫根因修复（决策68）：
