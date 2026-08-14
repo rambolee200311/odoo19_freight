@@ -249,3 +249,15 @@
   多张发票保持列表；服务端断言 PASS
 
 **验收**: context_loader 0.1.88 基线 PASS；verify.py 18/18 PASS；服务端断言 8/8 PASS；待 human browser acceptance。
+
+## Sprint4-6-Output-Statement (2026-08-14)
+
+**目标**: 起草“输出结算单”契约：freight.statement QWeb PDF 输出，还原应收对账单版式。
+
+**成果**:
+- Intent 契约 `INT-FREIGHT-SPRINT4-6-001` 登记
+- 以 `docs/reports/应收对账单原始单据.md` 为版式输入（B-27/BR-27）
+- 输出数据来源、版本独立、状态入口、收款账户、多币种、PDF 验收标准成文
+- 开放项 Q-S4-6-01 ~ Q-S4-6-05 待业务负责人确认后进入编码
+
+**验收**: context_loader 0.1.89 基线 PASS；verify.py 18/18 PASS；待契约评审与开放项确认。

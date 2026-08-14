@@ -546,3 +546,13 @@
 - 单张发票时 `views` 仅保留 `form` 视图，同时设置 `res_id` 与空 domain。
 - 多张发票保持列表动作（domain 覆盖全部 invoice_ids）。
 - 服务端断言：`view_mode=form`、`views=[(False,'form')]`、`res_id=invoice.id` PASS（事务回滚）。
+
+### 决策75：Sprint4-6 契约起草（输出结算单）
+
+**决策**: 业务负责人下达 Sprint4-6 起草任务，以 `docs/reports/应收对账单原始单据.md` 为版式输入（B-27 / BR-27），登记 `INT-FREIGHT-SPRINT4-6-001`：
+
+- 新增 `freight.statement` QWeb PDF 报表，还原“出口货代费用确认单（应收对账单）”版式。
+- 输出数据只读取 Statement / Statement Line 快照 + freight.shipment / company 档案，禁止从 freight.service 或 account.move 重算。
+- 每个 Statement 版本独立打印；默认 draft / confirmed / draft_invoice 可输出，voided 禁止输出。
+- 对公收款账户默认读取 `company_id.bank_ids` 按币种分组；多币种默认分组展示并汇总 RMB。
+- 开放项 Q-S4-6-01 ~ Q-S4-6-05 待业务负责人确认后再进入编码。

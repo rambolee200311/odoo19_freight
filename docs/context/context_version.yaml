@@ -3,12 +3,23 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.88
+context_version: 0.1.89
 update_time: 2026-08-14
-adapt_sprint: Sprint4-5-Generate-Draft-Invoice
+adapt_sprint: Sprint4-6-Output-Statement
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.89:
+    update_content: |
+      Sprint4-6 Intent 起草（输出结算单）：
+      - 以 docs/reports/应收对账单原始单据.md 为版式输入（B-27/BR-27）
+      - freight.statement QWeb PDF 输出，数据来源为 Statement/Statement Line 快照
+      - 版本独立打印；draft/confirmed/draft_invoice 默认可输出，voided 默认拦截
+      - 收款账户默认读取 company_id.bank_ids；多币种默认分组展示
+      - 开放项 Q-S4-6-01 ~ Q-S4-6-05 待业务负责人确认后进入编码
+    update_type: Sprint4-6 Intent 起草
+    effect_scope: intent_sprint4_6 + history
+
   0.1.88:
     update_content: |
       Sprint4-5 返回动作修复（决策74）：
