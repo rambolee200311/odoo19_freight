@@ -2,7 +2,7 @@
 # 测试/开发教训（context_loader 风险注入输入）
 # ==============================================
 
-test_lessons_version: "0.1.4"
+test_lessons_version: "0.1.5"
 source_sprints: ["Sprint0"]
 
 rules:
@@ -83,3 +83,41 @@ rules:
     problem: "wizard 实现卡了 8 小时，未先查阅框架源码与项目已有 wizard 参考（DeliveryOrderNewWizard、many2many_checkboxes），反复自造复杂方案"
     rule: "实现不熟悉的 UI 交互（wizard/勾选/多选）前必须先搜索框架源码与项目内已有实现作为参考，再定机制；禁止直接凭假设写代码并在失败后继续打补丁"
     severity: "LEVEL2"
+
+  # ==============================================
+  # 项目级 AI Coding Governance（通用规则，非 freight 专属）
+  # ==============================================
+  - id: "TL-001"
+    category: "AI Coding Governance"
+    source: "Wizard 8 小时复盘（2026-08-14）"
+    problem: "业务需求未先固化为 UI 契约，直接选择 One2many checkbox，随后在按钮/tags/checkboxes 之间反复横跳"
+    rule: "UI Contract First：先确定用户必须看到和操作什么，再选择技术机制"
+    severity: "LEVEL1"
+
+  - id: "TL-002"
+    category: "AI Coding Governance"
+    source: "Wizard 8 小时复盘（2026-08-14）"
+    problem: "未查项目已有 wizard 参考与框架原生控件，凭模型记忆假设 Odoo 行为"
+    rule: "Reference Before Coding：实现不熟悉的框架/UI 行为前，必须先搜索项目已有实现、框架源码或官方文档；禁止凭假设直接编码"
+    severity: "LEVEL1"
+
+  - id: "TL-003"
+    category: "AI Coding Governance"
+    source: "Wizard 8 小时复盘（2026-08-14）"
+    problem: "用 name+qty+price 等展示字段猜测 service_id 业务关联"
+    rule: "Business Object Is Source of Truth：Wizard 行只是 UI 投影，业务事实必须来自真实业务对象，禁止通过展示字段猜测业务关联"
+    severity: "LEVEL1"
+
+  - id: "TL-004"
+    category: "AI Coding Governance"
+    source: "Wizard 8 小时复盘（2026-08-14）"
+    problem: "反复以 odoo shell 服务端断言冒充浏览器/E2E 验证，声称测试通过后用户仍无法完成业务"
+    rule: "Validation Level Must Be Honest：Shell/ORM/API 验证不得冒充浏览器/E2E 验证；未完成真实用户操作不得宣称功能测试通过"
+    severity: "LEVEL1"
+
+  - id: "TL-005"
+    category: "AI Coding Governance"
+    source: "Wizard 8 小时复盘（2026-08-14）"
+    problem: "同一用户症状连续失败多次仍继续 patch，方向错误越修越完整"
+    rule: "Three Failures Trigger Re-analysis：同一症状连续失败三次必须停止 patch，重新检查 UI Contract、数据契约和框架机制"
+    severity: "LEVEL1"

@@ -28,7 +28,7 @@ core_refactor_goal:
   - "generate 是最终一致性边界"
 
 context_binding:
-  bind_context_version: "0.1.77"
+  bind_context_version: "0.1.82"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -740,7 +740,7 @@ acceptance_criteria:
 
 validation:
   context:
-    required_version: "0.1.74"
+    required_version: "0.1.82"
     command: "context_loader.py"
     expected: "PASS"
     bind_version_must_match: true

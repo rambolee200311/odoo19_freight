@@ -85,3 +85,53 @@ Sprint4-4-3 及后续 wizard 修复连续多轮被业务负责人打回：用户
 - 卡住后继续打补丁，而不是停下来查官方文档、社区示例或框架源码。
 
 规则（TL-FREIGHT-011）：实现不熟悉的 UI 交互前，必须先搜索框架源码与项目内已有实现作为参考，再定机制；禁止直接凭假设写代码并在失败后继续打补丁。
+
+## 10. AI Coding Governance（2026-08-14 最终治理版）
+
+这次 8 小时复盘的真正根因不是 One2many，而是**机制选择没有前置决策**：业务需求“用户看到费用表格、勾选几行、生成几行”没有先固化为 UI 契约，就直接选了 One2many checkbox，随后在按钮 / Many2many tags / Many2many checkboxes / One2many 之间反复横跳。
+
+AI 反模式：
+
+> AI 最危险的地方不是写错代码，而是可以非常高效地把一个错误的设计方向实现得越来越完整：每一轮代码都有逻辑、shell 断言都能通过、局部修复越来越严谨，但用户在浏览器里仍无法完成业务。
+
+通用开发顺序（UI Contract First）：
+
+1. 先确定用户看到什么。
+2. 查项目内已有实现。
+3. 查 Odoo 原生控件/源码。
+4. 确定状态应该挂在哪里。
+5. 再选择 ORM/UI 机制。
+6. 写最小实现。
+7. 浏览器真实操作验证。
+
+### 5 条项目级 AI Coding Governance 规则
+
+- `TL-001` UI Contract First：先确定用户必须看到和操作什么，再选择技术机制。
+- `TL-002` Reference Before Coding：实现不熟悉的框架/UI 行为前，必须先搜索项目已有实现、框架源码或官方文档；禁止凭假设直接编码。
+- `TL-003` Business Object Is Source of Truth：Wizard 行只是 UI 投影；业务事实必须来自真实业务对象，禁止通过 name/qty/price 等展示字段猜测业务关联。
+- `TL-004` Validation Level Must Be Honest：Shell/ORM/API 验证不得冒充浏览器/E2E 验证。未完成真实用户操作，不得宣称“功能测试通过”。
+- `TL-005` Three Failures Trigger Re-analysis：同一用户症状连续失败三次，必须停止继续 patch，重新检查 UI Contract、数据契约和框架机制。
+
+### 验证层级措辞
+
+| 验证层级 | 可声称的结论 |
+|---|---|
+| Python/static | 代码检查通过 |
+| odoo shell | 服务端逻辑验证通过 |
+| ORM 测试 | ORM 测试通过 |
+| HTTP/API | 接口验证通过 |
+| 浏览器操作 | UI 验证通过 |
+| 完整用户流程 | E2E 验收通过 |
+
+### Wizard 4 个核心契约（B-61~B-69 的简化版）
+
+1. 数据关联契约：`wizard.line.service_id` 必须直接指向 `freight.service`，禁止 name+qty+price 猜测恢复。
+2. UI 选择契约：用户勾选状态必须能跨 Wizard 行重建保持，`select_map` 负责该生命周期。
+3. Eligibility 契约：`_is_service_eligible()` 是唯一业务判断入口，列表、checkbox、Generate 不得各自定义资格。
+4. Generate 契约：UI 选择 → service IDs → 锁定真实 service → 重新 eligibility 校验 → 创建 statement。
+
+Wizard 设计核心原则：
+
+> Wizard line 是 UI 快照，不是真实业务事实。
+
+选择状态统一观（解决第 7/8 节表面矛盾）：选择状态必须脱离 One2many 瞬态行的重建生命周期，而不是必须使用 Many2many。最终角色分工：`service_id` = 真实对象关联；`select` = UI 状态；`select_map` = rebuild 时的状态迁移；`freight.service` = 业务事实；`fee_state` = 占用事实。

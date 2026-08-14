@@ -3,12 +3,24 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.81
+context_version: 0.1.82
 update_time: 2026-08-14
 adapt_sprint: Sprint4-4-4-Wizard-Refactor
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.82:
+    update_content: |
+      AI Coding Governance 升级（TL-001 ~ TL-005）：
+      - 复盘根因提升为“机制选择没有前置决策”，不再局限于 One2many
+      - 新增 5 条项目级通用规则：UI Contract First /
+        Reference Before Coding / Business Object Is Source of Truth /
+        Validation Level Must Be Honest / Three Failures Trigger Re-analysis
+      - lessons_learned.md 第 10 节登记开发顺序、验证层级措辞、
+        Wizard 4 核心契约与选择状态统一观
+    update_type: AI Coding Governance 规则升级
+    effect_scope: governance + history
+
   0.1.81:
     update_content: |
       参考纪律入库（TL-FREIGHT-011）：
