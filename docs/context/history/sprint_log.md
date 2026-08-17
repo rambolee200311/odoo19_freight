@@ -275,3 +275,19 @@
 - BR-76 ~ BR-80 同步 business_rules.yaml
 
 **验收**: context_loader 0.1.90 基线 PASS；verify.py 18/18 PASS；契约已可进入编码。
+
+## Sprint4-6-Contract-V1.1-Review (2026-08-17)
+
+**目标**: 按独立评审修订 Sprint4-6 输出结算单契约，钉死金额权威、Master Data 边界、冻结范围、运输模式判断、版式优先级和条款原文。
+
+**成果**:
+- `amount_contract`：`statement.amount_total` 为展示权威，line 汇总仅验证；不一致 `stop_and_report`
+- `data_source_contract`：拆分 `snapshot_sources` / `live_master_sources`
+- `forwarder_contact` 仅接入现有 `FROZEN_HEADER_FIELDS`，不改状态机
+- `transport_mode_contract`：按 `freight_operation_id.transport` 判断，禁止字段存在性猜测
+- `source_priority`：`source_doc` 为版式权威，`source_pdf` 为视觉参考
+- `terms_block.text_policy`：条款原文禁止改写
+- 清理 `confirmed_open_questions`；`unresolved_unknowns_allowed=false`
+- A4 验收改为禁止横向溢出 + 纵向自然分页 + 表头重复；版本独立验收强化为 V1 -> V2 -> 再打印 V1 快照一致
+
+**验收**: context_loader 0.1.91 基线 PASS；verify.py 18/18 PASS；待独立评审确认后进入编码。

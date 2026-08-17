@@ -566,3 +566,16 @@
 - B-78 / BR-78：不新增公司英文名称/传真字段，缺失时隐藏；`freight.statement` 新增 `forwarder_contact` 字段记录对接货代人员。
 - B-79 / BR-79：对公收款账户读取 `statement.company_id.bank_ids`，按币种分组展示。
 - B-80 / BR-80：多币种按币种分组显示原币小计，同时显示 RMB 总应收；跨币种按 `amount_total_company` 换算本币（人民币）后直接相加。
+
+### 决策77：Sprint4-6 契约按独立评审修订（V1.1）
+
+**决策**: 独立评审给出 9/10，要求修订 6 个关键点后进入编码：
+
+- `statement.amount_total` 为 PDF 展示权威，`sum(statement.line.amount_total_company)` 仅用于一致性验证；不一致时打印前 `stop_and_report`，报表不重算、不修正。
+- `bank_ids` / 公司 Logo / 联系方式属于 Company Master Data，不混称 Statement 快照；历史 Statement 重打可能展示当前公司账户。
+- `forwarder_contact` 仅新增字段并登记到现有 `FROZEN_HEADER_FIELDS`，不得修改状态机或扩大其他冻结字段语义。
+- 运输模式必须使用 `freight_operation_id.transport`，禁止通过 `vessel_id / airline_id / truck_ref` 是否存在猜测。
+- `source_doc` 为版式权威，`source_pdf` 仅作视觉参考。
+- 结算条款原文禁止润色、改写、翻译、纠错或自行补充。
+- 清理 `confirmed_open_questions` 语义重复；`unresolved_unknowns_allowed=false`。
+- A4 验收改为“禁止横向溢出 + 允许纵向自然分页 + 表头重复”；版本独立验收强化为 V1 打印 -> 生成 V2 -> 再打印 V1 与 V1 快照一致。

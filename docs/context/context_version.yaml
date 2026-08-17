@@ -3,12 +3,30 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.90
+context_version: 0.1.91
 update_time: 2026-08-14
 adapt_sprint: Sprint4-6-Output-Statement
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.91:
+    update_content: |
+      Sprint4-6 契约按独立评审修订（决策77，V1.1）：
+      - amount_contract：statement.amount_total 为展示权威，line 汇总仅验证；
+        不一致 stop_and_report，报表不重算、不修正
+      - data_source_contract：拆分 snapshot_sources / live_master_sources，
+        bank_ids / 公司联系方式明确为 Company Master Data
+      - forwarder_contact 仅接入现有 FROZEN_HEADER_FIELDS，不改状态机
+      - transport_mode_contract：按 freight_operation_id.transport 判断，
+        禁止字段存在性猜测
+      - source_priority：source_doc 为版式权威，source_pdf 为视觉参考
+      - terms_block.text_policy：条款原文禁止改写
+      - 清理 confirmed_open_questions；unresolved_unknowns_allowed=false
+      - A4 验收改为禁止横向溢出 + 纵向自然分页 + 表头重复
+      - 版本独立验收强化为 V1 -> V2 -> 再打印 V1 快照一致
+    update_type: Sprint4-6 契约独立评审修订
+    effect_scope: intent_sprint4_6 + history
+
   0.1.90:
     update_content: |
       Sprint4-6 契约开放项确认（B-76 ~ B-80 / BR-76 ~ BR-80）：
