@@ -1,27 +1,23 @@
 # ==============================================================
-# Intent: Sprint4-6 输出结算单（Customer Statement PDF/QWeb Output）
-# 状态：已确认（B-76 ~ B-80 + 独立评审修订 V1.1，可进入编码）
+# Intent: Sprint4-6 打印对账单（Statement PDF）
+# 状态：已确认（B-76 ~ B-83，可进入编码）
 # 核心定位：
-#   - 以 docs/reports/应收对账单原始单据.md 为版式输入（B-27 / BR-27）
-#   - freight.statement 为输出主对象，数据来源为 Statement / Statement Line 快照
-#   - 版本独立：每个 Statement 版本按自身快照打印，不默认取 current version
-#   - 本 Sprint 只做 PDF 输出，不实现邮件、portal、条款字段化等扩展
+#   - freight.statement -> QWeb -> PDF
+#   - 打印不改变任何业务状态，不涉及发票 / account.move / 开票流程
 # ==============================================================
 
 intent_id: "INT-FREIGHT-SPRINT4-6-001"
-sprint_version: "Sprint4-6-Output-Statement"
+sprint_version: "Sprint4-6-Print-Statement"
 intent_work_type: "Development"
-intent_change_type: "New Feature"
-title: "输出结算单（还原应收对账单 PDF/QWeb 版式）"
-target_scope: >
-  在 tk_freight 中新增 freight.statement 的 PDF/QWeb 报表输出，版式还原
-  docs/reports/应收对账单原始单据.md 的应收对账单（出口货代费用确认单）。
-  输出数据必须来自 freight.statement / freight.statement.line 快照及
-  freight.shipment / company 档案，禁止从 freight.service 或 account.move 重算；
-  支持按 Statement 版本独立打印，不修改结算单状态、费用状态或发票流程。
+intent_change_type: "Business Function"
+title: "Confirmed Statement 打印对账单"
+target_scope:
+  - "为 freight.statement 增加正式对账单打印功能"
+  - "打印内容来源于 Statement 及 Statement Line"
+  - "不涉及发票生成、account.move 或开票流程"
 
 context_binding:
-  bind_context_version: "0.1.91"
+  bind_context_version: "0.1.92"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -33,80 +29,52 @@ business_intent:
   source:
     type: "customer_demand"
     origin_team: "业务负责人（用户）"
-    confirmation_ref: "docs/reports/应收对账单原始单据.md（B-27/BR-27）+ Sprint4-6 起草指令"
   related_sprint:
     - "INT-FREIGHT-SPRINT4-001"
-    - "INT-FREIGHT-SPRINT4-5-001"
-  related_decisions:
-    - "B-23"
-    - "B-27"
-    - "B-31"
-    - "B-37"
-    - "B-38"
-    - "B-46"
-    - "B-70"
+  downstream_sprint:
+    - "未来 Sprint：客户确认后生成发票（不纳入本 Sprint）"
   confirmed_decisions:
     - id: "B-76"
-      decision_ref: "用户 2026-08-14 Sprint4-6 开放项确认"
       decision_status: "CONFIRMED"
-      statement: "输出结算单打印不分状态，draft / confirmed / draft_invoice / voided 均可输出"
+      statement: "四种 Statement 状态均可打印，打印不改变状态"
       rule_refs: ["BR-76"]
     - id: "B-77"
-      decision_ref: "用户 2026-08-14 Sprint4-6 开放项确认"
       decision_status: "CONFIRMED"
-      statement: "费用明细首列“关联运输信息”默认取 statement.line.product_id.name"
+      statement: "费用明细首列使用 statement.line.product_id.name"
       rule_refs: ["BR-77"]
     - id: "B-78"
-      decision_ref: "用户 2026-08-14 Sprint4-6 开放项确认"
       decision_status: "CONFIRMED"
-      statement: "不新增公司英文名称/传真字段，缺失时隐藏；freight.statement 新增 forwarder_contact 字段记录对接货代人员"
+      statement: "使用现有 Company 字段；新增 forwarder_contact，仅用于 Statement 抬头"
       rule_refs: ["BR-78"]
     - id: "B-79"
-      decision_ref: "用户 2026-08-14 Sprint4-6 开放项确认"
       decision_status: "CONFIRMED"
-      statement: "对公收款账户读取 statement.company_id.bank_ids，按币种分组展示"
+      statement: "收款账户来自当前 statement.company_id.bank_ids，按币种展示"
       rule_refs: ["BR-79"]
     - id: "B-80"
-      decision_ref: "用户 2026-08-14 Sprint4-6 开放项确认"
       decision_status: "CONFIRMED"
-      statement: "多币种按币种分组显示原币小计，同时显示 RMB 总应收；跨币种按 amount_total_company 换算本币（人民币）后直接相加"
+      statement: "多币种按原币分组；RMB 总应收直接使用 amount_total_company 汇总"
       rule_refs: ["BR-80"]
-  draft_scope:
-    - "新增 freight.statement QWeb PDF 报表（ir.actions.report，report_type=qweb-pdf）"
-    - "报表版式以应收对账单原始单据.md 的标题、公司信息、客户信息、单据元数据、费用明细、汇总、收款账户、结算条款、签章区为必现内容"
-    - "输出数据只读 Statement / Statement Line 快照，禁止从 freight.service 重算"
-    - "每个 Statement 版本独立可打印，打印当前打开/选中的版本"
-    - "报表入口为 Statement 表单 Print 按钮 + ir.actions.report 标准打印入口"
-    - "公司英文名称/传真缺失时隐藏；freight.statement 新增可选 forwarder_contact 字段记录对接货代人员"
-    - "对公收款账户读取 company_id.bank_ids；多币种按币种分组显示原币小计并汇总 RMB 总应收"
+    - id: "B-81"
+      decision_status: "CONFIRMED"
+      statement: "打印数据来自当前 Statement 自身及 Statement Line 快照，禁止从 freight.service / account.move 重算"
+      rule_refs: ["BR-81"]
+    - id: "B-82"
+      decision_status: "CONFIRMED"
+      statement: "Statement 版本独立打印，打印 V1 永远使用 V1 自身快照"
+      rule_refs: ["BR-82"]
+    - id: "B-83"
+      decision_status: "CONFIRMED"
+      statement: "statement.amount_total 与 line 汇总不一致时停止打印并报错"
+      rule_refs: ["BR-83"]
   unresolved_unknowns: []
 
 unknown_policy:
   unresolved_unknowns_allowed: false
   newly_discovered_unknown_action: "stop_and_escalate"
-  coding_gate: "Q-S4-6-01 ~ Q-S4-6-05 已确认（B-76 ~ B-80），可进入编码"
 
 decision_gate:
   status: "satisfied"
   required_before_coding: []
-  mapping:
-    - "B-27 -> 版式输入已确认（无需重复确认）"
-    - "Q-S4-6-01 -> B-76"
-    - "Q-S4-6-02 -> B-77"
-    - "Q-S4-6-03 -> B-78"
-    - "Q-S4-6-04 -> B-79"
-    - "Q-S4-6-05 -> B-80"
-
-review_revision:
-  reviewer: "independent review"
-  result: "9/10，修改后可以进入编码"
-  key_fixes:
-    - "amount_contract：statement.amount_total 为展示权威，line 汇总仅验证；不一致 stop_and_report"
-    - "data_source_contract：拆分 snapshot_sources 与 live_master_sources，bank_ids 明确为 Company Master Data"
-    - "forwarder_contact 仅接入现有 FROZEN_HEADER_FIELDS，不改状态机"
-    - "transport_mode_contract：按 freight_operation_id.transport 判断，禁止字段存在性猜测"
-    - "source_priority：source_doc 为版式权威，source_pdf 为视觉参考"
-    - "terms_block.text_policy：条款原文禁止改写"
 
 report_identity:
   report_name: "tk_freight.customer_statement_report"
@@ -114,256 +82,97 @@ report_identity:
   report_model: "freight.statement"
   report_type: "qweb-pdf"
   paper: "A4 Portrait"
-  document_title: "出口货代费用确认单（应收对账单）"
   source_doc: "docs/reports/应收对账单原始单据.md"
-  source_pdf: "docs/reports/应收对账单.pdf"
-  print_file_name: "'%s-对账单' % (object.name)"
-  version_independent: true
   source_priority:
     layout_authority: "source_doc"
-    visual_reference: "source_pdf"
-    rule: "结构、文字、栏目定义以 source_doc 为准；source_pdf 仅用于视觉比对，冲突时以 source_doc 为准"
-  layout_contract:
-    paper: "A4 Portrait"
+    visual_reference: "docs/reports/应收对账单.pdf"
+  layout:
     horizontal_overflow: "forbidden"
     vertical_overflow: "natural_pagination"
     repeated_table_header: true
 
 data_source_contract:
-  authoritative_object: "freight.statement"
-  snapshot_sources:
-    - "freight.statement"
-    - "freight.statement.line"
-  live_master_sources:
-    - "statement.company_id"
-    - "statement.company_id.bank_ids"
-    - "statement.company_id.logo"
-    - "statement.company_id.phone"
-    - "statement.company_id.email"
-    - "statement.company_id.company_details"
-    - "statement.company_id.report_header"
-  source_classification_rule: "历史 Statement 的费用、客户、金额、运输信息来自自身快照；公司 Logo、联系方式、银行账户属于当前 Company Master Data，不属于 Statement 财务快照"
-  forbidden_sources:
-    - "从 freight.service 重算行、数量、单价、税额或金额"
-    - "从 account.move / invoice_ids 重算对账单金额"
-    - "打印时用 current version 覆盖用户所选 statement 版本"
-    - "打印过程中 write / unlink statement、statement.line、freight.service、fee_state"
-  snapshot_rule: "打印内容只读取所选 Statement 自身及其 line 快照；缺失字段按展示规则处理，不触发 recompute"
+  statement_data:
+    source: "当前打印的 freight.statement / freight.statement.line"
+    rule: "费用、客户、金额、运输信息使用 Statement 自身数据"
+  company_data:
+    source: "statement.company_id 当前公司主数据"
+    fields:
+      - "name"
+      - "logo"
+      - "phone"
+      - "email"
+      - "bank_ids"
+    rule: "缺失时隐藏，不阻断打印"
+  forbidden:
+    - "从 freight.service 重算费用"
+    - "从 account.move 获取金额"
+    - "切换到 current version"
 
-section_contract:
-  company_header:
-    required: true
-    only_existing_fields: true
-    fields:
-      - label: "公司中文名称"
-        source: "statement.company_id.name"
-      - label: "Logo"
-        source: "statement.company_id.logo"
-      - label: "联系电话"
-        source: "statement.company_id.phone"
-      - label: "邮箱"
-        source: "statement.company_id.email"
-      - label: "可选补充信息"
-        source: "statement.company_id.company_details / report_header"
-    missing_policy: "缺失字段隐藏或留空，不阻断打印"
-    decision_refs: ["B-78"]
-    note: "company_details / report_header 使用 Odoo 现有 res.company 字段；不存在或为空时按 missing_policy 隐藏，不新增公司字段"
-  customer_block:
-    required: true
-    fields:
-      - label: "客户名称（付款方）"
-        source: "statement.customer_id.name"
-      - label: "对接货代人员"
-        source: "statement.forwarder_contact"
-    missing_policy: "customer_id 必填，缺失时打印前明确报错"
-    decision_refs: ["B-78"]
-  metadata_block:
-    required: true
-    document_type: "fixed：出口货代费用确认单（应收对账单）"
-    transport_mode_source: "freight_operation_id.transport"
-    transport_mode_rule: "必须使用正式业务字段 transport 选择字段组；禁止通过 vessel_id / airline_id / truck_ref 是否存在猜测运输模式"
-    fields:
-      - label: "制单日期"
-        source: "statement.settlement_date"
-        format: "YYYY-MM-DD"
-      - label: "内部工作号"
-        source: "freight_operation_id.name"
-      - label: "船名航次"
-        source: "ocean: vessel_id.name + ' / ' + voyage_no；air: airline_id.name + ' / ' + flight_no；land: truck_ref / trucker_number"
-        fallback: "空值显示 '-'"
-      - label: "提单号"
-        source: "ocean: bl_number 优先，否则 obl；air: mawb_no；land: truck_ref"
-        fallback: "空值显示 '-'"
-      - label: "开航日期"
-        source: "freight_operation_id.pickup_datetime 的日期"
-        note: "当前字段语义为 Estimate Pickup；如需独立开航日期字段，后续 Sprint 评估，本 Sprint 使用现有字段"
-        fallback: "空值隐藏或留空"
-  line_table:
-    required: true
-    columns:
-      - label: "关联运输信息"
-        source: "statement.line.product_id.name"
-        decision_refs: ["B-77"]
-      - label: "费用名称"
-        source: "statement.line.name"
-      - label: "结算币种"
-        source: "statement.line.currency_id"
-      - label: "单价/数量"
-        source: "statement.line.price_unit + ' / ' + statement.line.qty"
-      - label: "应收金额(RMB)"
-        source: "statement.line.amount_total_company"
-    row_rule: "一条 statement.line 输出一行；不拆分、不合并、不重算"
-    negative_rule: "负向费用以 -1,000.00 形式展示，禁止括号负数，不折行、不吞字符"
-  summary_block:
-    required: true
-    fields:
-      - label: "总应收金额"
-        source: "RMB: statement.amount_total（展示权威）；多币种同时展示 statement.currency_summary"
-      - label: "币种汇总"
-        source: "按 statement.line.currency_id 分组展示原币小计；RMB 总应收 = sum(amount_total_company)，跨币种换算本币（人民币）后直接相加"
-    decision_refs: ["B-80"]
-  bank_account_block:
-    required: false
-    source: "statement.company_id.bank_ids"
-    grouping: "按 currency_id 分组"
-    display: "开户行 bank_id.name；账号 acc_number；账户持有人 acc_holder_name"
-    missing_policy: "无账户时整区隐藏或留空，不阻断打印"
-    decision_refs: ["B-79"]
-    note: "bank_ids 属于 Company Master Data（live master source），不是 Statement 快照；历史 Statement 重打可能展示当前公司账户"
-  terms_block:
-    required: true
-    mode: "template_static"
-    source_text: "docs/reports/应收对账单原始单据.md 第四节 1-5"
-    text_policy:
-      source: "docs/reports/应收对账单原始单据.md"
-      modification: "forbidden"
-      rule: "条款文本不得润色、改写、翻译、纠错或自行补充"
-    rendering:
-      - "货物履约确认条款原样呈现"
-      - "账期约定：船舶开航后 5 个工作日内结清"
-      - "逾期按每日千分之三计收违约金"
-      - "单据留置权约定"
-      - "客户盖章与年月日签章区"
-    note: "条款字段化/存档不纳入本 Sprint"
+print_source:
+  header:
+    - "Statement No"
+    - "Customer"
+    - "Statement Date"
+    - "Freight Operation"
+  lines:
+    - "Description"
+    - "Quantity"
+    - "Unit Price"
+    - "Tax"
+    - "Amount"
+  totals:
+    - "Subtotal"
+    - "Tax"
+    - "Total"
 
 amount_contract:
-  statement_rmb_total:
-    source: "statement.amount_total"
-    display_authority: true
-  line_rmb_amount:
-    source: "statement.line.amount_total_company"
-    display_authority: true
-  consistency_check: true
+  display_total: "statement.amount_total"
+  validation_total: "sum(statement.line.amount_total_company)"
+  consistency_required: true
   inconsistency_action: "stop_and_report"
-  report_must_not_recalculate: true
-  rules:
-    - "statement.amount_total 必须等于 sum(statement.line.amount_total_company)"
-    - "报表只展示 statement 快照金额，不在 QWeb 内重算汇率或金额"
-    - "不一致属于数据完整性异常，打印前明确报错/停止，不得自行修正"
-    - "负费用格式为 -1,000.00，禁止括号负数"
-  original_currency_total: "statement.line.amount_total 按 currency_id 分组小计"
-  conversion: "不重算汇率；直接使用 statement.line 快照中的 settlement_rate 与 amount_total_company"
-  grouping: "按 currency_id 分组展示原币小计；RMB 总应收按 amount_total_company 汇总后直接相加"
+  qweb_calculation: "forbidden"
 
-bank_account_contract:
-  source: "statement.company_id.bank_ids"
-  filter: "active 银行账户"
-  grouping: "按 currency_id 分组"
-  display_fields:
-    - "bank_id.name"
-    - "acc_number"
-    - "acc_holder_name"
-  missing_policy: "无账户时隐藏或留空，不阻断打印"
-  forbidden: "本 Sprint 不新增 statement/客户级账户绑定字段"
-  note: "bank_ids 属于 Company Master Data，不是 Statement 快照；历史 Statement 重打可展示当前公司账户"
+forwarder_contact:
+  purpose: "仅用于结算单抬头展示"
+  type: "optional Char"
+  lifecycle: "draft 可编辑；确认后冻结"
+  not_used_for:
+    - "状态判断"
+    - "费用计算"
+    - "发票计算"
 
 transport_mode_contract:
   mode_field: "freight_operation_id.transport"
   mode_values: ["air", "ocean", "land"]
-  mapping:
-    ocean:
-      - "vessel_id.name + ' / ' + voyage_no"
-      - "bl_number 优先，否则 obl"
-    air:
-      - "airline_id.name + ' / ' + flight_no"
-      - "mawb_no"
-    land:
-      - "truck_ref / trucker_number"
-      - "truck_ref"
-  forbidden:
-    - "不得通过 vessel_id / airline_id / truck_ref 是否有值推断 transport"
-    - "不得在 QWeb 中自行判断业务场景，必须读取 freight_operation_id.transport"
+  rule: "必须使用正式字段 transport 选择字段组，禁止通过字段是否为空猜测"
+  mapping: "详见 report specification / source_doc"
 
-field_freeze_contract:
-  forwarder_contact:
-    field_scope: "仅新增 forwarder_contact 字段并登记到现有 FROZEN_HEADER_FIELDS"
-    freeze_timing: "draft 可编辑；voided / confirmed / draft_invoice 只读"
-    printing_side_effect: "打印只读取字段，不触发冻结或写回"
-    forbidden:
-      - "不得修改现有 Statement 状态机"
-      - "不得扩大其他既有冻结字段语义"
-      - "不得在打印时写 statement / statement.line / fee_state"
-
-company_master_field_contract:
-  use_only_existing_fields: true
-  fields:
-    - "statement.company_id.name"
-    - "statement.company_id.logo"
-    - "statement.company_id.phone"
-    - "statement.company_id.email"
-    - "statement.company_id.company_details"
-    - "statement.company_id.report_header"
-  missing_policy: "字段不存在或为空时隐藏，不新增公司字段"
-
-version_preservation_contract:
-  rule: "每次打印必须使用所选 statement 自身的 header 与 statement.line 快照"
-  acceptance_scenario:
-    - "打印 Statement V1"
-    - "生成/修改 Statement V2"
-    - "再次打印 Statement V1"
-    - "V1 PDF 内容必须与 V1 自身快照一致"
-  forbidden:
-    - "不得用 current version 覆盖历史版本"
-    - "不得在 V2 生成后回写 V1 快照"
-
-architecture_simplification:
-  implementation_shape: "freight.statement -> QWeb -> PDF"
-  python_changes_only:
-    - "forwarder_contact 字段"
-    - "action_print_statement 打印动作"
-  excluded_designs:
-    - "Report Wizard"
-    - "Report 参数模型"
-    - "Snapshot Report Model"
-    - "Report Service"
-    - "Python PDF 生成器"
-    - "独立银行账户快照模型"
-    - "Invoice 数据同步"
-    - "邮件发送 / Portal / 动态条款模型"
+terms_block:
+  mode: "template_static"
+  text_policy:
+    source: "docs/reports/应收对账单原始单据.md"
+    modification: "forbidden"
+    rule: "条款文本不得润色、改写、翻译、纠错或自行补充"
 
 print_entry_contract:
   canonical_entry: "action_print_statement"
-  form_button:
-    label: "输出结算单"
-    method: "freight.statement.action_print_statement"
-    state_visible: ["draft", "confirmed", "draft_invoice", "voided"]
-  report_binding: "ir.actions.report 仅作为 action_print_statement 触发的渲染动作，不提供绕过校验的独立打印入口"
-  voided_policy: "允许输出；打印不分状态"
-  direct_call: "action_print_statement 不按 state 拦截，任何状态均可返回报表；标准打印入口必须先执行 amount 一致性校验"
+  rules:
+    - "所有正式打印必须经过 action_print_statement"
+    - "打印前执行 amount consistency check"
+    - "校验失败不得生成 PDF"
+    - "打印不创建/修改任何业务数据"
+  state_ui:
+    draft: true
+    confirmed: true
+    draft_invoice: true
+    voided: true
 
-state_ui_contract:
-  draft:
-    print_button: true
-    report_action: true
-  confirmed:
-    print_button: true
-    report_action: true
-  draft_invoice:
-    print_button: true
-    report_action: true
-  voided:
-    print_button: true
-    report_action: true
+business_flow:
+  - "Confirmed Statement"
+  - "点击 Print Statement"
+  - "生成 Statement PDF"
+  - "用户查看/下载/打印"
 
 scope:
   allowed_files:
@@ -371,7 +180,7 @@ scope:
     - "mymodules/tk_freight/models/freight_statement.py"
     - "mymodules/tk_freight/views/freight_statement_view.xml"
     - "mymodules/tk_freight/__manifest__.py"
-    - "mymodules/tk_freight/report/customer_statement_report.xml"
+    - "mymodules/tk_freight/report/"
     - "mymodules/tk_freight/i18n/zh_CN.po"
     - "docs/context/business/business_rules.yaml"
     - "docs/context/history/decision_note.md"
@@ -390,23 +199,17 @@ scope:
     - "mymodules/tk_freight/models/freight_shipment.py"
     - "mymodules/tk_freight/models/freight_configuration.py"
     - "mymodules/tk_freight/views/menus.xml"
-  allowed_changes:
-    - "新增 report/customer_statement_report.xml（QWeb 模板 + ir.actions.report）"
-    - "manifest 仅注册新增 report XML"
-    - "freight_statement.py 新增 forwarder_contact 字段、action_print_statement 打印动作及冻结字段登记"
-    - "freight_statement_view.xml 新增输出结算单按钮与 forwarder_contact 展示"
-    - "zh_CN.po 新增报表/按钮/栏目中文文案"
-    - "business_rules.yaml 登记 BR-76 ~ BR-80"
-    - "Context 审计记录更新（decision_note / sprint_log / context_version）"
   forbidden_changes:
-    - "修改 account 模块或官方 addons"
-    - "修改结算单状态机、版本链、作废/确认/草稿发票逻辑"
-    - "修改 freight.service / fee_state / wizard / shipment 业务逻辑"
-    - "修改菜单、权限、security group / record rule"
-    - "新建 data XML 或修改 data/ 目录"
-    - "新增邮件模板、portal 页面、Controller 或前端静态资源"
-    - "使用 reportlab / 直连 SQL / 非 QWeb 报表机制"
-    - "打印时写回任何业务数据"
+    - "account.move"
+    - "account 模块"
+    - "freight.service 业务逻辑"
+    - "开票申请"
+    - "发票审批"
+    - "发票状态机"
+    - "自动过账"
+    - "新增 Invoice Line 关联"
+    - "修改 Statement 状态机/版本链"
+    - "修改 fee_state"
 
 change_boundary:
   functional_code:
@@ -424,73 +227,37 @@ change_boundary:
     - "docs/context/validation/test_exec_records.yaml"
 
 technical_constraints:
-  - "报表使用 Odoo QWeb PDF（ir.actions.report），模型为 freight.statement"
-  - "A4 Portrait；禁止横向溢出，允许纵向自然分页，多页时费用明细表头重复"
-  - "金额右对齐，数量/单价保留原字段精度，负费用显示 -1,000.00，禁止括号负数"
-  - "中文文本采用项目现有报表中文渲染链路，验收 PDF 时检查字体与乱码"
-  - "新增报表文件后在 manifest data 注册，不修改既有报表文件"
-  - "action_print_statement 先执行 amount 一致性校验，失败 stop_and_report；仅校验通过后返回 report_action，不允许创建/修改任何记录"
-  - "打印不分状态；draft / confirmed / draft_invoice / voided 均可输出"
-  - "多币种按 currency_id 分组显示原币小计；RMB 总应收按 amount_total_company 换算本币（人民币）后直接相加"
-  - "报表字段直接引用 statement / statement.line 快照，禁止反向读取 freight.service 计算"
-  - "打印所选 statement 记录自身，禁止跳转到 current version"
-  - "freight.statement.forwarder_contact 为可选 Char 字段；draft 可编辑，voided / confirmed / draft_invoice 只读并纳入 FROZEN_HEADER_FIELDS"
-  - "公司 Logo、联系方式、company_details / report_header、bank_ids 属于 Company Master Data，不作为 Statement 快照"
-  - "运输模式判断必须使用 freight_operation_id.transport，禁止通过字段是否为空猜测"
-  - "结算条款文本必须原样呈现，禁止润色、改写、翻译、纠错或自行补充"
-  - "仅使用现有 Company 字段；不存在或为空时隐藏，不新增公司字段"
-  - "不引入 Report Wizard / Report 参数模型 / Snapshot Report Model / Report Service / Python PDF 生成器"
+  - "QWeb PDF，模型 freight.statement"
+  - "A4；禁止横向溢出，允许纵向自然分页，表头重复"
+  - "打印仅产生 PDF，不创建/修改业务数据"
+  - "金额一致性校验在 action_print_statement 中执行，QWeb 不重算"
+  - "条款原文禁止改写"
+  - "不引入 Report Wizard / 独立 Snapshot Model / Python PDF 生成器 / 银行账户快照模型 / 邮件 / Portal"
 
 invariants:
   unchanged_business_behavior:
     - "statement 状态机与版本链不变"
     - "fee_state 语义与费用锁定不变"
-    - "草稿发票生成、幂等、税映射逻辑不变"
-    - "BR-23 / BR-27 / BR-35 / BR-38 / BR-70 口径不变"
+    - "既有 Statement 业务逻辑不变"
   unchanged_permissions:
     - "不修改既有 security group / record rule"
   forbidden_menu_changes: []
 
 acceptance_criteria:
-  functional:
-    - "Statement 表单存在“输出结算单”按钮，draft / confirmed / draft_invoice / voided 均可见"
-    - "输出 PDF 标题为“出口货代费用确认单（应收对账单）”"
-    - "公司名称/电话/邮箱/Logo、客户名称、statement.forwarder_contact、单据元数据按 section_contract 展示"
-    - "费用明细表逐行输出 statement.line 快照，不拆分、不合并、不重算"
-    - "费用明细首列“关联运输信息”展示 statement.line.product_id.name"
-    - "总应收金额展示 statement.amount_total；statement.amount_total 与 sum(amount_total_company) 不一致时打印前 stop_and_report"
-    - "跨币种按 amount_total_company 汇总本币（人民币）后直接相加"
-    - "对公收款账户按币种分组展示（有数据时），读取当前 Company Master Data bank_ids"
-    - "结算条款原文原样呈现，不得被 AI 改写；客户盖章/年月日签章区原样呈现"
-    - "voided Statement 同样可输出结算单"
-    - "打印所选版本，不使用 current version 覆盖"
-    - "打印过程不写 statement / statement.line / freight.service / fee_state"
-    - "运输模式由 freight_operation_id.transport 决定，不使用字段存在性猜测"
-    - "负费用格式为 -1,000.00，禁止括号负数"
-    - "A4 无横向溢出，内容多时纵向自然分页且表头重复"
-    - "历史 V1 打印后生成 V2，再打印 V1，V1 PDF 内容必须与 V1 自身快照一致"
-  excluded:
-    - "邮件发送对账单"
-    - "portal 客户自助查看/下载"
-    - "条款字段化/客户条款存档"
-    - "账户信息档案扩展（默认不新增字段）"
-    - "PDF 水印/审批签章"
-    - "Excel/CSV 输出"
-    - "无校验的独立报表入口（所有打印必须经 action_print_statement）"
-  non_regression:
-    - "既有报表、菜单、权限、wizard、invoice 流程不受影响"
-    - "结算单状态机与版本链不变"
-    - "BR-27 版式输入不变"
-  validation:
-    - "context_loader.py 基线 PASS（bind 0.1.91）"
-    - "verify.py 全部强制门禁 PASS（18 项）"
-    - "XML-RPC 模块升级验证通过"
-    - "PDF 渲染验收：A4、中文、表格、负数、多币种、分页表头"
-    - "浏览器验收：四状态均可打印、历史版本独立打印"
+  - "Confirmed Statement 显示 Print Statement"
+  - "点击后能够生成 PDF"
+  - "PDF 中 Statement 基本信息正确"
+  - "PDF 中 Statement Lines 与系统数据一致"
+  - "金额、税额、合计正确"
+  - "Draft/Voided 是否允许打印按既有业务规则执行"
+  - "打印不创建 account.move"
+  - "打印不修改 freight.service"
+  - "打印当前所选 Statement 版本，不切换到 current version"
+  - "真实浏览器点击验证通过"
 
 validation:
   context:
-    required_version: "0.1.91"
+    required_version: "0.1.92"
     command: "context_loader.py"
     expected: "PASS"
     bind_version_must_match: true
@@ -500,87 +267,43 @@ validation:
     - "Python/XML/Odoo19 兼容校验 PASS"
   runtime:
     server_side:
-      - "常驻 Odoo + button_immediate_upgrade 通过"
-      - "odoo shell 断言：report 存在、模型正确、forwarder_contact 冻结、action_print_statement 四状态可打印、打印不写业务数据"
-      - "amount 一致性校验：statement.amount_total != sum(amount_total_company) 时 stop_and_report，不生成 PDF"
+      - "模块升级通过"
+      - "report 存在且模型正确"
+      - "action_print_statement 返回 PDF 且不写业务数据"
+      - "amount 不一致时 stop_and_report"
     pdf:
-      - "生成真实 PDF 并渲染检查：标题、公司信息、客户、单据元数据、费用表、汇总、账户、条款、签章区"
-      - "中文不乱码、表格边框完整、多页表头重复、负数/多币种无溢出"
-      - "版本独立：V1 打印 -> 生成 V2 -> 再打印 V1，V1 PDF 与 V1 快照一致"
+      - "打开 PDF 并检查版式、字段、金额、条款"
+      - "V1 打印 -> 生成 V2 -> 再打印 V1，V1 与 V1 快照一致"
     browser:
-      - "Statement 表单点击输出结算单，PDF 可打开"
-      - "draft / confirmed / draft_invoice / voided 均可打开 PDF"
-      - "历史版本打开后打印的是该版本内容"
+      - "真实浏览器点击输出结算单"
+      - "真实打开 PDF"
+      - "检查版式与关键业务字段"
   business_review:
     - "业务负责人人工验收通过"
-  snapshot:
-    verify_gate_count: 18
-    note: "verify.py 18 项门禁为当前基线"
-
-loop_policy:
-  max_iteration: 5
-  retry_scope:
-    mode: "affected_asset_only"
-  scope_expansion:
-    allowed: false
-    require_human: true
-  stop_condition:
-    success:
-      - all_validation_pass
-      - human_accept
-    hard_stop:
-      - risk_block
-      - scope_violation
-      - forbidden_change
-      - new_unknown
-
-affected_assets:
-  business:
-    - business_rules
-  architecture: []
-  governance: []
-  history:
-    - decision_note
-    - sprint_log
-
-execution_artifacts:
-  intent_records:
-    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-6-001/"
-  validation_records:
-    - "docs/context/validation/test_exec_records.yaml"
-  context_version:
-    - "docs/context/context_version.yaml"
 
 success_definition:
-  - "freight.statement 可输出 PDF 结算单，版式还原应收对账单原始单据"
-  - "数据来源为 Statement / Statement Line 快照，不重算、不写业务数据"
-  - "statement.amount_total 为展示权威，line 汇总仅验证；不一致 stop_and_report"
-  - "bank_ids / 公司联系方式明确为 Company Master Data，不混称为 Statement 快照"
-  - "forwarder_contact 仅接入现有冻结机制，不改状态机"
-  - "运输模式按 freight_operation_id.transport 判断，禁止字段存在性猜测"
-  - "source_doc 为版式权威，条款原文禁止改写"
-  - "打印不分状态，draft / confirmed / draft_invoice / voided 均可输出"
-  - "forwarder_contact / 收款账户 / 多币种按 B-77 ~ B-80 确认口径落地"
-  - "context_loader / verify / PDF 渲染 / 浏览器验收全部 PASS"
+  - "Statement 可按要求输出 PDF"
+  - "打印数据来源正确"
+  - "版本独立"
+  - "金额一致性校验有效"
+  - "四状态均可打印"
+  - "PDF 与原始单据版式一致"
+  - "服务端 + PDF + 浏览器 + 业务验收全部通过"
 
 deliverables:
-  - "Sprint4-6 意图契约（本文件）"
-  - "report/customer_statement_report.xml（QWeb 模板 + ir.actions.report）"
-  - "Statement 表单输出结算单入口与 action_print_statement"
-  - "manifest 注册、zh_CN 翻译、Context 审计记录"
+  - "report/customer_statement_report.xml"
+  - "Statement 表单 Print Statement 按钮"
+  - "freight.statement.action_print_statement"
+  - "forwarder_contact 字段"
+  - "manifest / i18n / Context 审计"
   - "PDF 渲染与浏览器验收记录"
 
 audit:
   intent_records: "执行完成后归档至 INT-FREIGHT-SPRINT4-6-001/"
 
 risk_precheck:
-  - "状态回归：四状态均可输出，无状态拦截"
-  - "版本回归：打印所选版本，不被 current version 覆盖"
-  - "数据来源回归：金额与行内容来自 statement.line 快照"
-  - "金额权威回归：statement.amount_total 为展示权威，不一致 stop_and_report"
-  - "Master Data 边界回归：bank_ids / 公司联系方式为 live master data，不作为 Statement 快照"
-  - "运输模式回归：按 freight_operation_id.transport 判断，禁止字段存在性猜测"
-  - "条款回归：结算条款原文禁止改写"
-  - "多币种回归：原币分组展示，RMB 总应收按 amount_total_company 汇总"
-  - "PDF 排版回归：中文、负数、分页、表头重复"
-  - "禁止越界到 wizard / freight.service / fee_state / invoice 流程"
+  - "打印不创建/修改 account.move"
+  - "打印不修改 freight.service / fee_state"
+  - "版本独立：打印所选 Statement 版本"
+  - "金额一致性：不一致停止打印"
+  - "真实 PDF 视觉与浏览器验收"

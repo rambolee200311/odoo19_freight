@@ -579,3 +579,12 @@
 - 结算条款原文禁止润色、改写、翻译、纠错或自行补充。
 - 清理 `confirmed_open_questions` 语义重复；`unresolved_unknowns_allowed=false`。
 - A4 验收改为“禁止横向溢出 + 允许纵向自然分页 + 表头重复”；版本独立验收强化为 V1 打印 -> 生成 V2 -> 再打印 V1 与 V1 快照一致。
+
+### 决策78：Sprint4-6 契约按减法评审简化（只做打印）
+
+**决策**: 独立评审确认 Sprint4-6 只做“Statement 打印”，不要再绑定后续发票 Sprint：
+
+- `related_sprint` 仅保留 `INT-FREIGHT-SPRINT4-001`；发票生成登记为 `downstream_sprint`（未来 Sprint）。
+- 删除发票相关 invariants、report binding 内部机制、architecture_simplification 中的过度实现约束。
+- 保留版本独立打印、amount 一致性校验、Company Master Data 边界、运输模式正式字段判断、条款原文不可改写、真实 PDF + 浏览器验收。
+- 核心业务规则收敛为 B-76 ~ B-83；新增 B-81 / B-82 / B-83 并登记 BR-81 ~ BR-83。

@@ -291,3 +291,16 @@
 - A4 验收改为禁止横向溢出 + 纵向自然分页 + 表头重复；版本独立验收强化为 V1 -> V2 -> 再打印 V1 快照一致
 
 **验收**: context_loader 0.1.91 基线 PASS；verify.py 18/18 PASS；待独立评审确认后进入编码。
+
+## Sprint4-6-Print-Statement-Simplified (2026-08-17)
+
+**目标**: 按减法评审把 Sprint4-6 契约简化为“Statement 打印对账单”，移除与发票流程的绑定。
+
+**成果**:
+- Intent 标题改为 `Confirmed Statement 打印对账单`，sprint_version 改为 `Sprint4-6-Print-Statement`
+- `related_sprint` 仅保留 `INT-FREIGHT-SPRINT4-001`；发票生成列为未来 `downstream_sprint`
+- 核心规则 B-76 ~ B-83；新增 B-81/B-82/B-83，同步 BR-81 ~ BR-83
+- 删除发票 invariants、report binding 内部机制、架构过度设计
+- 保留版本独立、amount 一致性、Master Data 边界、条款原文、真实 PDF + 浏览器验收
+
+**验收**: context_loader 0.1.92 基线 PASS；verify.py 18/18 PASS；契约可进入编码。
