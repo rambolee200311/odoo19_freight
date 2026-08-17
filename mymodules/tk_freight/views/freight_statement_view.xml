@@ -61,6 +61,8 @@
                                 class="btn-primary" invisible="state != 'draft'"/>
                         <button name="action_void" type="object" string="Void"
                                 class="btn-danger" invisible="state != 'draft'"/>
+                        <button name="action_print_statement" type="object"
+                                string="Print Statement" class="btn-secondary"/>
                         <button name="action_generate_draft_invoice" type="object"
                                 string="Generate Draft Invoice" class="btn-primary"
                                 invisible="state != 'confirmed'"/>
@@ -78,6 +80,9 @@
                                 <field name="freight_operation_id" readonly="1"
                                        string="Freight Operation"/>
                                 <field name="customer_id" readonly="1" string="Customer"/>
+                                <field name="forwarder_contact"
+                                       readonly="state != 'draft'"
+                                       string="Forwarder Contact"/>
                                 <field name="settlement_date" readonly="state != 'draft'"
                                        string="Settlement Date"/>
                             </group>

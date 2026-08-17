@@ -304,3 +304,15 @@
 - 保留版本独立、amount 一致性、Master Data 边界、条款原文、真实 PDF + 浏览器验收
 
 **验收**: context_loader 0.1.92 基线 PASS；verify.py 18/18 PASS；契约可进入编码。
+
+## Sprint4-6-Print-Statement-Implementation (2026-08-17)
+
+**目标**: 实现 Statement 打印对账单：forwarder_contact、打印动作、QWeb PDF 报表、表单按钮、manifest/i18n。
+
+**成果**:
+- `freight.statement.forwarder_contact` 可选 Char 字段，纳入 `FROZEN_HEADER_FIELDS`
+- `action_print_statement` 执行 amount 一致性校验后返回 QWeb PDF
+- `report/customer_statement_report.xml`：A4、费用明细、汇总、收款账户、条款、签章区
+- Statement 表单 Print Statement 按钮四状态可见；manifest 2.2.2 注册报表；zh_CN 文案更新
+
+**验收**: context_loader 0.1.93 基线 PASS；verify.py 18/18 PASS；XML-RPC 升级 19.0.2.2.2 + log clean；odoo shell 断言 PASS；PDF 生成 + HTML 字段核对 PASS；浏览器点击待业务负责人验收。

@@ -588,3 +588,13 @@
 - 删除发票相关 invariants、report binding 内部机制、architecture_simplification 中的过度实现约束。
 - 保留版本独立打印、amount 一致性校验、Company Master Data 边界、运输模式正式字段判断、条款原文不可改写、真实 PDF + 浏览器验收。
 - 核心业务规则收敛为 B-76 ~ B-83；新增 B-81 / B-82 / B-83 并登记 BR-81 ~ BR-83。
+
+### 决策79：Sprint4-6 打印对账单实施完成
+
+**决策**: 按简化契约完成 Sprint4-6 编码与验证：
+
+- `freight.statement` 新增可选 `forwarder_contact` 字段并登记到 `FROZEN_HEADER_FIELDS`。
+- 新增 `action_print_statement`：先执行 `statement.amount_total` 与 line 汇总一致性校验，失败 `stop_and_report`，通过后返回 QWeb PDF report_action。
+- 新增 `report/customer_statement_report.xml`：A4 PDF、Statement/Line 快照展示、多币种原币小计、RMB 总应收、公司银行账户、条款原文、签章区。
+- Statement 表单新增 Print Statement 按钮（四状态均可见），manifest 注册报表，zh_CN 新增文案。
+- XML-RPC 升级到 `19.0.2.2.2`，log clean；odoo shell 断言 report/字段/打印动作/无写回 PASS；真实 PDF 生成并核对 HTML 字段正确；浏览器点击待业务负责人人工验收。

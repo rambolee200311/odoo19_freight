@@ -18,8 +18,8 @@ class FreightStatement(models.Model):
     _order = 'id desc'
 
     FROZEN_HEADER_FIELDS = ('freight_operation_id', 'customer_id', 'settlement_date',
-                            'company_id', 'currency_id', 'voided_uid', 'voided_date',
-                            'voided_reason')
+                            'company_id', 'currency_id', 'forwarder_contact',
+                            'voided_uid', 'voided_date', 'voided_reason')
 
     name = fields.Char(string='Statement Number', required=True, readonly=True,
                        copy=False, index=True, tracking=True)
@@ -50,6 +50,7 @@ class FreightStatement(models.Model):
     settlement_date = fields.Date(string='Settlement Date',
                                   default=fields.Date.context_today,
                                   required=True, tracking=True, copy=False)
+    forwarder_contact = fields.Char(string='Forwarder Contact', copy=False)
     currency_summary = fields.Text(string='Currency Summary', compute='_compute_currency_summary')
     amount_untaxed = fields.Monetary(string='Untaxed Amount', currency_field='currency_id',
                                      compute='_compute_amounts', store=True)
@@ -215,6 +216,22 @@ class FreightStatement(models.Model):
                 'confirmed_date': fields.Datetime.now(),
             })
         return True
+
+    def _check_print_amounts(self):
+        """Stop printing when the statement total disagrees with line totals."""
+        for rec in self:
+            line_total = sum(rec.statement_line_ids.mapped('amount_total_company'))
+            if round(rec.amount_total or 0.0, 2) != round(line_total or 0.0, 2):
+                raise ValidationError(_(
+                    'Statement %s amount total does not match line totals. '
+                    'Printing stopped.') % rec.name)
+
+    def action_print_statement(self):
+        """Print the selected statement without changing any business data."""
+        self.ensure_one()
+        self._check_print_amounts()
+        report = self.env.ref('tk_freight.freight_statement_report')
+        return report.report_action(self)
 
     def _find_sale_tax(self, rate, name=False):
         """Resolve the statement tax snapshot to a unique account.tax.

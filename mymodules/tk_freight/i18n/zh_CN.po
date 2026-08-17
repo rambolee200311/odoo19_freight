@@ -9500,3 +9500,23 @@ msgstr "勾选"
 msgid "Deselect"
 msgstr "取消勾选"
 
+#. module: tk_freight
+#: model:ir.model.fields,field_description:tk_freight.field_freight_statement__forwarder_contact
+msgid "Forwarder Contact"
+msgstr "对接货代人员"
+
+#. module: tk_freight
+#: model:ir.ui.view,arch_db:tk_freight.freight_statement_form_view
+msgid "Print Statement"
+msgstr "打印对账单"
+
+#. module: tk_freight
+#: code:addons/tk_freight/models/freight_statement.py:0
+msgid "Statement %s amount total does not match line totals. Printing stopped."
+msgstr "结算单 %s 的总额与明细合计不一致，已停止打印。"
+
+#. module: tk_freight
+#: model:ir.actions.report,name:tk_freight.freight_statement_report
+msgid "Customer Statement Report"
+msgstr "对账单"
+

@@ -1,6 +1,6 @@
 # ==============================================================
 # Intent: Sprint4-6 打印对账单（Statement PDF）
-# 状态：已确认（B-76 ~ B-83，可进入编码）
+# 状态：已实现（B-76 ~ B-83，可进入浏览器验收）
 # 核心定位：
 #   - freight.statement -> QWeb -> PDF
 #   - 打印不改变任何业务状态，不涉及发票 / account.move / 开票流程
@@ -17,7 +17,7 @@ target_scope:
   - "不涉及发票生成、account.move 或开票流程"
 
 context_binding:
-  bind_context_version: "0.1.92"
+  bind_context_version: "0.1.93"
   asset_snapshot_profile: "development"
 
 context_policy:
@@ -257,7 +257,7 @@ acceptance_criteria:
 
 validation:
   context:
-    required_version: "0.1.92"
+    required_version: "0.1.93"
     command: "context_loader.py"
     expected: "PASS"
     bind_version_must_match: true

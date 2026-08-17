@@ -3,12 +3,24 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.92
+context_version: 0.1.93
 update_time: 2026-08-17
 adapt_sprint: Sprint4-6-Output-Statement
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.93:
+    update_content: |
+      Sprint4-6 打印对账单实施完成（决策79）：
+      - freight.statement 新增 forwarder_contact 并登记 FROZEN_HEADER_FIELDS
+      - 新增 action_print_statement + amount 一致性校验
+      - 新增 report/customer_statement_report.xml QWeb PDF 报表
+      - Statement 表单新增 Print Statement 按钮；manifest/i18n 注册
+      - XML-RPC 升级 19.0.2.2.2 PASS；odoo shell 运行时断言 PASS；
+        PDF 生成成功且 HTML 字段核对通过；浏览器点击待业务负责人验收
+    update_type: Sprint4-6 实施完成
+    effect_scope: intent_sprint4_6 + business + history + validation
+
   0.1.92:
     update_content: |
       Sprint4-6 契约按减法评审简化（决策78）：

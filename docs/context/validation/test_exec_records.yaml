@@ -605,3 +605,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "根因：_rebuild_lines 的 (5,0,0) 重建赋值递归触发 write 守卫被当作用户清空；修复后重建赋值自带 wizard_rebuild 上下文、守卫先处理 (0,0,...) 重建；实测 onchange 保留 select、生成仅 fee2 1 行、网页端清空+重建保留状态、纯删除恢复 3 行全选"
+
+  - contract_id: INT-FREIGHT-SPRINT4-6-001
+    sprint_name: Sprint4-6 打印对账单
+    context_baseline: "0.1.93"
+    execute_time: "2026-08-17"
+    test_category: "Statement PDF 打印"
+    test_target_models: ["freight.statement", "freight.statement.line"]
+    total_case_count: 6
+    pass_count: 6
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；XML-RPC 升级 19.0.2.2.2 PASS；odoo shell 6/6 PASS；PDF 生成 + HTML 字段核对 PASS；log clean"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "覆盖：report 存在、模型正确、forwarder_contact 冻结、action_print_statement 返回 qweb-pdf、打印无写回、真实 PDF 生成；浏览器点击待业务负责人人工验收"

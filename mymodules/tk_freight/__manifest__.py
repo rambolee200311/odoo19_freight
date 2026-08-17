@@ -12,7 +12,7 @@
     'summary': """
         All types of transportation management
     """,
-    'version': '2.2.0',
+    'version': '2.2.2',
     'author': 'TechKhedut Inc.',
     'category': 'services',
     'company': 'TechKhedut Inc.',
@@ -69,6 +69,7 @@
         'report/freight_quotation_report.xml',
         'report/shipment_bill_qweb_report.xml',
         'report/waybill_land_qweb_report.xml',
+        'report/customer_statement_report.xml',
         # Menu
         'views/menus.xml',
         # Mail Template
