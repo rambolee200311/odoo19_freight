@@ -607,3 +607,12 @@
 - `report/customer_statement_report.xml` 改为调用 `tk_freight.custom_external_layout`，输出费用确认版式。
 - `freight_statement.action_print_statement` 改为支持多条记录逐个校验并返回报表动作。
 - 用户已实际打印测试通过；静态校验 `verify.py` 18/18 PASS，XML/Python 编译 PASS。
+
+### 决策81：Sprint4-7 中文汉化
+
+**决策**: 业务负责人要求对 Sprint4 新增功能做一次汉化，登记为 Sprint4-7：
+
+- B-84：Sprint4 新增模型字段、提示、按钮、action、菜单统一通过 `zh_CN.po` 汉化。
+- B-85：汉化只写 `zh_CN.po`，不修改英文源码字符串，不改变业务逻辑。
+- 覆盖客户结算单、结算单行、向导、费用状态、菜单、报表 action 等。
+- `zh_CN.po` 无重复 msgid，`msgfmt -c` 与 `verify.py` 18/18 通过；manifest 升至 2.2.3 并完成 XML-RPC 升级验证。

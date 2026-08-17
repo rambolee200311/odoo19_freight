@@ -3,12 +3,21 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.94
+context_version: 0.1.95
 update_time: 2026-08-17
 adapt_sprint: Sprint4-6-Output-Statement
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.95:
+    update_content: |
+      Sprint4-7 中文汉化完成（决策81，B-84/B-85）：
+      - zh_CN.po 补齐 Sprint4 结算单/向导/费用状态/菜单/报表 action 相关翻译
+      - 覆盖模型 description、字段 label、help、按钮、action、菜单名称
+      - manifest 2.2.3；msgfmt/verify 通过；XML-RPC 升级验证通过
+    update_type: Sprint4-7 中文汉化
+    effect_scope: intent_sprint4_7 + translation + history + validation
+
   0.1.94:
     update_content: |
       Sprint4-6 用户自主完成登记（决策80）：

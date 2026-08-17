@@ -12,7 +12,7 @@
     'summary': """
         All types of transportation management
     """,
-    'version': '2.2.2',
+    'version': '2.2.3',
     'author': 'TechKhedut Inc.',
     'category': 'services',
     'company': 'TechKhedut Inc.',

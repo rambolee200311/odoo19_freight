@@ -1,0 +1,120 @@
+# ==============================================================
+# Intent: Sprint4-7 中文汉化（Sprint4 新增功能界面）
+# 状态：已实现
+# 核心定位：
+#   - 只补 zh_CN.po 翻译，不修改英文源码字符串
+#   - 覆盖 Sprint4 新增模型/字段/help/按钮/action/菜单等
+# ==============================================================
+
+intent_id: "INT-FREIGHT-SPRINT4-7-001"
+sprint_version: "Sprint4-7-Chinese-Localization"
+intent_work_type: "Development"
+intent_change_type: "Configuration Change"
+title: "Sprint4 新增功能中文汉化"
+target_scope:
+  - "为 Sprint4 新增的结算单、向导、费用状态、菜单、报表 action 等界面文案补充 zh_CN.po 翻译"
+  - "包括模型 description、字段 label、help、按钮、action、菜单名称"
+  - "不修改英文源码字符串，不改变业务逻辑"
+
+context_binding:
+  bind_context_version: "0.1.95"
+  asset_snapshot_profile: "development"
+
+context_policy:
+  bind_version_immutable: true
+  post_execution_context_update_allowed: true
+  resulting_context_version: "auto"
+
+business_intent:
+  source:
+    type: "customer_demand"
+    origin_team: "业务负责人（用户）"
+  confirmed_decisions:
+    - id: "B-84"
+      decision_status: "CONFIRMED"
+      statement: "Sprint4 新增模型字段、提示、按钮、action、菜单统一通过 zh_CN.po 汉化"
+    - id: "B-85"
+      decision_status: "CONFIRMED"
+      statement: "汉化只写 zh_CN.po，不修改英文源码字符串，不改变业务逻辑"
+  unresolved_unknowns: []
+
+unknown_policy:
+  unresolved_unknowns_allowed: false
+  newly_discovered_unknown_action: "stop_and_escalate"
+
+decision_gate:
+  status: "satisfied"
+  required_before_coding: []
+
+scope:
+  allowed_files:
+    - "docs/context/intent/intent_sprint4_7_chinese_localization.yaml"
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+    - "mymodules/tk_freight/__manifest__.py"
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/validation/test_exec_records.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-7-001/"
+  forbidden_paths:
+    - "odoo/"
+    - "addons/"
+    - "mymodules/tk_freight/models/"
+    - "mymodules/tk_freight/views/"
+    - "mymodules/tk_freight/wizard/"
+    - "mymodules/tk_freight/report/"
+    - "mymodules/tk_freight/security/"
+    - "mymodules/tk_freight/controllers/"
+    - "mymodules/tk_freight/static/"
+  forbidden_changes:
+    - "修改模型字段、视图、按钮、action、菜单的英文源码字符串"
+    - "修改业务逻辑、状态机、报表版式"
+    - "修改 account 模块或官方 addons"
+
+change_boundary:
+  translation:
+    - "mymodules/tk_freight/i18n/zh_CN.po"
+  context_audit:
+    - "docs/context/history/decision_note.md"
+    - "docs/context/history/sprint_log.md"
+    - "docs/context/context_version.yaml"
+    - "docs/context/validation/test_exec_records.yaml"
+    - "docs/context/intent_records/INT-FREIGHT-SPRINT4-7-001/"
+
+technical_constraints:
+  - "zh_CN.po 不得出现重复 msgid"
+  - "zh_CN.po 必须通过 msgfmt -c 校验"
+  - "manifest 版本递增后执行 XML-RPC 模块升级验证"
+  - "不新增模型/字段/视图/按钮/action/菜单"
+
+acceptance_criteria:
+  - "Sprint4 结算单/向导/费用状态/菜单/报表 action 相关文案在 zh_CN.po 中已有中文翻译"
+  - "模型 description 与字段 label 覆盖客户结算单、结算单行、向导行等"
+  - "help 文本、按钮、action、菜单名称已翻译"
+  - "msgfmt -c 通过"
+  - "verify.py 18/18 PASS"
+  - "模块升级后中文文案可加载"
+
+validation:
+  context:
+    required_version: "0.1.95"
+    command: "context_loader.py"
+    expected: "PASS"
+    bind_version_must_match: true
+  static:
+    - "verify.py 全部强制门禁 PASS"
+  build:
+    - "msgfmt -c -o /dev/null mymodules/tk_freight/i18n/zh_CN.po PASS"
+  runtime:
+    - "XML-RPC 模块升级通过"
+  business_review:
+    - "业务负责人人工验收通过"
+
+success_definition:
+  - "Sprint4 新增界面文案完成中文汉化"
+  - "zh_CN.po 无重复 msgid，msgfmt 通过"
+  - "模块升级成功，翻译可加载"
+
+deliverables:
+  - "zh_CN.po Sprint4 相关翻译补齐"
+  - "Context 审计与 Intent 记录"

@@ -328,3 +328,15 @@
 - 用户已实际打印测试通过
 
 **验收**: verify.py 18/18 PASS；report XML 解析 PASS；Python 编译 PASS；待正式提交推送后归档。
+
+## Sprint4-7-Chinese-Localization (2026-08-17)
+
+**目标**: 对 Sprint4 新增功能做一次汉化，覆盖模型、字段、提示、按钮、action、菜单等。
+
+**成果**:
+- `zh_CN.po` 补齐客户结算单、结算单行、向导、费用状态、菜单、报表 action 相关翻译
+- 覆盖模型 description、字段 label、help、按钮、action、菜单名称
+- `zh_CN.po` 无重复 msgid，`msgfmt -c` 通过
+- manifest 升至 2.2.3，XML-RPC 模块升级验证通过
+
+**验收**: context_loader 0.1.95 基线 PASS；verify.py 18/18 PASS；msgfmt PASS；待业务负责人浏览器验收中文文案。

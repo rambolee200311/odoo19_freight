@@ -639,3 +639,20 @@ test_exec_records:
     auditor: "业务负责人 + Codex Agent"
     match_exit_criteria: true
     note: "用户自主完成 custom_report_layout.xml / customer_statement_report.xml 版式并打印测试通过；已登记为 Sprint4-6 用户自主完成"
+
+  - contract_id: INT-FREIGHT-SPRINT4-7-001
+    sprint_name: Sprint4-7 中文汉化
+    context_baseline: "0.1.95"
+    execute_time: "2026-08-17"
+    test_category: "i18n 汉化"
+    test_target_models: ["freight.statement", "freight.statement.line", "freight.statement.wizard"]
+    total_case_count: 3
+    pass_count: 3
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；msgfmt -c PASS；XML-RPC 升级 PASS；无重复 msgid"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19 PostgreSQL 5555"
+    auditor: "Codex Agent"
+    match_exit_criteria: true
+    note: "Sprint4 模型/字段/help/按钮/action/菜单翻译补齐；manifest 2.2.3；待业务负责人浏览器验收中文文案"
