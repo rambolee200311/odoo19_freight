@@ -316,3 +316,15 @@
 - Statement 表单 Print Statement 按钮四状态可见；manifest 2.2.2 注册报表；zh_CN 文案更新
 
 **验收**: context_loader 0.1.93 基线 PASS；verify.py 18/18 PASS；XML-RPC 升级 19.0.2.2.2 + log clean；odoo shell 断言 PASS；PDF 生成 + HTML 字段核对 PASS；浏览器点击待业务负责人验收。
+
+## Sprint4-6-User-Implemented (2026-08-17)
+
+**目标**: 登记业务负责人自主完成 Sprint4-6 打印对账单并已打印验收。
+
+**成果**:
+- 新增 `report/custom_report_layout.xml` 自定义报表抬头/页脚/银行账号布局
+- `report/customer_statement_report.xml` 改用 `tk_freight.custom_external_layout`
+- `action_print_statement` 支持多条记录逐个返回报表动作
+- 用户已实际打印测试通过
+
+**验收**: verify.py 18/18 PASS；report XML 解析 PASS；Python 编译 PASS；待正式提交推送后归档。

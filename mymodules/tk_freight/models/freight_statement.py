@@ -228,10 +228,16 @@ class FreightStatement(models.Model):
 
     def action_print_statement(self):
         """Print the selected statement without changing any business data."""
-        self.ensure_one()
-        self._check_print_amounts()
-        report = self.env.ref('tk_freight.freight_statement_report')
-        return report.report_action(self)
+        # self.ensure_one()
+        # self._check_print_amounts()
+        # report = self.env.ref('tk_freight.freight_statement_report')
+        # return report.report_action(self)
+        for rec in self:
+            rec._check_print_amounts()
+            report_id = self.env.ref('tk_freight.freight_statement_report')
+            if report_id:
+                return report_id.report_action(rec)
+        return True
 
     def _find_sale_tax(self, rate, name=False):
         """Resolve the statement tax snapshot to a unique account.tax.

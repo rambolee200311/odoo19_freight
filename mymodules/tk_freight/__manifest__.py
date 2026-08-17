@@ -69,6 +69,7 @@
         'report/freight_quotation_report.xml',
         'report/shipment_bill_qweb_report.xml',
         'report/waybill_land_qweb_report.xml',
+        'report/custom_report_layout.xml',
         'report/customer_statement_report.xml',
         # Menu
         'views/menus.xml',

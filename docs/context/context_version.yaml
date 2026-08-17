@@ -3,12 +3,23 @@
 # 适配：Odoo19 Freight 出口货代项目
 # ==============================================
 
-context_version: 0.1.93
+context_version: 0.1.94
 update_time: 2026-08-17
 adapt_sprint: Sprint4-6-Output-Statement
 update_author: AI-Engineering-Team
 
 version_log:
+  0.1.94:
+    update_content: |
+      Sprint4-6 用户自主完成登记（决策80）：
+      - 用户自主完成报表版式重构并打印验收
+      - 新增 report/custom_report_layout.xml 自定义抬头/页脚版式
+      - report/customer_statement_report.xml 改为 custom_external_layout 布局
+      - freight_statement.action_print_statement 支持多条记录逐个返回报表
+      - 静态校验 verify.py 18/18 PASS；XML/Python 编译 PASS
+    update_type: Sprint4-6 用户自主完成
+    effect_scope: intent_sprint4_6 + history + validation
+
   0.1.93:
     update_content: |
       Sprint4-6 打印对账单实施完成（决策79）：

@@ -4,219 +4,104 @@
         <template id="customer_statement_report_template">
             <t t-call="web.html_container">
                 <t t-foreach="docs" t-as="o">
-                    <t t-call="web.basic_layout">
-                        <style>
-                            .statement-page {
-                                font-size: 13px;
-                                color: #000;
-                            }
-                            .statement-page h2 {
-                                text-align: center;
-                                font-size: 20px;
-                                margin-bottom: 12px;
-                            }
-                            .statement-table {
-                                width: 100%;
-                                border-collapse: collapse;
-                                margin-top: 8px;
-                            }
-                            .statement-table th,
-                            .statement-table td {
-                                border: 1px solid #000;
-                                padding: 4px 6px;
-                                vertical-align: top;
-                            }
-                            .statement-table th {
-                                background: #f2f2f2;
-                                text-align: center;
-                            }
-                            .amount-cell {
-                                text-align: right;
-                                white-space: nowrap;
-                            }
-                            .sign-area {
-                                margin-top: 48px;
-                            }
-                        </style>
-                        <div class="statement-page">
-                            <h2>出口货代费用确认单（应收对账单）</h2>
+                    <t t-call="tk_freight.custom_external_layout">
+                        <div class="page" style="font-family: 'Noto Sans SC', 'WenQuanYi Micro Hei', 'SimSun', serif; font-size: 11px; padding: 15px;">
 
-                            <table style="width:100%;border-collapse:collapse;">
-                                <tr>
-                                    <td style="width:55%;padding:0px;">
-                                        <div style="display:flex;align-items:center;">
-                                            <t t-if="o.company_id.logo">
-                                                <img t-att-src="image_data_uri(o.company_id.logo)"
-                                                     alt="Logo"
-                                                     style="max-width:90px;max-height:70px;margin-right:8px;"/>
-                                            </t>
-                                            <div>
-                                                <div style="font-weight:bold;font-size:15px;">
-                                                    <span t-field="o.company_id.name"/>
-                                                </div>
-                                                <t t-if="o.company_id.phone">
-                                                    <div>联系电话：<span t-field="o.company_id.phone"/></div>
-                                                </t>
-                                                <t t-if="o.company_id.email">
-                                                    <div>邮箱：<span t-field="o.company_id.email"/></div>
-                                                </t>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style="width:45%;padding:0px;text-align:right;">
-                                        <div>单据编号：<span t-field="o.name"/></div>
-                                        <div>制单日期：<span t-field="o.settlement_date"/></div>
-                                        <div>内部工作号：<span t-field="o.freight_operation_id.name"/></div>
-                                    </td>
-                                </tr>
-                            </table>
+                            <!-- 公司抬头 -->
+                            <div style="text-align:center; margin-bottom:6px;">
+                                <div style="font-weight:bold; font-size:14px;">
+                                    <h1 style="font-size:24px"><span t-esc="o.company_id.name"/></h1>
+                                </div>
+                                <div style="font-size:10px; margin-top:2px;">
+                                    TEL:<span t-esc="o.company_id.phone or ''"/>
+                                    <t t-if="o.company_id.email">
+                                        &#160;E-MAIL:<span t-esc="o.company_id.email"/>
+                                    </t>
+                                </div>
+                            </div>
 
-                            <table style="width:100%;border-collapse:collapse;margin-top:10px;">
-                                <tr>
-                                    <td style="width:50%;padding:0px;">
-                                        <div><strong>客户（付款方）：</strong><span t-field="o.customer_id.name"/></div>
-                                        <t t-if="o.forwarder_contact">
-                                            <div>对接货代人员：<span t-field="o.forwarder_contact"/></div>
-                                        </t>
-                                    </td>
-                                    <td style="width:50%;padding:0px;">
-                                        <t t-if="o.freight_operation_id.transport == 'ocean'">
-                                            <div>船名航次：
-                                                <span t-field="o.freight_operation_id.vessel_id.name"/>
-                                                <t t-if="o.freight_operation_id.voyage_no">
-                                                    / <span t-field="o.freight_operation_id.voyage_no"/>
-                                                </t>
-                                            </div>
-                                            <div>提单号：
-                                                <t t-if="o.freight_operation_id.bl_number">
-                                                    <span t-field="o.freight_operation_id.bl_number"/>
-                                                </t>
-                                                <t t-else="">
-                                                    <span t-field="o.freight_operation_id.obl"/>
-                                                </t>
-                                            </div>
-                                        </t>
-                                        <t t-elif="o.freight_operation_id.transport == 'air'">
-                                            <div>航班信息：
-                                                <span t-field="o.freight_operation_id.airline_id.name"/>
-                                                <t t-if="o.freight_operation_id.flight_no">
-                                                    / <span t-field="o.freight_operation_id.flight_no"/>
-                                                </t>
-                                            </div>
-                                            <div>运单号：<span t-field="o.freight_operation_id.mawb_no"/></div>
-                                        </t>
-                                        <t t-elif="o.freight_operation_id.transport == 'land'">
-                                            <div>运输信息：<span t-field="o.freight_operation_id.truck_ref"/></div>
-                                            <div>车牌/参考号：<span t-field="o.freight_operation_id.trucker_number"/></div>
-                                        </t>
-                                        <t t-if="o.freight_operation_id.pickup_datetime">
-                                            <div>开航日期：<span t-field="o.freight_operation_id.pickup_datetime"/></div>
-                                        </t>
-                                    </td>
-                                </tr>
-                            </table>
+                            <!-- 标题 -->
+                            <h2 style="text-align:center; font-size:20px; font-weight:bold; margin:10px 0; border-bottom:1px solid #000; padding-bottom:4px;">
+                                费用确认
+                            </h2>
 
-                            <table class="statement-table">
+                            <!-- TO / DATE / FM / 工作号 -->
+                            <div style="margin-bottom:8px; font-size:12px;">
+                                <div style="margin-bottom:2px;">
+                                    <strong>TO:</strong><span t-esc="o.customer_id.name or ''"/>
+                                    <span style="float:right;"><strong>DATE:</strong> <span t-esc="o.settlement_date or ''"/></span>
+                                </div>
+                                <div style="margin-bottom:2px;">
+                                    <strong>联系人:</strong><span t-esc="o.customer_id.name or ''"/>
+                                    <span style="float:right;"><strong>TEL:</strong> <span t-esc="o.customer_id.phone or ''"/></span>
+                                </div>
+                                <div>
+                                    <strong>FM:</strong><span t-esc="o.company_id.name or ''"/> <span t-esc="o.create_uid.name or ''"/>
+                                    <span style="float:right;"><strong>工作号:</strong> <span t-esc="o.freight_operation_id.name or ''"/></span>
+                                </div>
+                            </div>
+
+                            <!-- 5列费用表格 -->
+                            <table rules="none" style="width:100%; border-collapse:collapse; margin-top:6px; font-size:12px; border:1px solid #000 !important;">
                                 <thead>
-                                    <tr>
-                                        <th style="width:18%;">关联运输信息</th>
-                                        <th style="width:24%;">费用名称</th>
-                                        <th style="width:10%;">结算币种</th>
-                                        <th style="width:16%;">单价 / 数量</th>
-                                        <th style="width:14%;">税率 / 税额</th>
-                                        <th style="width:18%;">应收金额(RMB)</th>
+                                    <tr style="border:0 !important;">
+                                        <th style="padding:3px 6px; border-bottom:1px solid #000 !important; border-left:0 !important; border-right:0 !important; border-top:0 !important; text-align:left;">货物描述</th>
+                                        <th style="padding:3px 6px; border-bottom:1px solid #000 !important; border-left:0 !important; border-right:0 !important; border-top:0 !important; text-align:left;">费用名称</th>
+                                        <th style="padding:3px 6px; border-bottom:1px solid #000 !important; border-left:0 !important; border-right:0 !important; border-top:0 !important; text-align:left;">币种</th>
+                                        <th style="padding:3px 6px; border-bottom:1px solid #000 !important; border-left:0 !important; border-right:0 !important; border-top:0 !important; text-align:left;">单价/数量</th>
+                                        <th style="padding:3px 6px; border-bottom:1px solid #000 !important; border-left:0 !important; border-right:0 !important; border-top:0 !important; text-align:right;">金额</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <t t-foreach="o.statement_line_ids" t-as="line">
-                                        <tr>
-                                            <td><span t-field="line.product_id.name"/></td>
-                                            <td><span t-field="line.name"/></td>
-                                            <td><span t-field="line.currency_id.name"/></td>
-                                            <td><span t-field="line.price_unit"/> / <span t-field="line.qty"/></td>
-                                            <td>
-                                                <t t-if="line.tax_rate">
-                                                    <span t-field="line.tax_rate"/>%
-                                                </t>
-                                                <t t-else="">
-                                                    0%
-                                                </t>
-                                                <span> / </span>
-                                                <span t-field="line.tax_amount"/>
-                                            </td>
-                                            <td class="amount-cell"><span t-field="line.amount_total_company"/></td>
+                                    <!-- 第一行：货物描述 + 第一条费用 -->
+                                    <tr style="border:0 !important;">
+                                        <td t-att-rowspan="len(o.statement_line_ids)" style="padding:3px 6px; border:0 !important;">
+                                            <t t-if="o.freight_operation_id.transport == 'ocean'">
+                                                船名:<span t-esc="o.freight_operation_id.vessel_id.name or ''"/><br/>
+                                                提单号:<span t-esc="o.freight_operation_id.bl_number or o.freight_operation_id.obl or ''"/>
+                                            </t>
+                                        </td>
+                                        <t t-if="o.statement_line_ids">
+                                            <td style="padding:3px 6px; border:0 !important;"><span t-esc="o.statement_line_ids[0].name"/></td>
+                                            <td style="padding:3px 6px; border:0 !important;"><span t-esc="o.statement_line_ids[0].currency_id.name"/></td>
+                                            <td style="padding:3px 6px; border:0 !important; text-align:right;"><span t-esc="o.statement_line_ids[0].price_unit"/>/<span t-esc="o.statement_line_ids[0].qty"/></td>
+                                            <td style="padding:3px 6px; border:0 !important; text-align:right;"><span t-esc="o.statement_line_ids[0].amount_total_company"/></td>
+                                        </t>
+                                    </tr>
+                                    <!-- 后续行：只输出费用列 -->
+                                    <t t-foreach="o.statement_line_ids[1:]" t-as="line">
+                                        <tr style="border:0 !important;">
+                                            <td style="padding:3px 6px; border:0 !important;"><span t-esc="line.name"/></td>
+                                            <td style="padding:3px 6px; border:0 !important;"><span t-esc="line.currency_id.name"/></td>
+                                            <td style="padding:3px 6px; border:0 !important; text-align:right;"><span t-esc="line.price_unit"/>/<span t-esc="line.qty"/></td>
+                                            <td style="padding:3px 6px; border:0 !important; text-align:right;"><span t-esc="line.amount_total_company"/></td>
                                         </tr>
                                     </t>
+                                    <!-- 合计行 -->
+                                    <tr style="border:0 !important;">
+                                        <td colspan="4" style="padding:3px 6px; border-top:1px solid #000 !important; border-left:0 !important; border-right:0 !important; border-bottom:0 !important; text-align:right; font-weight:bold;">
+                                            费用合计:<span t-esc="o.currency_id.name or 'RMB'"/>合计:
+                                        </td>
+                                        <td style="padding:3px 6px; border-top:1px solid #000 !important; border-left:0 !important; border-right:0 !important; border-bottom:0 !important; text-align:right; font-weight:bold;">
+                                            <span t-esc="o.amount_total"/>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
 
-                            <table style="width:100%;border-collapse:collapse;margin-top:8px;">
-                                <tr>
-                                    <td style="width:50%;padding:0px;"></td>
-                                    <td style="width:50%;padding:0px;">
-                                        <table style="width:100%;border-collapse:collapse;">
-                                            <tr>
-                                                <td style="padding:4px 6px;">不含税合计</td>
-                                                <td class="amount-cell" style="padding:4px 6px;">
-                                                    <span t-field="o.amount_untaxed"/>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding:4px 6px;">税额合计</td>
-                                                <td class="amount-cell" style="padding:4px 6px;">
-                                                    <span t-field="o.tax_amount"/>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding:4px 6px;font-weight:bold;">总应收金额</td>
-                                                <td class="amount-cell" style="padding:4px 6px;font-weight:bold;">
-                                                    <span t-field="o.amount_total"/>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-
-                            <t t-if="o.company_id.bank_ids">
-                                <h4 style="margin-top:16px;">对公收款账户信息</h4>
-                                <t t-foreach="o.company_id.bank_ids" t-as="bank">
-                                    <div>
-                                        <span t-esc="bank.currency_id.name or '银行账户'"/>账户：
-                                        开户行 <span t-field="bank.bank_id.name"/>，
-                                        账号 <span t-field="bank.acc_number"/>
-                                        <t t-if="bank.acc_holder_name">
-                                            ，户名 <span t-field="bank.acc_holder_name"/>
-                                        </t>
-                                    </div>
-                                </t>
-                            </t>
-
-                            <h4 style="margin-top:16px;">业务权责 &amp; 结算条款</h4>
-                            <ol style="padding-left:20px;margin:0;">
-                                <li>
-                                    我司（<span t-field="o.customer_id.name"/>）委托
-                                    <span t-field="o.company_id.name"/>出运货物，本票货物已按约定正常出运；
-                                    所有代操作服务（代装箱、产装、代理报关、订舱等）客户全部认可。
-                                </li>
-                                <li>
-                                    运费及配套费用付款期限：船舶开航后5个工作日内结清。
-                                </li>
-                                <li>
-                                    未按期足额支付款项，逾期部分按每日千分之三计收违约金。
-                                </li>
-                                <li>
-                                    客户逾期未结清费用，货代有权留置本票对应提单、全套货运单据，直至款项付清。
-                                </li>
-                                <li>
-                                    底部预留客户盖章、填写年月日位置，盖章后具备对账/结算约束效力。
-                                </li>
-                            </ol>
-
-                            <div class="sign-area">
-                                <div>客户盖章：____________________________</div>
-                                <div style="margin-top:16px;">日期：____________年______月______日</div>
+                            <!-- 条款 -->
+                            <div style="margin-top:10px; font-size:10px; line-height:1.5;">
+                                <p style="margin:2px 0;">我司委托贵司出运的货物已于以下列明的信息正常出运，我司保证根据本确认书的有关规定支付运费及其他相关费用。我司同意,在未按本确认书履行支付相关费用的情况下,我司同意贵司留置本票货物的提单及其他相关运输单据。</p>
+                                <p style="margin:2px 0;">收付期限:船开五个工作日之内 (如未能按期支付,应按未能支付数额的部分按日支付千分之3的违约金)</p>
+                                <p style="margin:2px 0;">我司同时确认，贵司在根据我司订舱进行操作时，根据我司指示委托为出运或采取的包括但不限于代为装箱，指派车队产装，代为报关等我司均予以确认。</p>
                             </div>
+
+                            <!-- 盖章区 -->
+                            <div style="margin-top:30px; font-size:11px;">
+                                <div>贵公司盖章处</div>
+                                <div style="margin-top:15px;">年 月 日</div>
+                            </div>
+
                         </div>
                     </t>
                 </t>

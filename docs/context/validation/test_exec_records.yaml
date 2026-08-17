@@ -622,3 +622,20 @@ test_exec_records:
     auditor: "Codex Agent"
     match_exit_criteria: true
     note: "覆盖：report 存在、模型正确、forwarder_contact 冻结、action_print_statement 返回 qweb-pdf、打印无写回、真实 PDF 生成；浏览器点击待业务负责人人工验收"
+
+  - contract_id: INT-FREIGHT-SPRINT4-6-USER-001
+    sprint_name: Sprint4-6 用户自主完成
+    context_baseline: "0.1.94"
+    execute_time: "2026-08-17"
+    test_category: "用户自主实现 + 打印验收"
+    test_target_models: ["freight.statement", "freight.statement.line"]
+    total_case_count: 3
+    pass_count: 3
+    fail_count: 0
+    skip_count: 0
+    coverage_rate: "verify.py 18/18；report XML 解析 PASS；Python 编译 PASS；用户实际打印验收"
+    fail_detail: []
+    execute_environment: "开发环境 macOS Odoo19"
+    auditor: "业务负责人 + Codex Agent"
+    match_exit_criteria: true
+    note: "用户自主完成 custom_report_layout.xml / customer_statement_report.xml 版式并打印测试通过；已登记为 Sprint4-6 用户自主完成"

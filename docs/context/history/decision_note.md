@@ -598,3 +598,12 @@
 - 新增 `report/customer_statement_report.xml`：A4 PDF、Statement/Line 快照展示、多币种原币小计、RMB 总应收、公司银行账户、条款原文、签章区。
 - Statement 表单新增 Print Statement 按钮（四状态均可见），manifest 注册报表，zh_CN 新增文案。
 - XML-RPC 升级到 `19.0.2.2.2`，log clean；odoo shell 断言 report/字段/打印动作/无写回 PASS；真实 PDF 生成并核对 HTML 字段正确；浏览器点击待业务负责人人工验收。
+
+### 决策80：Sprint4-6 用户自主完成并验收
+
+**决策**: 业务负责人自主完成 Sprint4-6 报表版式落地并已实际打印验收：
+
+- 新增 `report/custom_report_layout.xml`：自定义公司抬头、地址、银行账号、页脚/页码布局。
+- `report/customer_statement_report.xml` 改为调用 `tk_freight.custom_external_layout`，输出费用确认版式。
+- `freight_statement.action_print_statement` 改为支持多条记录逐个校验并返回报表动作。
+- 用户已实际打印测试通过；静态校验 `verify.py` 18/18 PASS，XML/Python 编译 PASS。

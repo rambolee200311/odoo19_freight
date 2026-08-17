@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="custom_external_layout" name="Custom External Layout">
+
+        <t t-set="company" t-value="company or (docs and docs[0].company_id) or env.company"/>
+
+        <div t-attf-class="header o_company_#{company.id}_layout" style="font-size:10px !important; line-height:1.4;">
+            <!-- Logo 在上，公司名+地址在 Logo 下面，全部左对齐 -->
+            <img t-if="company.logo" class="o_company_logo_small" t-att-src="image_data_uri(company.logo)" alt="Logo" style="max-height:40px;"/>
+            <div style="margin-top:4px; font-size:10px !important; line-height:1.4;">
+                <div style="font-weight:bold;"><t t-esc="company.name"/></div>
+                <div  style="font-family: Arial, 'Noto Sans SC', sans-serif !important;"><t t-esc="company.country_id.name or ''"/>  <t t-esc="company.state_id.name or ''"/>  <t t-esc="company.city or ''"/></div>
+                <div style="font-family: Arial, 'Noto Sans SC', sans-serif !important;"><t t-esc="company.street"/></div>
+
+            </div>
+        </div>
+
+        <div t-attf-class="article o_report_layout_standard o_table_standard o_company_#{company.id}_layout o_snail_mail" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+            <t t-out="0"/>
+        </div>
+
+        <div t-attf-class="footer o_company_#{company.id}_layout">
+            <!-- 银行账号区域：独占一行，分行打印 -->
+            <div style="font-size:12px !important; line-height:1.5; margin-bottom:6px; font-family: Arial, 'Noto Sans SC', sans-serif !important;">
+                <div style="font-weight:bold; margin-bottom:2px;">银行账号</div>
+                <t t-foreach="company.bank_ids" t-as="bank">
+                    <div>
+                        <t t-esc="bank.currency_id.name if bank.currency_id else '—'"/>
+                        开户行：<t t-esc="bank.bank_id.name or bank.bank_name or ''"/>
+                        账号：<t t-esc="bank.acc_number"/>
+                    </div>
+                </t>
+            </div>
+
+            <div class="o_footer_content d-flex border-top pt-2" style="font-size:9px !important;">
+                <div class="flex-grow-1 text-start me-2" t-field="company.report_footer"/>
+                <div class="text-end text-muted">
+                    <div t-if="report_type == 'pdf' and display_name_in_footer" t-out="o.name"/>
+                    <div t-if="report_type == 'pdf'" class="text-nowrap">Page <span class="page"/> / <span class="topage"/></div>
+                </div>
+            </div>
+        </div>
+
+    </template>
+</odoo>
