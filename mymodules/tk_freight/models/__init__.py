@@ -6,6 +6,7 @@ from . import freight_bookings
 from . import freight_dashboard
 from . import freight_shipment
 from . import freight_configuration
+from . import freight_service
 from . import freight_quot
 from . import res_config
 from . import freight_crm
