@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 继承 OCA 的 provider 表单视图，增加 TK 字段 -->
+    <record id="view_currency_rate_provider_form_tk" model="ir.ui.view">
+        <field name="name">currency.rate.provider.form.tk</field>
+        <field name="model">currency.rate.provider</field>
+        <field name="inherit_id" ref="currency_rate_update.currency_rate_provider_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <group string="TK 自动更新设置">
+                    <field name="active_for_auto"/>
+                    <field name="volatility_threshold"/>
+                </group>
+                <group string="更新状态（只读）">
+                    <field name="last_rate" readonly="1"/>
+                    <field name="last_update" readonly="1"/>
+                    <field name="update_status" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- 继承 provider 列表视图，增加状态列 -->
+    <record id="view_currency_rate_provider_tree_tk" model="ir.ui.view">
+        <field name="name">currency.rate.provider.tree.tk</field>
+        <field name="model">currency.rate.provider</field>
+        <field name="inherit_id" ref="currency_rate_update.currency_rate_provider_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree" position="inside">
+                <field name="active_for_auto"/>
+                <field name="last_rate"/>
+                <field name="last_update"/>
+                <field name="update_status"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

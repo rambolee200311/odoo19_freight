@@ -1,0 +1,6 @@
+本目录下的 currency_rate_update 模块 fork 自 OCA/currency 仓库
+基线版本：19.0.1.0.1.8（2026-06-09 发布）
+上游仓库：https://github.com/OCA/currency
+许可证：AGPL-3
+
+本项目的定制扩展在 mymodules/currency_rate_update_tk/ 中实现
