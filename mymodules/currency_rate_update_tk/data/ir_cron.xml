@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 继承 OCA 的 Cron，修改执行时间和时区策略 -->
+    <record id="cron_update_currency_rates_tk" model="ir.cron">
+        <field name="name">自动更新汇率（TK 扩展）</field>
+        <field name="model_id" ref="currency_rate_update.model_res_currency_rate_provider"/>
+        <field name="state">code</field>
+        <field name="code">model._scheduled_update()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <!-- 23:30 UTC，配合公司时区转换 -->
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).replace(hour=23, minute=30, second=0)"/>
+        <field name="active">True</field>
+    </record>
+</odoo>

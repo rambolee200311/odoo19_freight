@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 列表视图：只看核心信息 -->
+    <record id="view_currency_rate_update_log_list" model="ir.ui.view">
+        <field name="name">currency.rate.update.log.list</field>
+        <field name="model">currency.rate.update.log</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false">
+                <field name="create_date" string="时间"/>
+                <field name="provider_id" string="服务商"/>
+                <field name="trigger_type" string="触发方式"/>
+                <field name="state" string="状态"/>
+                <field name="rates_count" string="更新笔数"/>
+                <field name="message" string="摘要"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- 表单视图：只看排查需要的信息 -->
+    <record id="view_currency_rate_update_log_form" model="ir.ui.view">
+        <field name="name">currency.rate.update.log.form</field>
+        <field name="model">currency.rate.update.log</field>
+        <field name="arch" type="xml">
+            <form create="false" edit="false" delete="false">
+                <sheet>
+                    <group>
+                        <field name="provider_id"/>
+                        <field name="trigger_type"/>
+                        <field name="state"/>
+                        <field name="create_date"/>
+                        <field name="start_time"/>
+                        <field name="end_time"/>
+                        <field name="rates_count"/>
+                    </group>
+                    <group>
+                        <field name="message" widget="textarea"/>
+                        <field name="detail" widget="textarea" placeholder="完整报错堆栈"/>
+                        <field name="rate_ids">
+                            <list>
+                                <field name="name" string="生效日期"/>
+                                <field name="currency_id" string="币种"/>
+                                <field name="rate" string="汇率"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 动作和菜单 -->
+    <record id="action_currency_rate_update_log" model="ir.actions.act_window">
+        <field name="name">汇率更新日志</field>
+        <field name="res_model">currency.rate.update.log</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_currency_rate_update_log"
+              name="汇率更新日志"
+              parent="account.account_account_menu"
+              action="action_currency_rate_update_log"
+              sequence="31"/>
+</odoo>

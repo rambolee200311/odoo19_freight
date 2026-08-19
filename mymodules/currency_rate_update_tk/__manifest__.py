@@ -12,6 +12,7 @@
         'views/currency_rate_provider_views.xml',
         'wizards/update_rates_wizard.xml',
         'data/ir_cron.xml',
+        'views/currency_rate_update_log_views.xml',
     ],
     'installable': True,
     'auto_install': False,

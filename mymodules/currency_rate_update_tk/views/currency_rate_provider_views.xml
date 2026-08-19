@@ -1,35 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 继承 OCA 的 provider 表单视图，增加 TK 字段 -->
     <record id="view_currency_rate_provider_form_tk" model="ir.ui.view">
         <field name="name">currency.rate.provider.form.tk</field>
-        <field name="model">currency.rate.provider</field>
-        <field name="inherit_id" ref="currency_rate_update.currency_rate_provider_form_view"/>
+        <field name="model">res.currency.rate.provider</field>
+        <field name="inherit_id" ref="currency_rate_update.res_currency_rate_provider_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//sheet" position="inside">
-                <group string="TK 自动更新设置">
-                    <field name="active_for_auto"/>
-                    <field name="volatility_threshold"/>
+            <xpath expr="//sheet/group[@name='options']" position="after">
+                <group string="TK 自动更新配置">
+                    <field name="active_for_auto" help="取消勾选后Cron自动更新跳过此币别"/>
+                    <field name="volatility_threshold" help="超过阈值阻止自动写入，需人工确认"/>
                 </group>
-                <group string="更新状态（只读）">
-                    <field name="last_rate" readonly="1"/>
+                <!-- <group string="更新状态（只读）">
+                    
+                    <field name="last_rate" readonly="1" options="{'digits': [12, 6]}"/>
                     <field name="last_update" readonly="1"/>
                     <field name="update_status" readonly="1"/>
-                </group>
+                </group> -->
+                <notebook>
+                    <page string="更新日志">
+                        <field name="log_ids" readonly="1" nolabel="1">
+                            <list string="汇率更新日志" decoration-success="state=='success'" decoration-danger="state=='failed'">
+                                <field name="create_date" string="创建时间"/>
+                                <field name="trigger_type" string="触发方式"/>
+                                <field name="state" string="状态"/>
+                                <field name="rates_count" string="更新笔数"/>
+                                <field name="message" string="摘要"/>
+                                <field name="start_time" string="开始时间"/>
+                                <field name="end_time" string="结束时间"/>
+                            </list>   
+                        </field>                     
+                    </page>
+                </notebook>
             </xpath>
         </field>
     </record>
 
-    <!-- 继承 provider 列表视图，增加状态列 -->
-    <record id="view_currency_rate_provider_tree_tk" model="ir.ui.view">
-        <field name="name">currency.rate.provider.tree.tk</field>
-        <field name="model">currency.rate.provider</field>
-        <field name="inherit_id" ref="currency_rate_update.currency_rate_provider_tree_view"/>
+    <record id="view_currency_rate_provider_list_tk" model="ir.ui.view">
+        <field name="name">currency.rate.provider.list.tk</field>
+        <field name="model">res.currency.rate.provider</field>
+        <field name="inherit_id" ref="currency_rate_update.res_currency_rate_provider_tree_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//tree" position="inside">
+            <xpath expr="//list/field[@name='currency_ids']" position="after">
                 <field name="active_for_auto"/>
-                <field name="last_rate"/>
-                <field name="last_update"/>
+                <field name="volatility_threshold"/>
+                <field name="last_rate" options="{'digits': [12, 6]}"/>
                 <field name="update_status"/>
             </xpath>
         </field>

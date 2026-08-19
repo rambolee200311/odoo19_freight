@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_update_rates_wizard_form" model="ir.ui.view">
-        <field name="name">update.rates.wizard.form</field>
+    <record id="action_update_rates_wizard_tk" model="ir.actions.act_window">
+        <field name="name">TK 汇率更新</field>
+        <field name="res_model">update.rates.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <record id="view_update_rates_wizard_form_tk" model="ir.ui.view">
+        <field name="name">update.rates.wizard.form.tk</field>
         <field name="model">update.rates.wizard</field>
         <field name="arch" type="xml">
-            <form string="更新汇率">
+            <form string="TK 汇率更新">
                 <group>
                     <field name="provider_id"/>
                     <field name="test_mode"/>
                 </group>
                 <group>
-                    <field name="result" widget="textarea" placeholder="点击执行后查看结果"/>
+                    <field name="result" widget="textarea" readonly="1"/>
                 </group>
                 <footer>
                     <button name="action_update" string="执行" type="object" class="btn-primary"/>
@@ -20,24 +27,18 @@
         </field>
     </record>
 
-    <record id="action_update_rates_wizard" model="ir.actions.act_window">
-        <field name="name">更新汇率</field>
-        <field name="res_model">update.rates.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="target">new</field>
-    </record>
-
-    <!-- 在 Providers 菜单旁加按钮 -->
+    <!-- 在OCA原生按钮旁加TK测试按钮 -->
     <record id="provider_form_view_tk_button" model="ir.ui.view">
         <field name="name">currency.rate.provider.form.tk.button</field>
-        <field name="model">currency.rate.provider</field>
-        <field name="inherit_id" ref="currency_rate_update.currency_rate_provider_form_view"/>
+        <field name="model">res.currency.rate.provider</field>
+        <field name="inherit_id" ref="currency_rate_update.res_currency_rate_provider_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//header" position="inside">
-                <button name="%(action_update_rates_wizard)d"
-                        string="立即更新"
+            <xpath expr="//form/header" position="inside">
+                <button name="%(action_update_rates_wizard_tk)d"
+                        string="TK测试更新"
                         type="action"
-                        class="btn-primary"/>
+                        class="btn-secondary"
+                        groups="base.group_system"/>
             </xpath>
         </field>
     </record>
